@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart'; // <--- ★★★ "package://"가 아닌 "package:"가 올바른 형식입니다 ★★★
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가 (ko_KR)
 
 // 4쪽&7쪽_대표 화면 설명&초기 화면.html의 Primary Color (#ec4899) 반영
@@ -14,7 +14,7 @@ class MainAppShellScreen extends StatefulWidget {
   @override
   State<MainAppShellScreen> createState() => _MainAppShellScreenState();
 }
-// (이하 코드는 이전과 동일합니다. 맨 위 import 문이 수정되었습니다)
+
 class _MainAppShellScreenState extends State<MainAppShellScreen> {
   int _selectedIndex = 0; // 0: 홈, 1: 생활, 2: 채팅, 3: 프로필
 
@@ -88,6 +88,17 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
 // 홈 탭 (방문 진료 예약) UI 구현 (HTML main 영역)
 // ----------------------------------------------------
 
+// [수정됨] 3. 환자 데이터를 관리하기 위한 간단한 클래스
+class Patient {
+  final String id;
+  final String name;
+  final String imageUrl;
+  final Color color;
+
+  Patient({required this.id, required this.name, required this.imageUrl, required this.color});
+}
+
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -96,7 +107,23 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _selectedPatient = "me"; // '나' 기본 선택
+  // [수정됨] 3. 환자 목록 관리
+  final List<Patient> _patients = [
+    Patient(
+      id: "me", 
+      name: "나", 
+      imageUrl: "https://readdy.ai/api/search-image?query=Professional%20young%20Korean%20man%20in%20casual%20clothes%2C%20friendly%20smile%2C%20clean%20background%2C%20portrait%20photography%2C%20soft%20lighting%2C%20natural%20expression%2C%20modern%20style&width=64&height=64&seq=patient_me&orientation=squarish", 
+      color: kPrimaryPink
+    ),
+    Patient(
+      id: "grandmother", 
+      name: "할머니", 
+      imageUrl: "https://readdy.ai/api/search-image?query=Kind%20elderly%20Korean%20grandmother%20with%20gentle%20smile%2C%20warm%20expression%2C%20traditional%20Korean%20style%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=64&height=64&seq=patient_grandmother&orientation=squarish", 
+      color: kPrimaryBlue
+    ),
+  ];
+  
+  String _selectedPatientId = "me"; // '나' 기본 선택
   bool _symptomsVisible = false;
 
   // [수정됨] 1. 선택된 날짜와 증상을 저장할 변수 추가
@@ -105,7 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // HTML의 선택 버튼 스타일
   Widget _buildSelectionButton(String text, IconData icon) {
-    // [수정됨] 텍스트가 placeholder인지 확인 (회색 처리를 위해)
     bool isPlaceholder = text.contains("선택") || text.contains("입력");
     
     return Container(
@@ -121,9 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             text,
             style: TextStyle(
-              color: isPlaceholder ? kPrimaryBlue.withOpacity(0.8) : kDarkGray, // 선택되면 검은색, 아니면 파란색
+              color: isPlaceholder ? kPrimaryBlue.withOpacity(0.8) : kDarkGray, 
               fontSize: 15,
-              fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500, // 선택되면 굵게
+              fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500,
             ),
           ),
           Icon(icon, color: kPrimaryBlue.withOpacity(0.6)), // text-blue-400
@@ -147,14 +173,14 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16), // rounded-2xl
-            border: Border.all(color: kPrimaryPink.withOpacity(0.3), width: 2, style: BorderStyle.solid), // border-dashed border-pink-200 (Flutter는 점선 border가 복잡하여 실선으로 대체)
+            border: Border.all(color: kPrimaryPink.withOpacity(0.3), width: 2, style: BorderStyle.solid), 
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildPatientOption("나", "me", kPrimaryPink),
-              _buildPatientOption("할머니", "grandmother", kPrimaryBlue),
-              _buildPatientOption("추가", "add", kPrimaryBlue, isAddButton: true),
+              // [수정됨] 3. 동적 환자 목록 생성
+              ..._patients.map((patient) => _buildPatientOption(patient)).toList(),
+              _buildAddPatientButton(), // '추가' 버튼
             ],
           ),
         ),
@@ -163,18 +189,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // '누가' 섹션의 개별 옵션 버튼
-  Widget _buildPatientOption(String label, String key, Color color, {bool isAddButton = false}) {
-    bool isSelected = _selectedPatient == key;
+  Widget _buildPatientOption(Patient patient) {
+    bool isSelected = _selectedPatientId == patient.id;
     
     return GestureDetector(
       onTap: () {
-        if (!isAddButton) {
-          setState(() {
-            _selectedPatient = key;
-          });
-        } else {
-          // (개선) 환자 추가 모달 띄우기 (HTML의 addPatientModal)
-        }
+        setState(() {
+          _selectedPatientId = patient.id;
+        });
       },
       child: Column(
         children: [
@@ -183,35 +205,185 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 64,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16), // rounded-2xl
-              border: isSelected 
-                  ? Border.all(color: color, width: 4) // 선택 시
-                  : isAddButton 
-                      ? Border.all(color: color.withOpacity(0.6), width: 2, style: BorderStyle.solid) // 추가 버튼 (점선 대체)
-                      : null,
-              color: color.withOpacity(0.1), // bg-pink-50 또는 bg-blue-50
+              border: isSelected ? Border.all(color: patient.color, width: 4) : null, // 선택 시
+              color: patient.color.withOpacity(0.1), // bg-pink-50 또는 bg-blue-50
             ),
-            child: isAddButton 
-                ? Icon(Icons.add, color: color.withOpacity(0.8), size: 30) // ri-add-line
-                : Icon(key == "me" ? Icons.person : Icons.elderly, color: color, size: 30), // (임시 아이콘)
+            // [수정됨] 3. 이미지 로딩 (HTML의 img src 반영)
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                patient.imageUrl,
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+                // 이미지 로딩 중 오류 발생 시 아이콘 표시
+                errorBuilder: (context, error, stackTrace) => Icon(
+                  patient.id == "me" ? Icons.person : Icons.elderly, 
+                  color: patient.color, 
+                  size: 30
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 8),
           Text(
-            label,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color.withOpacity(0.9)),
+            patient.name,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: patient.color.withOpacity(0.9)),
           ),
         ],
       ),
     );
   }
 
-  // [수정됨] 2. 날짜 선택 모달 (Date Picker) 기능
+  // [수정됨] 3. '환자 추가' 버튼
+  Widget _buildAddPatientButton() {
+    return GestureDetector(
+      onTap: () {
+        _showAddPatientModal(context); // 모달 띄우기
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16), // rounded-2xl
+              border: Border.all(color: kPrimaryBlue.withOpacity(0.6), width: 2, style: BorderStyle.solid), // 점선 대체
+            ),
+            child: Icon(Icons.add, color: kPrimaryBlue.withOpacity(0.8), size: 30), // ri-add-line
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "추가",
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: kPrimaryBlue.withOpacity(0.9)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // [수정됨] 3. 환자 추가 모달 (addPatientModal)
+  void _showAddPatientModal(BuildContext context) {
+    // HTML의 환자 추가 옵션들
+    final List<Patient> addOptions = [
+      Patient(
+        id: "mother", 
+        name: "어머니", 
+        imageUrl: "https://readdy.ai/api/search-image?query=Kind%20middle%20aged%20Korean%20mother%20with%20warm%20smile%2C%20gentle%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_mother&orientation=squarish", 
+        color: kPrimaryBlue
+      ),
+      Patient(
+        id: "child", 
+        name: "자녀", 
+        imageUrl: "https://readdy.ai/api/search-image?query=Cute%20Korean%20child%20with%20bright%20smile%2C%20happy%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_child&orientation=squarish", 
+        color: kPrimaryBlue
+      ),
+      Patient(
+        id: "grandfather", 
+        name: "할아버지", 
+        imageUrl: "https://readdy.ai/api/search-image?query=Kind%20elderly%20Korean%20grandfather%20with%20gentle%20smile%2C%20warm%20expression%2C%20traditional%20Korean%20style%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_grandfather&orientation=squarish", 
+        color: kPrimaryBlue
+      ),
+      Patient(
+        id: "spouse", 
+        name: "배우자", 
+        imageUrl: "https://readdy.ai/api/search-image?query=Professional%20Korean%20spouse%20with%20friendly%20smile%2C%20kind%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_spouse&orientation=squarish", 
+        color: kPrimaryBlue
+      ),
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 모달 헤더
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("환자 추가", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: kDarkGray)),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: kGrayText),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // 환자 추가 그리드
+              GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // HTML과 동일하게 2열
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: addOptions.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final patient = addOptions[index];
+                  return GestureDetector(
+                    onTap: () {
+                      // [수정됨] 3. 환자 목록에 추가하는 로직
+                      setState(() {
+                        // 중복 추가 방지 (선택적)
+                        if (!_patients.any((p) => p.id == patient.id)) {
+                          _patients.add(patient);
+                          _selectedPatientId = patient.id; // 새로 추가된 환자를 선택
+                        }
+                      });
+                      Navigator.of(context).pop(); // 모달 닫기
+                    },
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 80, // HTML의 w-20
+                          height: 80, // HTML의 h-20
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16), // rounded-2xl
+                            color: kPrimaryBlue.withOpacity(0.1), // bg-blue-50
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.network(
+                              patient.imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.person_add_alt_1_outlined, color: kPrimaryBlue),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(patient.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: kDarkGray)),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  // [수정됨] 1. 날짜 선택 모달 (Date Picker) 기능
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(), // 오늘부터 선택 가능
       lastDate: DateTime(2101),
-      // (개선) HTML의 핑크/블루 테마에 맞게 색상 적용
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -264,12 +436,12 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 2.0, // 카드 비율
+              childAspectRatio: 2.5, // HTML과 비율 맞춤 (w-full p-4)
               children: [
-                _buildSymptomOption("근골격계"),
-                _buildSymptomOption("감기"),
-                _buildSymptomOption("두통"),
-                _buildSymptomOption("기타"),
+                _buildSymptomOption("근골격계", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20bone%20and%20joint%20symbol%20with%20gentle%20care%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_musculoskeletal_blue&orientation=squarish"),
+                _buildSymptomOption("감기", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20thermometer%20and%20tissue%20box%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_cold_blue&orientation=squarish"),
+                _buildSymptomOption("두통", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20head%20with%20gentle%20pain%20relief%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_headache_blue&orientation=squarish"),
+                _buildSymptomOption("기타", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20stethoscope%20and%20health%20check%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_other_blue&orientation=squarish"),
               ],
             ),
           )
@@ -277,8 +449,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // '어떤 질환'의 개별 옵션 버튼
-  Widget _buildSymptomOption(String label) {
+  // '어떤 질환'의 개별 옵션 버튼 (HTML의 이미지 경로 포함)
+  Widget _buildSymptomOption(String label, String imageUrl) {
     bool isSelected = _selectedSymptom == label;
 
     return GestureDetector(
@@ -296,20 +468,22 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected ? kPrimaryBlue : kPrimaryBlue.withOpacity(0.2), // 선택 시 테두리
-            width: isSelected ? 2 : 1,
+            width: isSelected ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
           ],
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.healing_outlined, color: kPrimaryBlue, size: 24),
-            const SizedBox(width: 12),
+            // [수정됨] HTML의 이미지 아이콘 반영
+            Image.network(imageUrl, width: 24, height: 24, errorBuilder: (context, error, stackTrace) => const Icon(Icons.healing_outlined, color: kPrimaryBlue)),
+            const SizedBox(width: 10),
             Text(
               label, 
               style: TextStyle(
-                color: kPrimaryBlue.withOpacity(0.9), 
+                color: kDarkGray, 
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               )
             ),
