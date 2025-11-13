@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart'; // <--- ★★★ 이 한 줄이 모든 오류를 해결합니다 ★★★
+import 'package:flutter/material.dart'; // <--- ★★★ "package://"가 아닌 "package:"가 올바른 형식입니다 ★★★
+import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가 (ko_KR)
 
 // 4쪽&7쪽_대표 화면 설명&초기 화면.html의 Primary Color (#ec4899) 반영
 const Color kPrimaryPink = Color(0xFFEC4899); 
@@ -13,7 +14,7 @@ class MainAppShellScreen extends StatefulWidget {
   @override
   State<MainAppShellScreen> createState() => _MainAppShellScreenState();
 }
-
+// (이하 코드는 이전과 동일합니다. 맨 위 import 문이 수정되었습니다)
 class _MainAppShellScreenState extends State<MainAppShellScreen> {
   int _selectedIndex = 0; // 0: 홈, 1: 생활, 2: 채팅, 3: 프로필
 
@@ -98,8 +99,15 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedPatient = "me"; // '나' 기본 선택
   bool _symptomsVisible = false;
 
+  // [수정됨] 1. 선택된 날짜와 증상을 저장할 변수 추가
+  DateTime? _selectedDate;
+  String? _selectedSymptom;
+
   // HTML의 선택 버튼 스타일
   Widget _buildSelectionButton(String text, IconData icon) {
+    // [수정됨] 텍스트가 placeholder인지 확인 (회색 처리를 위해)
+    bool isPlaceholder = text.contains("선택") || text.contains("입력");
+    
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
       decoration: BoxDecoration(
@@ -112,7 +120,11 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             text,
-            style: TextStyle(color: text.contains("선택") ? kPrimaryBlue.withOpacity(0.8) : kDarkGray, fontSize: 15),
+            style: TextStyle(
+              color: isPlaceholder ? kPrimaryBlue.withOpacity(0.8) : kDarkGray, // 선택되면 검은색, 아니면 파란색
+              fontSize: 15,
+              fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500, // 선택되면 굵게
+            ),
           ),
           Icon(icon, color: kPrimaryBlue.withOpacity(0.6)), // text-blue-400
         ],
@@ -192,6 +204,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // [수정됨] 2. 날짜 선택 모달 (Date Picker) 기능
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime.now(), // 오늘부터 선택 가능
+      lastDate: DateTime(2101),
+      // (개선) HTML의 핑크/블루 테마에 맞게 색상 적용
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: kPrimaryPink, // 헤더 배경색
+              onPrimary: Colors.white, // 헤더 글자색
+              onSurface: kDarkGray, // 날짜 글자색
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: kPrimaryPink, // 버튼 글자색
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked; // 날짜 상태 업데이트
+      });
+    }
+  }
+
+
   // HTML의 '어떤 질환' 섹션
   Widget _buildSymptomSelection() {
     return Column(
@@ -202,8 +248,9 @@ class _HomeScreenState extends State<HomeScreen> {
               _symptomsVisible = !_symptomsVisible;
             });
           },
+          // [수정됨] 2. 증상 선택 시 텍스트 반영
           child: _buildSelectionButton(
-            "증상을 선택해주세요", 
+            _selectedSymptom ?? "증상을 선택해주세요", // 선택된 증상 표시
             _symptomsVisible ? Icons.arrow_drop_up : Icons.arrow_drop_down, // ri-arrow-down-s-line
           ),
         ),
@@ -232,22 +279,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // '어떤 질환'의 개별 옵션 버튼
   Widget _buildSymptomOption(String label) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: kPrimaryBlue.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.healing_outlined, color: kPrimaryBlue, size: 24),
-          const SizedBox(width: 12),
-          Text(label, style: TextStyle(color: kPrimaryBlue.withOpacity(0.9), fontWeight: FontWeight.w500)),
-        ],
+    bool isSelected = _selectedSymptom == label;
+
+    return GestureDetector(
+      // [수정됨] 2. 증상 선택 기능 구현
+      onTap: () {
+        setState(() {
+          _selectedSymptom = label; // 증상 상태 업데이트
+          _symptomsVisible = false; // 그리드 닫기
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? kPrimaryBlue.withOpacity(0.1) : Colors.white, // 선택 시 색상 변경
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? kPrimaryBlue : kPrimaryBlue.withOpacity(0.2), // 선택 시 테두리
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.healing_outlined, color: kPrimaryBlue, size: 24),
+            const SizedBox(width: 12),
+            Text(
+              label, 
+              style: TextStyle(
+                color: kPrimaryBlue.withOpacity(0.9), 
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              )
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -269,7 +336,6 @@ class _HomeScreenState extends State<HomeScreen> {
             // 2. 주소를 입력해주세요
             GestureDetector(
               onTap: () { /* (개선) 주소 검색 API 연동 */ },
-              // ▼▼▼ [수정됨] Icons.map_pin_line -> Icons.place_outlined ▼▼▼
               child: _buildSelectionButton("주소를 입력해주세요", Icons.place_outlined),
             ),
             const SizedBox(height: 24),
@@ -281,8 +347,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             GestureDetector(
-              onTap: () { /* (개선) 날짜 선택 모달 띄우기 (HTML의 calendarOverlay) */ },
-              child: _buildSelectionButton("날짜를 선택해주세요", Icons.calendar_today),
+              // [수정됨] 1. 날짜 선택 모달 띄우기
+              onTap: () => _selectDate(context),
+              child: _buildSelectionButton(
+                // [수정됨] 1. 선택된 날짜 텍스트로 표시
+                _selectedDate == null 
+                    ? "날짜를 선택해주세요" 
+                    : DateFormat('yyyy년 MM월 dd일 (E)', 'ko_KR').format(_selectedDate!), // 예: 2025년 11월 13일 (목)
+                Icons.calendar_today
+              ),
             ),
             const SizedBox(height: 24),
 

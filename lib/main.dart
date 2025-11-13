@@ -1,14 +1,14 @@
-// lib/main.dart
+// lib/main.dart (전체 덮어쓰기)
 
 import 'package:flutter/material.dart';
-import 'package:hanbang_app/signup_screen.dart'; // 1. 우리가 만든 파일 import
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart'; // [수정됨] 1. Kakao SDK 임포트
+import 'package:hanbang_app/signup_screen.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+// [수정됨] 1. 한글 언어 설정을 위한 임포트
+import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() async { // [수정됨] 2. async 추가
-  // [수정됨] 3. runApp 전에 Flutter 바인딩을 보장합니다.
+void main() async { 
   WidgetsFlutterBinding.ensureInitialized();
 
-  // [수정됨] 4. ★ 여기에 사용자 키를 삽입했습니다 ★
   KakaoSdk.init(nativeAppKey: '6daf1cc619f2e11d4d4a129475e9c3ff'); 
  
   runApp(const MyApp());
@@ -20,15 +20,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '한방 의료 어플', // 사용자가 수정한 title 유지
+      title: '한방 의료 어플',
       theme: ThemeData(
-        // 앱 전체에 일관된 폰트 적용 (HTML 스타일과 유사하게)
         fontFamily: 'Roboto', 
-        primaryColor: const Color(0xFF3B82F6), // 기본 색상
+        primaryColor: const Color(0xFF3B82F6),
       ),
-      debugShowCheckedModeBanner: false, // 오른쪽 위 'DEBUG' 배너 숨기기
+      debugShowCheckedModeBanner: false,
       
-      // 2. 앱의 '홈' 화면을 SignUpScreen으로 지정
+      // [수정됨] 2. 한글 날짜(DateFormat)를 위한 로케일 설정
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ko', 'KR'), // 한국어
+        Locale('en', 'US'), // 영어 (기본값)
+      ],
+      locale: const Locale('ko', 'KR'), // 앱의 기본 언어를 한국어로 설정
+
       home: const SignUpScreen(), 
     );
   }
