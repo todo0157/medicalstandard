@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // 날짜 포맷을 위해 추가 (ko_KR)
+import 'package:hanbang_app/chat_screen.dart';
 
 // 4쪽&7쪽_대표 화면 설명&초기 화면.html의 Primary Color (#ec4899) 반영
 const Color kPrimaryPink = Color(0xFFEC4899); 
@@ -28,7 +29,7 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
   static final List<Widget> _widgetOptions = <Widget>[
     const HomeScreen(), // 홈 탭 (방문 진료 예약)
     const Center(child: Text("생활 탭", style: TextStyle(fontSize: 20, color: kPrimaryPink))),
-    const Center(child: Text("채팅 탭", style: TextStyle(fontSize: 20, color: kPrimaryPink))),
+    const ChatScreen(), // <--- 이 부분
     const Center(child: Text("프로필 탭", style: TextStyle(fontSize: 20, color: kPrimaryPink))),
   ];
 
@@ -107,7 +108,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // [수정됨] 3. 환자 목록 관리
+  // [수정됨] '나'만 포함하도록 초기 환자 목록 변경
   final List<Patient> _patients = [
     Patient(
       id: "me", 
@@ -115,18 +116,11 @@ class _HomeScreenState extends State<HomeScreen> {
       imageUrl: "https://readdy.ai/api/search-image?query=Professional%20young%20Korean%20man%20in%20casual%20clothes%2C%20friendly%20smile%2C%20clean%20background%2C%20portrait%20photography%2C%20soft%20lighting%2C%20natural%20expression%2C%20modern%20style&width=64&height=64&seq=patient_me&orientation=squarish", 
       color: kPrimaryPink
     ),
-    Patient(
-      id: "grandmother", 
-      name: "할머니", 
-      imageUrl: "https://readdy.ai/api/search-image?query=Kind%20elderly%20Korean%20grandmother%20with%20gentle%20smile%2C%20warm%20expression%2C%20traditional%20Korean%20style%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=64&height=64&seq=patient_grandmother&orientation=squarish", 
-      color: kPrimaryBlue
-    ),
+    // '할머니' 항목 제거
   ];
   
   String _selectedPatientId = "me"; // '나' 기본 선택
   bool _symptomsVisible = false;
-
-  // [수정됨] 1. 선택된 날짜와 증상을 저장할 변수 추가
   DateTime? _selectedDate;
   String? _selectedSymptom;
 
@@ -176,10 +170,14 @@ class _HomeScreenState extends State<HomeScreen> {
             border: Border.all(color: kPrimaryPink.withOpacity(0.3), width: 2, style: BorderStyle.solid), 
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            // [수정됨] Row의 정렬을 spaceEvenly -> flex-start (start)로 변경
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              // [수정됨] 3. 동적 환자 목록 생성
-              ..._patients.map((patient) => _buildPatientOption(patient)).toList(),
+              // 동적 환자 목록 생성
+              ..._patients.map((patient) => Padding(
+                padding: const EdgeInsets.only(right: 24.0), // 환자 간 간격
+                child: _buildPatientOption(patient),
+              )).toList(),
               _buildAddPatientButton(), // '추가' 버튼
             ],
           ),
@@ -208,7 +206,6 @@ class _HomeScreenState extends State<HomeScreen> {
               border: isSelected ? Border.all(color: patient.color, width: 4) : null, // 선택 시
               color: patient.color.withOpacity(0.1), // bg-pink-50 또는 bg-blue-50
             ),
-            // [수정됨] 3. 이미지 로딩 (HTML의 img src 반영)
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
@@ -216,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 64,
                 height: 64,
                 fit: BoxFit.cover,
-                // 이미지 로딩 중 오류 발생 시 아이콘 표시
                 errorBuilder: (context, error, stackTrace) => Icon(
                   patient.id == "me" ? Icons.person : Icons.elderly, 
                   color: patient.color, 
@@ -235,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // [수정됨] 3. '환자 추가' 버튼
+  // '환자 추가' 버튼
   Widget _buildAddPatientButton() {
     return GestureDetector(
       onTap: () {
@@ -262,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // [수정됨] 3. 환자 추가 모달 (addPatientModal)
+  // 환자 추가 모달 (addPatientModal)
   void _showAddPatientModal(BuildContext context) {
     // HTML의 환자 추가 옵션들
     final List<Patient> addOptions = [
@@ -334,9 +330,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   final patient = addOptions[index];
                   return GestureDetector(
                     onTap: () {
-                      // [수정됨] 3. 환자 목록에 추가하는 로직
                       setState(() {
-                        // 중복 추가 방지 (선택적)
+                        // 중복 추가 방지
                         if (!_patients.any((p) => p.id == patient.id)) {
                           _patients.add(patient);
                           _selectedPatientId = patient.id; // 새로 추가된 환자를 선택
@@ -377,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  // [수정됨] 1. 날짜 선택 모달 (Date Picker) 기능
+  // 날짜 선택 모달 (Date Picker) 기능
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -420,7 +415,6 @@ class _HomeScreenState extends State<HomeScreen> {
               _symptomsVisible = !_symptomsVisible;
             });
           },
-          // [수정됨] 2. 증상 선택 시 텍스트 반영
           child: _buildSelectionButton(
             _selectedSymptom ?? "증상을 선택해주세요", // 선택된 증상 표시
             _symptomsVisible ? Icons.arrow_drop_up : Icons.arrow_drop_down, // ri-arrow-down-s-line
@@ -454,7 +448,6 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isSelected = _selectedSymptom == label;
 
     return GestureDetector(
-      // [수정됨] 2. 증상 선택 기능 구현
       onTap: () {
         setState(() {
           _selectedSymptom = label; // 증상 상태 업데이트
@@ -477,7 +470,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // [수정됨] HTML의 이미지 아이콘 반영
             Image.network(imageUrl, width: 24, height: 24, errorBuilder: (context, error, stackTrace) => const Icon(Icons.healing_outlined, color: kPrimaryBlue)),
             const SizedBox(width: 10),
             Text(
@@ -521,10 +513,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             GestureDetector(
-              // [수정됨] 1. 날짜 선택 모달 띄우기
               onTap: () => _selectDate(context),
               child: _buildSelectionButton(
-                // [수정됨] 1. 선택된 날짜 텍스트로 표시
                 _selectedDate == null 
                     ? "날짜를 선택해주세요" 
                     : DateFormat('yyyy년 MM월 dd일 (E)', 'ko_KR').format(_selectedDate!), // 예: 2025년 11월 13일 (목)
