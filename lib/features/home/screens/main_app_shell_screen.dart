@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../chat/screens/chat_screen.dart';
 import '../../profile/screens/profile_screen.dart';
@@ -95,6 +96,21 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
         elevation: 10,
         showUnselectedLabels: true,
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton.extended(
+              backgroundColor: kPrimaryPink,
+              onPressed: () => context.push('/booking'),
+              icon: const Icon(Icons.calendar_month, color: Colors.white),
+              label: const Text(
+                '새 방문 예약',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
@@ -516,7 +532,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildSymptomSelection(),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () { /* 한의사 찾기 화면으로 이동 */ },
+              onPressed: () => context.push('/find-doctor'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: kPrimaryPink,
                 foregroundColor: Colors.white,

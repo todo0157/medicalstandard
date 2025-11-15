@@ -8,6 +8,8 @@ import 'features/insurance/health_insurance_screen.dart';
 import 'features/support/customer_support_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/legal/legal_notice_screen.dart';
+import 'features/booking/appointment_booking_screen.dart';
+import 'features/doctor/screens/find_doctor_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/signup',
@@ -41,6 +43,22 @@ final appRouter = GoRouter(
       name: 'medical-records',
       pageBuilder: (context, state) => MaterialPage(
         child: const MedicalRecordsScreen(),
+      ),
+    ),
+    // Appointment Booking
+    GoRoute(
+      path: '/booking',
+      name: 'booking',
+      pageBuilder: (context, state) => MaterialPage(
+        child: const AppointmentBookingScreen(),
+      ),
+    ),
+    // Find Doctor
+    GoRoute(
+      path: '/find-doctor',
+      name: 'find-doctor',
+      pageBuilder: (context, state) => MaterialPage(
+        child: const FindDoctorScreen(),
       ),
     ),
 
