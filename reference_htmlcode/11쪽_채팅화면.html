@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한의사 방문진료 채팅</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#10B981',secondary:'#F3F4F6'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.message-bubble {
+max-width: 70%;
+word-wrap: break-word;
+}
+.chat-container {
+height: calc(100vh - 140px);
+overflow-y: auto;
+padding-bottom: 20px;
+}
+.input-container {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: white;
+border-top: 1px solid #e5e7eb;
+}
+.navbar {
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+background: white;
+border-bottom: 1px solid #e5e7eb;
+z-index: 50;
+}
+.pain-selector {
+background-image: url('https://readdy.ai/api/search-image?query=human%20back%20anatomy%20diagram%20medical%20illustration%20showing%20lower%20back%20lumbar%20spine%20region%2C%20clean%20white%20background%2C%20medical%20textbook%20style%2C%20anatomical%20drawing&width=300&height=400&seq=back001&orientation=portrait');
+background-size: contain;
+background-repeat: no-repeat;
+background-position: center;
+}
+</style>
+</head>
+<body>
+<nav class="navbar px-4 py-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<button class="w-8 h-8 flex items-center justify-center cursor-pointer">
+<i class="ri-arrow-left-line text-gray-700 text-xl"></i>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=80&height=80&seq=doctor001&orientation=squarish" alt="한의사" class="w-full h-full object-cover">
+</div>
+<div>
+<h3 class="font-semibold text-gray-900">남상수 원장</h3>
+<div class="flex items-center space-x-2">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-xs text-gray-600">온라인 · 방문진료 가능</span>
+</div>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-phone-line text-gray-700 text-xl"></i>
+</button>
+<button class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-vidicon-line text-gray-700 text-xl"></i>
+</button>
+</div>
+</div>
+</nav>
+<div class="chat-container px-4 pt-20">
+<div class="space-y-4">
+<div class="text-center">
+<span class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">오늘 오전 10:15</span>
+</div>
+
+<div class="flex items-start space-x-2">
+<div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+<img src="https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor002&orientation=squarish" alt="한의사" class="w-full h-full object-cover">
+</div>
+<div class="message-bubble bg-white border px-4 py-2 rounded-2xl rounded-bl-md">
+<p class="text-sm text-gray-900">내일 예정된 시간에 방문드리고 필요하면 추후 꾸준히 관리해드릴게요.
+도착 전에 한 번 더 연락드리겠습니다 😊</p>
+</div>
+</div>
+<div class="flex justify-end">
+<div class="message-bubble bg-primary text-white px-4 py-2 rounded-2xl rounded-br-md">
+<p class="text-sm">네 감사합니다 선생님 🙏</p>
+</div>
+</div>
+<div class="flex items-start space-x-2">
+<div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+<img src="https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor004&orientation=squarish" alt="한의사" class="w-full h-full object-cover">
+</div>
+<div class="message-bubble bg-white border rounded-2xl rounded-bl-md overflow-hidden">
+<div class="p-4">
+<p class="text-sm text-gray-900 mb-3">통증이 심해지신 건 언제부터인가요?</p>
+<div class="space-y-2">
+<button class="w-full text-left px-3 py-2 border rounded-lg hover:bg-gray-50 cursor-pointer pain-type" data-type="찌르는 듯한 통증">
+<span class="text-sm">찌르는 듯한 통증</span>
+</button>
+<button class="w-full text-left px-3 py-2 border rounded-lg hover:bg-gray-50 cursor-pointer pain-type" data-type="묵직한 통증">
+<span class="text-sm">묵직한 통증</span>
+</button>
+<button class="w-full text-left px-3 py-2 border rounded-lg hover:bg-gray-50 cursor-pointer pain-type" data-type="당기는 통증">
+<span class="text-sm">당기는 통증</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-end">
+<div class="message-bubble bg-primary text-white px-4 py-2 rounded-2xl rounded-br-md">
+<p class="text-sm">찌르는 듯이 아파요</p>
+</div>
+</div>
+<div class="flex justify-end">
+<div class="message-bubble bg-primary text-white px-4 py-2 rounded-2xl rounded-br-md">
+<p class="text-sm">움직이기가 너무 힘들어요</p>
+</div>
+</div>
+<div class="flex items-start space-x-2">
+<div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+<img src="https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor005&orientation=squarish" alt="한의사" class="w-full h-full object-cover">
+</div>
+<div class="message-bubble bg-white border px-4 py-2 rounded-2xl rounded-bl-md">
+<p class="text-sm text-gray-900">안녕하세요. 환자분 오늘 오후 6:30 에 방문진료 예약하셨습니다. </p>
+</div>
+</div>
+<div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mx-2">
+<div class="flex items-start space-x-2">
+<div class="w-6 h-6 flex items-center justify-center flex-shrink-0">
+<i class="ri-information-line text-blue-600"></i>
+</div>
+<div>
+<h4 class="font-semibold text-blue-900 text-sm mb-2">📌 방문진료 안내</h4>
+<div class="text-xs text-blue-800 space-y-1">
+<p>• 원칙: 시범기관 내원 후 1회 이상 진료받은 환자</p>
+<p>• 예외: 한의사가 필요하다고 판단 시 초진도 가능</p>
+</div>
+<button class="w-full mt-3 bg-blue-600 text-white py-2 rounded-button text-sm cursor-pointer !rounded-button" id="requestVisit">
+방문진료 요청
+</button>
+</div>
+</div>
+</div>
+<div class="flex justify-end">
+<div class="message-bubble bg-primary text-white px-4 py-2 rounded-2xl rounded-br-md">
+<p class="text-sm">서울시 강남구 삼성동 100-1</p>
+</div>
+</div>
+<div class="flex justify-end">
+<div class="message-bubble bg-primary text-white px-4 py-2 rounded-2xl rounded-br-md">
+<p class="text-sm">101동 1503호입니다</p>
+</div>
+</div>
+<div class="flex items-start space-x-2">
+<div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+<img src="https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor006&orientation=squarish" alt="한의사" class="w-full h-full object-cover">
+</div>
+<div class="message-bubble bg-white border px-4 py-2 rounded-2xl rounded-bl-md">
+<p class="text-sm text-gray-900">네, 오후 2시에 방문하겠습니다.<br>진료 전까지 가능한 움직임을 최소화해주세요.</p>
+</div>
+</div>
+<div class="bg-green-50 border border-green-200 rounded-xl p-4 mx-2">
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-check-line text-green-600"></i>
+</div>
+<div>
+<p class="text-sm text-green-800 font-medium">오후 2:00 방문진료가 예약되었습니다.</p>
+<p class="text-xs text-green-700 mt-1">일정 변경 시 미리 연락드리겠습니다.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="input-container p-4">
+<div class="flex items-center space-x-3">
+<button class="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-full cursor-pointer">
+<i class="ri-add-line text-gray-600"></i>
+</button>
+<div class="flex-1 relative">
+<input type="text" placeholder="메시지를 입력하세요..." class="w-full px-4 py-3 bg-gray-100 rounded-2xl border-none text-sm" id="messageInput">
+<button class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 flex items-center justify-center cursor-pointer">
+<i class="ri-mic-line text-gray-500"></i>
+</button>
+</div>
+<button class="w-10 h-10 flex items-center justify-center bg-primary rounded-full cursor-pointer" id="sendButton">
+<i class="ri-send-plane-fill text-white"></i>
+</button>
+</div>
+</div>
+<div class="fixed inset-0 bg-black bg-opacity-50 hidden z-50" id="visitModal">
+<div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6">
+<div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+<h3 class="text-lg font-semibold text-gray-900 mb-4">방문진료 요청</h3>
+<div class="space-y-4">
+<div class="bg-green-50 border border-green-200 rounded-lg p-3">
+<p class="text-sm text-green-800">✅ 현재 환자는 재진 환자입니다 → 방문진료 가능</p>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-2">환자 정보</label>
+<div class="bg-gray-50 rounded-lg p-3">
+<p class="text-sm text-gray-900">이름: 박영수 (남, 65세)</p>
+<p class="text-xs text-gray-600 mt-1">최근 진료: 2024.01.15 (요통 치료)</p>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-2">방문 주소</label>
+<input type="text" value="서울시 강남구 삼성동 100-1, 101동 1503호" class="w-full px-3 py-2 border rounded-lg text-sm">
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-2">희망 방문 시간</label>
+<div class="relative">
+<button class="w-full px-3 py-2 border rounded-lg text-sm text-left flex items-center justify-between cursor-pointer" id="timeSelector">
+<span>오늘 오후 2:00</span>
+<i class="ri-arrow-down-s-line text-gray-400"></i>
+</button>
+<div class="absolute top-full left-0 right-0 bg-white border rounded-lg shadow-lg mt-1 hidden" id="timeDropdown">
+<button class="w-full px-3 py-2 text-left hover:bg-gray-50 cursor-pointer time-option">오늘 오후 2:00</button>
+<button class="w-full px-3 py-2 text-left hover:bg-gray-50 cursor-pointer time-option">오늘 오후 3:00</button>
+<button class="w-full px-3 py-2 text-left hover:bg-gray-50 cursor-pointer time-option">오늘 오후 4:00</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex space-x-3 mt-6">
+<button class="flex-1 py-3 border border-gray-300 rounded-button text-gray-700 cursor-pointer !rounded-button" id="cancelVisit">취소</button>
+<button class="flex-1 py-3 bg-primary text-white rounded-button cursor-pointer !rounded-button" id="confirmVisit">요청 전송</button>
+</div>
+</div>
+</div>
+<script id="chatInteraction">
+document.addEventListener('DOMContentLoaded', function() {
+const painTypes = document.querySelectorAll('.pain-type');
+const chatContainer = document.querySelector('.chat-container');
+painTypes.forEach(button => {
+button.addEventListener('click', function() {
+const painType = this.dataset.type;
+addUserMessage(painType);
+this.parentElement.parentElement.style.display = 'none';
+});
+});
+function addUserMessage(text) {
+const messageDiv = document.createElement('div');
+messageDiv.className = 'flex justify-end';
+messageDiv.innerHTML = `
+<div class="message-bubble bg-primary text-white px-4 py-2 rounded-2xl rounded-br-md">
+<p class="text-sm">${text}</p>
+</div>
+`;
+chatContainer.appendChild(messageDiv);
+chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+});
+</script>
+<script id="modalControl">
+document.addEventListener('DOMContentLoaded', function() {
+const requestVisitBtn = document.getElementById('requestVisit');
+const visitModal = document.getElementById('visitModal');
+const cancelVisitBtn = document.getElementById('cancelVisit');
+const confirmVisitBtn = document.getElementById('confirmVisit');
+const timeSelector = document.getElementById('timeSelector');
+const timeDropdown = document.getElementById('timeDropdown');
+const timeOptions = document.querySelectorAll('.time-option');
+requestVisitBtn.addEventListener('click', function() {
+visitModal.classList.remove('hidden');
+});
+cancelVisitBtn.addEventListener('click', function() {
+visitModal.classList.add('hidden');
+});
+confirmVisitBtn.addEventListener('click', function() {
+visitModal.classList.add('hidden');
+addSystemMessage('방문진료 요청이 접수되었습니다. 일정 확정 시 알림이 갑니다.');
+});
+timeSelector.addEventListener('click', function() {
+timeDropdown.classList.toggle('hidden');
+});
+timeOptions.forEach(option => {
+option.addEventListener('click', function() {
+timeSelector.querySelector('span').textContent = this.textContent;
+timeDropdown.classList.add('hidden');
+});
+});
+document.addEventListener('click', function(e) {
+if (!timeSelector.contains(e.target) && !timeDropdown.contains(e.target)) {
+timeDropdown.classList.add('hidden');
+}
+});
+function addSystemMessage(text) {
+const chatContainer = document.querySelector('.chat-container');
+const messageDiv = document.createElement('div');
+messageDiv.className = 'bg-blue-50 border border-blue-200 rounded-xl p-4 mx-2';
+messageDiv.innerHTML = `
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-information-line text-blue-600"></i>
+</div>
+<p class="text-sm text-blue-800">${text}</p>
+</div>
+`;
+chatContainer.appendChild(messageDiv);
+chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+});
+</script>
+<script id="messageInput">
+document.addEventListener('DOMContentLoaded', function() {
+const messageInput = document.getElementById('messageInput');
+const sendButton = document.getElementById('sendButton');
+const chatContainer = document.querySelector('.chat-container');
+sendButton.addEventListener('click', sendMessage);
+messageInput.addEventListener('keypress', function(e) {
+if (e.key === 'Enter') {
+sendMessage();
+}
+});
+function sendMessage() {
+const text = messageInput.value.trim();
+if (text) {
+addUserMessage(text);
+messageInput.value = '';
+}
+}
+function addUserMessage(text) {
+const messageDiv = document.createElement('div');
+messageDiv.className = 'flex justify-end';
+messageDiv.innerHTML = `
+<div class="message-bubble bg-primary text-white px-4 py-2 rounded-2xl rounded-br-md">
+<p class="text-sm">${text}</p>
+</div>
+`;
+chatContainer.appendChild(messageDiv);
+chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+});
+</script>
+</body>
+</html>

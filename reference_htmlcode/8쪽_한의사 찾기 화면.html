@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한의사 찾기</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10B981',
+                        secondary: '#059669'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .map-container {
+            background-image: url('https://public.readdy.ai/gen_page/map_placeholder_1280x720.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <div class="flex items-center justify-between px-4 py-3">
+            <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer">
+                <i class="ri-arrow-left-line text-xl text-gray-700"></i>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">한의사 찾기</h1>
+            <div class="w-10"></div>
+        </div>
+    </nav>
+
+    <!-- Map Container -->
+    <div class="map-container relative" style="height: 400px; margin-top: 60px;">
+        <!-- GPS Button -->
+        <button class="absolute top-4 right-4 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:shadow-xl transition-shadow">
+            <i class="ri-navigation-line text-xl text-primary"></i>
+        </button>
+        
+        <!-- Map Markers (simulated) -->
+        <div class="absolute top-20 left-16 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+            <i class="ri-hospital-line text-white text-sm"></i>
+        </div>
+        <div class="absolute top-32 right-20 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+            <i class="ri-hospital-line text-white text-sm"></i>
+        </div>
+        <div class="absolute bottom-20 left-20 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+            <i class="ri-hospital-line text-white text-sm"></i>
+        </div>
+        <div class="absolute bottom-16 right-16 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+            <i class="ri-hospital-line text-white text-sm"></i>
+        </div>
+        
+        <!-- Search Bar Overlay -->
+        <div class="absolute bottom-4 left-4 right-4">
+            <div class="bg-white rounded-xl shadow-lg p-3 flex items-center gap-3">
+                <div class="flex-1 flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2">
+                    <i class="ri-search-line text-gray-400"></i>
+                    <input type="text" placeholder="한의원 이름 또는 지역 검색" class="flex-1 bg-transparent border-none outline-none text-sm text-gray-700">
+                </div>
+                <button class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center cursor-pointer hover:bg-secondary transition-colors">
+                    <i class="ri-equalizer-line text-white"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Doctor List Container -->
+    <div class="bg-white" style="min-height: calc(100vh - 460px); padding-bottom: 80px;">
+        <div class="px-4 py-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900">주변 한의원</h2>
+                <span class="text-sm text-gray-500">12개 발견</span>
+            </div>
+            
+            <!-- Doctor Cards -->
+            <div class="space-y-4">
+                <!-- Card 1 -->
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="flex gap-3">
+                        <img src="https://readdy.ai/api/search-image?query=Professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle-aged%20male%2C%20friendly%20smile%2C%20white%20coat%2C%20clean%20background%2C%20professional%20headshot%2C%20high%20quality%20photography&width=80&height=80&seq=doctor1&orientation=squarish" alt="김태현 한의사" class="w-16 h-16 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base">청담 한의원</h3>
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-star-fill text-yellow-400 text-sm"></i>
+                                    <span class="text-sm font-medium text-gray-700">4.8</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">김태현 한의사</p>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-map-pin-line text-gray-400 text-sm"></i>
+                                <span class="text-sm text-gray-500">250m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="flex gap-3">
+                        <img src="https://readdy.ai/api/search-image?query=Professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20young%20female%2C%20confident%20expression%2C%20white%20coat%2C%20clean%20background%2C%20professional%20headshot%2C%20high%20quality%20photography&width=80&height=80&seq=doctor2&orientation=squarish" alt="박지영 한의사" class="w-16 h-16 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base">서울 경희 한의원</h3>
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-star-fill text-yellow-400 text-sm"></i>
+                                    <span class="text-sm font-medium text-gray-700">4.6</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">박지영 한의사</p>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-map-pin-line text-gray-400 text-sm"></i>
+                                <span class="text-sm text-gray-500">320m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="flex gap-3">
+                        <img src="https://readdy.ai/api/search-image?query=Professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle-aged%20male%2C%20warm%20smile%2C%20white%20coat%2C%20clean%20background%2C%20professional%20headshot%2C%20high%20quality%20photography&width=80&height=80&seq=doctor3&orientation=squarish" alt="이승호 한의사" class="w-16 h-16 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base">건강 한의원</h3>
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-star-fill text-yellow-400 text-sm"></i>
+                                    <span class="text-sm font-medium text-gray-700">4.9</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">이승호 한의사</p>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-map-pin-line text-gray-400 text-sm"></i>
+                                <span class="text-sm text-gray-500">450m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="flex gap-3">
+                        <img src="https://readdy.ai/api/search-image?query=Professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20young%20male%2C%20serious%20expression%2C%20white%20coat%2C%20clean%20background%2C%20professional%20headshot%2C%20high%20quality%20photography&width=80&height=80&seq=doctor4&orientation=squarish" alt="정민수 한의사" class="w-16 h-16 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base">명동 한의원</h3>
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-star-fill text-yellow-400 text-sm"></i>
+                                    <span class="text-sm font-medium text-gray-700">4.7</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">정민수 한의사</p>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-map-pin-line text-gray-400 text-sm"></i>
+                                <span class="text-sm text-gray-500">580m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="flex gap-3">
+                        <img src="https://readdy.ai/api/search-image?query=Professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle-aged%20female%2C%20kind%20smile%2C%20white%20coat%2C%20clean%20background%2C%20professional%20headshot%2C%20high%20quality%20photography&width=80&height=80&seq=doctor5&orientation=squarish" alt="최은정 한의사" class="w-16 h-16 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base">자연 한의원</h3>
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-star-fill text-yellow-400 text-sm"></i>
+                                    <span class="text-sm font-medium text-gray-700">4.5</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">최은정 한의사</p>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-map-pin-line text-gray-400 text-sm"></i>
+                                <span class="text-sm text-gray-500">720m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="flex gap-3">
+                        <img src="https://readdy.ai/api/search-image?query=Professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20young%20male%2C%20professional%20appearance%2C%20white%20coat%2C%20clean%20background%2C%20professional%20headshot%2C%20high%20quality%20photography&width=80&height=80&seq=doctor6&orientation=squarish" alt="윤성민 한의사" class="w-16 h-16 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base">강남 한의원</h3>
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-star-fill text-yellow-400 text-sm"></i>
+                                    <span class="text-sm font-medium text-gray-700">4.4</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">윤성민 한의사</p>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-map-pin-line text-gray-400 text-sm"></i>
+                                <span class="text-sm text-gray-500">850m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 7 -->
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div class="flex gap-3">
+                        <img src="https://readdy.ai/api/search-image?query=Professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20young%20female%2C%20gentle%20smile%2C%20white%20coat%2C%20clean%20background%2C%20professional%20headshot%2C%20high%20quality%20photography&width=80&height=80&seq=doctor7&orientation=squarish" alt="한지우 한의사" class="w-16 h-16 rounded-full object-cover">
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-semibold text-gray-900 text-base">평화 한의원</h3>
+                                <div class="flex items-center gap-1">
+                                    <i class="ri-star-fill text-yellow-400 text-sm"></i>
+                                    <span class="text-sm font-medium text-gray-700">4.6</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-2">한지우 한의사</p>
+                            <div class="flex items-center gap-1">
+                                <i class="ri-map-pin-line text-gray-400 text-sm"></i>
+                                <span class="text-sm text-gray-500">920m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Tab Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 grid grid-cols-3">
+        <button class="flex flex-col items-center justify-center py-2 cursor-pointer hover:bg-gray-50 transition-colors">
+            <div class="w-6 h-6 flex items-center justify-center mb-1">
+                <i class="ri-list-check text-primary text-lg"></i>
+            </div>
+            <span class="text-xs text-primary font-medium">목록</span>
+        </button>
+        <button class="flex flex-col items-center justify-center py-2 cursor-pointer hover:bg-gray-50 transition-colors">
+            <div class="w-6 h-6 flex items-center justify-center mb-1">
+                <i class="ri-map-2-line text-gray-400 text-lg"></i>
+            </div>
+            <span class="text-xs text-gray-400">지도</span>
+        </button>
+        <button class="flex flex-col items-center justify-center py-2 cursor-pointer hover:bg-gray-50 transition-colors">
+            <div class="w-6 h-6 flex items-center justify-center mb-1">
+                <i class="ri-heart-line text-gray-400 text-lg"></i>
+            </div>
+            <span class="text-xs text-gray-400">즐겨찾기</span>
+        </button>
+    </div>
+
+    <script id="search-functionality">
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[placeholder="한의원 이름 또는 지역 검색"]');
+            const doctorCards = document.querySelectorAll('.bg-white.border.border-gray-100');
+            
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                doctorCards.forEach(card => {
+                    const clinicName = card.querySelector('h3').textContent.toLowerCase();
+                    const doctorName = card.querySelector('p').textContent.toLowerCase();
+                    
+                    if (clinicName.includes(searchTerm) || doctorName.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+
+    <script id="tab-navigation">
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.fixed.bottom-0 button');
+            
+            tabButtons.forEach((button, index) => {
+                button.addEventListener('click', function() {
+                    tabButtons.forEach(btn => {
+                        const icon = btn.querySelector('i');
+                        const text = btn.querySelector('span');
+                        icon.className = icon.className.replace('text-primary', 'text-gray-400');
+                        text.className = text.className.replace('text-primary', 'text-gray-400');
+                    });
+                    
+                    const activeIcon = this.querySelector('i');
+                    const activeText = this.querySelector('span');
+                    activeIcon.className = activeIcon.className.replace('text-gray-400', 'text-primary');
+                    activeText.className = activeText.className.replace('text-gray-400', 'text-primary');
+                });
+            });
+        });
+    </script>
+
+    <script id="card-interactions">
+        document.addEventListener('DOMContentLoaded', function() {
+            const doctorCards = document.querySelectorAll('.bg-white.border.border-gray-100');
+            
+            doctorCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const clinicName = this.querySelector('h3').textContent;
+                    console.log(`선택된 한의원: ${clinicName}`);
+                });
+            });
+        });
+    </script>
+
+    <script id="gps-button">
+        document.addEventListener('DOMContentLoaded', function() {
+            const gpsButton = document.querySelector('.absolute.top-4.right-4');
+            
+            gpsButton.addEventListener('click', function() {
+                this.classList.add('animate-pulse');
+                setTimeout(() => {
+                    this.classList.remove('animate-pulse');
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

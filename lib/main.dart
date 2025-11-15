@@ -1,17 +1,15 @@
-// lib/main.dart (전체 덮어쓰기)
-
 import 'package:flutter/material.dart';
-import 'package:hanbang_app/signup_screen.dart';
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
-// [수정됨] 1. 한글 언어 설정을 위한 임포트
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'app_router.dart';
 
-void main() async { 
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  KakaoSdk.init(nativeAppKey: '6daf1cc619f2e11d4d4a129475e9c3ff'); 
- 
-  runApp(const MyApp());
+  KakaoSdk.init(nativeAppKey: '6daf1cc619f2e11d4d4a129475e9c3ff');
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -19,15 +17,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: '한방 의료 어플',
       theme: ThemeData(
-        fontFamily: 'Roboto', 
+        fontFamily: 'Roboto',
         primaryColor: const Color(0xFF3B82F6),
       ),
       debugShowCheckedModeBanner: false,
-      
-      // [수정됨] 2. 한글 날짜(DateFormat)를 위한 로케일 설정
+
+      // 한글 날짜(DateFormat)를 위한 로케일 설정
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -39,7 +37,8 @@ class MyApp extends StatelessWidget {
       ],
       locale: const Locale('ko', 'KR'), // 앱의 기본 언어를 한국어로 설정
 
-      home: const SignUpScreen(), 
+      // go_router 설정
+      routerConfig: appRouter,
     );
   }
 }

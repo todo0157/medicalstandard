@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>방문 진료</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#ec4899',secondary:'#f9a8d4'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.calendar-hidden { display: none; }
+.calendar-visible { display: block; }
+</style>
+</head>
+<body class="bg-pink-50 font-sans">
+<div class="w-full max-w-sm mx-auto bg-white min-h-screen relative">
+<header class="fixed top-0 w-full max-w-sm bg-white border-b border-pink-100 z-50">
+<div class="flex items-center justify-between px-4 py-3 h-14">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-menu-line text-pink-600 text-xl"></i>
+</div>
+<h1 class="text-lg font-semibold text-pink-900">방문 진료</h1>
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-notification-line text-pink-600 text-xl"></i>
+</div>
+</div>
+</header>
+<main class="pt-16 pb-20 px-4">
+<section class="mb-6">
+<h2 class="text-lg font-semibold text-pink-900 mb-4">누가 진료를 받을까요?</h2>
+<div class="bg-white border-2 border-dashed border-pink-200 rounded-2xl p-6 mb-4">
+<div class="flex justify-between items-center gap-4 mb-0" id="patientContainer">
+<div class="flex flex-col items-center cursor-pointer patient-option" data-patient="me">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-4 border-transparent transition-all duration-200 bg-pink-50">
+<img src="https://readdy.ai/api/search-image?query=Professional%20young%20Korean%20man%20in%20casual%20clothes%2C%20friendly%20smile%2C%20clean%20background%2C%20portrait%20photography%2C%20soft%20lighting%2C%20natural%20expression%2C%20modern%20style&width=64&height=64&seq=patient_me&orientation=squarish"
+alt="나" class="w-full h-full object-cover">
+</div>
+<span class="mt-2 text-xs font-medium text-pink-700">나</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer patient-option" data-patient="grandmother">
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-4 border-transparent transition-all duration-200 bg-blue-50">
+<img src="https://readdy.ai/api/search-image?query=Kind%20elderly%20Korean%20grandmother%20with%20gentle%20smile%2C%20warm%20expression%2C%20traditional%20Korean%20style%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=64&height=64&seq=patient_grandmother&orientation=squarish"
+alt="할머니" class="w-full h-full object-cover">
+</div>
+<span class="mt-2 text-xs font-medium text-blue-700">할머니</span>
+</div>
+<button class="flex flex-col items-center cursor-pointer hover:bg-blue-50 transition-colors" id="addPatient">
+<div class="w-16 h-16 rounded-2xl border-2 border-dashed border-blue-300 flex items-center justify-center">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-add-line text-blue-400 text-xl"></i>
+</div>
+</div>
+<span class="mt-2 text-xs font-medium text-blue-400">추가</span>
+</button>
+</div>
+</div>
+<button class="w-full bg-white border border-blue-200 rounded-lg px-4 py-4 flex items-center justify-between cursor-pointer hover:bg-blue-50 transition-colors mb-6" id="addressButton">
+<span class="text-blue-600" id="selectedAddress">주소를 입력해주세요</span>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-map-pin-line text-blue-400"></i>
+</div>
+</button>
+</section>
+<section class="mb-8">
+<h2 class="text-lg font-semibold text-blue-900 mb-4">언제 진료를 받을까요?</h2>
+<button class="w-full bg-white border border-blue-200 rounded-lg px-4 py-4 flex items-center justify-between cursor-pointer hover:bg-blue-50 transition-colors" id="dateButton">
+<span class="text-blue-600" id="selectedDate">날짜를 선택해주세요</span>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-calendar-line text-blue-400"></i>
+</div>
+</button>
+</section>
+<section class="mb-8">
+<h2 class="text-lg font-semibold text-blue-900 mb-4">어떤 질환으로 진료받으시나요?</h2>
+<button class="w-full bg-white border border-blue-200 rounded-lg px-4 py-4 flex items-center justify-between cursor-pointer hover:bg-blue-50 transition-colors mb-4" id="symptomButton">
+<span class="text-blue-600" id="selectedSymptom">증상을 선택해주세요</span>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-arrow-down-s-line text-blue-400" id="symptomArrow"></i>
+</div>
+</button>
+<div class="grid grid-cols-2 gap-3 hidden" id="symptomOptions">
+<div class="bg-white rounded-lg p-4 border border-blue-100 cursor-pointer hover:shadow-md transition-all duration-200 symptom-option" data-symptom="musculoskeletal">
+<div class="w-12 h-12 mx-auto mb-2 overflow-hidden rounded-lg">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20bone%20and%20joint%20symbol%20with%20gentle%20care%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_musculoskeletal_blue&orientation=squarish"
+alt="근골격계" class="w-full h-full object-cover">
+</div>
+<p class="text-xs text-center text-blue-700 font-medium" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">근골격계</p>
+</div>
+<div class="bg-white rounded-lg p-4 border border-blue-100 cursor-pointer hover:shadow-md transition-all duration-200 symptom-option" data-symptom="cold">
+<div class="w-12 h-12 mx-auto mb-2 overflow-hidden rounded-lg">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20thermometer%20and%20tissue%20box%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_cold_blue&orientation=squarish"
+alt="감기" class="w-full h-full object-cover">
+</div>
+<p class="text-xs text-center text-blue-700 font-medium" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">감기</p>
+</div>
+<div class="bg-white rounded-lg p-4 border border-blue-100 cursor-pointer hover:shadow-md transition-all duration-200 symptom-option" data-symptom="headache">
+<div class="w-12 h-12 mx-auto mb-2 overflow-hidden rounded-lg">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20head%20with%20gentle%20pain%20relief%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_headache_blue&orientation=squarish"
+alt="두통" class="w-full h-full object-cover">
+</div>
+<p class="text-xs text-center text-blue-700 font-medium" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">두통</p>
+</div>
+<div class="bg-white rounded-lg p-4 border border-blue-100 cursor-pointer hover:shadow-md transition-all duration-200 symptom-option" data-symptom="other">
+<div class="w-12 h-12 mx-auto mb-2 overflow-hidden rounded-lg">
+<img src="https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20stethoscope%20and%20health%20check%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_other_blue&orientation=squarish"
+alt="기타" class="w-full h-full object-cover">
+</div>
+<p class="text-xs text-center text-blue-700 font-medium" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">기타</p>
+</div>
+</div>
+</section>
+<button class="w-full bg-primary text-white py-4 rounded-button font-semibold text-lg cursor-pointer hover:bg-blue-700 transition-colors !rounded-button" id="searchButton">한의사 찾기
+</button>
+</main>
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 calendar-hidden" id="calendarOverlay">
+<div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-w-sm mx-auto">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-semibold text-gray-900">날짜 선택</h3>
+<button class="w-8 h-8 flex items-center justify-center cursor-pointer" id="closeCalendar">
+<i class="ri-close-line text-gray-600 text-xl"></i>
+</button>
+</div>
+<div class="calendar-container">
+<div class="flex items-center justify-between mb-4">
+<button class="w-8 h-8 flex items-center justify-center cursor-pointer" id="prevMonth">
+<i class="ri-arrow-left-s-line text-gray-600"></i>
+</button>
+<span class="font-semibold text-gray-900" id="currentMonth">2024년 11월</span>
+<button class="w-8 h-8 flex items-center justify-center cursor-pointer" id="nextMonth">
+<i class="ri-arrow-right-s-line text-gray-600"></i>
+</button>
+</div>
+<div class="grid grid-cols-7 gap-1 mb-2">
+<div class="text-center text-xs text-gray-500 py-2">일</div>
+<div class="text-center text-xs text-gray-500 py-2">월</div>
+<div class="text-center text-xs text-gray-500 py-2">화</div>
+<div class="text-center text-xs text-gray-500 py-2">수</div>
+<div class="text-center text-xs text-gray-500 py-2">목</div>
+<div class="text-center text-xs text-gray-500 py-2">금</div>
+<div class="text-center text-xs text-gray-500 py-2">토</div>
+</div>
+<div class="grid grid-cols-7 gap-1" id="calendarDays"></div>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden" id="addPatientModal">
+<div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-w-sm mx-auto">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-semibold text-gray-900">환자 추가</h3>
+<button class="w-8 h-8 flex items-center justify-center cursor-pointer" id="closeAddPatient">
+<i class="ri-close-line text-gray-600 text-xl"></i>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col items-center cursor-pointer add-patient-option" data-patient="mother">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-blue-50">
+<img src="https://readdy.ai/api/search-image?query=Kind%20middle%20aged%20Korean%20mother%20with%20warm%20smile%2C%20gentle%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_mother&orientation=squarish"
+alt="어머니" class="w-full h-full object-cover">
+</div>
+<span class="mt-2 text-sm font-medium text-blue-700">어머니</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer add-patient-option" data-patient="child">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-blue-50">
+<img src="https://readdy.ai/api/search-image?query=Cute%20Korean%20child%20with%20bright%20smile%2C%20happy%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_child&orientation=squarish"
+alt="자녀" class="w-full h-full object-cover">
+</div>
+<span class="mt-2 text-sm font-medium text-blue-700">자녀</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer add-patient-option" data-patient="grandfather">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-blue-50">
+<img src="https://readdy.ai/api/search-image?query=Kind%20elderly%20Korean%20grandfather%20with%20gentle%20smile%2C%20warm%20expression%2C%20traditional%20Korean%20style%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_grandfather&orientation=squarish"
+alt="할아버지" class="w-full h-full object-cover">
+</div>
+<span class="mt-2 text-sm font-medium text-blue-700">할아버지</span>
+</div>
+<div class="flex flex-col items-center cursor-pointer add-patient-option" data-patient="spouse">
+<div class="w-20 h-20 rounded-2xl overflow-hidden bg-blue-50">
+<img src="https://readdy.ai/api/search-image?query=Professional%20Korean%20spouse%20with%20friendly%20smile%2C%20kind%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_spouse&orientation=squarish"
+alt="배우자" class="w-full h-full object-cover">
+</div>
+<span class="mt-2 text-sm font-medium text-blue-700">배우자</span>
+</div>
+</div>
+</div>
+</div>
+<nav class="fixed bottom-0 w-full max-w-sm bg-white border-t border-gray-100">
+<div class="grid grid-cols-4 h-16">
+<button class="flex flex-col items-center justify-center cursor-pointer tab-item active" data-tab="home">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-home-line text-primary"></i>
+</div>
+<span class="text-xs text-primary font-medium">홈</span>
+</button>
+<button class="flex flex-col items-center justify-center cursor-pointer tab-item" data-tab="lifestyle">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-home-heart-line text-gray-400"></i>
+</div>
+<span class="text-xs text-gray-400">생활</span>
+</button>
+<button class="flex flex-col items-center justify-center cursor-pointer tab-item" data-tab="chat">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-chat-1-line text-gray-400"></i>
+</div>
+<span class="text-xs text-gray-400">채팅</span>
+</button>
+<button class="flex flex-col items-center justify-center cursor-pointer tab-item" data-tab="profile">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-user-line text-gray-400"></i>
+</div>
+<span class="text-xs text-gray-400">프로필</span>
+</button>
+</div>
+</nav>
+</div>
+<script id="patientSelection">
+document.addEventListener('DOMContentLoaded', function() {
+const patientOptions = document.querySelectorAll('.patient-option');
+let selectedPatient = null;
+patientOptions.forEach(option => {
+option.addEventListener('click', function() {
+patientOptions.forEach(opt => {
+opt.querySelector('div').classList.remove('border-primary', 'bg-blue-100');
+opt.querySelector('div').classList.add('border-transparent');
+});
+this.querySelector('div').classList.remove('border-transparent');
+this.querySelector('div').classList.add('border-primary', 'bg-blue-100');
+selectedPatient = this.dataset.patient;
+});
+});
+});
+</script>
+<script id="addPatientModal">
+document.addEventListener('DOMContentLoaded', function() {
+const addPatientBtn = document.getElementById('addPatient');
+const addPatientModal = document.getElementById('addPatientModal');
+const closeAddPatient = document.getElementById('closeAddPatient');
+const addPatientOptions = document.querySelectorAll('.add-patient-option');
+const patientContainer = document.getElementById('patientContainer');
+addPatientBtn.addEventListener('click', function() {
+addPatientModal.classList.remove('hidden');
+});
+closeAddPatient.addEventListener('click', function() {
+addPatientModal.classList.add('hidden');
+});
+addPatientModal.addEventListener('click', function(e) {
+if (e.target === addPatientModal) {
+addPatientModal.classList.add('hidden');
+}
+});
+addPatientOptions.forEach(option => {
+option.addEventListener('click', function() {
+const patientType = this.dataset.patient;
+const patientName = this.querySelector('span').textContent;
+const patientImg = this.querySelector('img').src;
+const addButton = document.getElementById('addPatient');
+const newPatient = document.createElement('div');
+newPatient.className = 'flex flex-col items-center cursor-pointer patient-option';
+newPatient.dataset.patient = patientType;
+newPatient.innerHTML = `
+<div class="w-16 h-16 rounded-2xl overflow-hidden border-4 border-transparent transition-all duration-200 bg-blue-50">
+<img src="${patientImg}" alt="${patientName}" class="w-full h-full object-cover">
+</div>
+<span class="mt-2 text-xs font-medium text-blue-700">${patientName}</span>
+`;
+newPatient.addEventListener('click', function() {
+document.querySelectorAll('.patient-option').forEach(opt => {
+opt.querySelector('div').classList.remove('border-primary', 'bg-blue-100');
+opt.querySelector('div').classList.add('border-transparent');
+});
+this.querySelector('div').classList.remove('border-transparent');
+this.querySelector('div').classList.add('border-primary', 'bg-blue-100');
+});
+patientContainer.insertBefore(newPatient, addButton);
+addPatientModal.classList.add('hidden');
+});
+});
+});
+</script>
+<script id="calendarFunctionality">
+document.addEventListener('DOMContentLoaded', function() {
+const dateButton = document.getElementById('dateButton');
+const calendarOverlay = document.getElementById('calendarOverlay');
+const closeCalendar = document.getElementById('closeCalendar');
+const selectedDateSpan = document.getElementById('selectedDate');
+const currentMonthSpan = document.getElementById('currentMonth');
+const calendarDays = document.getElementById('calendarDays');
+const prevMonth = document.getElementById('prevMonth');
+const nextMonth = document.getElementById('nextMonth');
+let currentDate = new Date();
+let selectedDate = null;
+dateButton.addEventListener('click', function() {
+calendarOverlay.classList.remove('calendar-hidden');
+calendarOverlay.classList.add('calendar-visible');
+renderCalendar();
+});
+closeCalendar.addEventListener('click', function() {
+calendarOverlay.classList.remove('calendar-visible');
+calendarOverlay.classList.add('calendar-hidden');
+});
+calendarOverlay.addEventListener('click', function(e) {
+if (e.target === calendarOverlay) {
+calendarOverlay.classList.remove('calendar-visible');
+calendarOverlay.classList.add('calendar-hidden');
+}
+});
+prevMonth.addEventListener('click', function() {
+currentDate.setMonth(currentDate.getMonth() - 1);
+renderCalendar();
+});
+nextMonth.addEventListener('click', function() {
+currentDate.setMonth(currentDate.getMonth() + 1);
+renderCalendar();
+});
+function renderCalendar() {
+const year = currentDate.getFullYear();
+const month = currentDate.getMonth();
+currentMonthSpan.textContent = `${year}년 ${month + 1}월`;
+const firstDay = new Date(year, month, 1).getDay();
+const daysInMonth = new Date(year, month + 1, 0).getDate();
+calendarDays.innerHTML = '';
+for (let i = 0; i < firstDay; i++) {
+const emptyDay = document.createElement('div');
+emptyDay.className = 'h-10';
+calendarDays.appendChild(emptyDay);
+}
+for (let day = 1; day <= daysInMonth; day++) {
+const dayElement = document.createElement('button');
+dayElement.className = 'h-10 flex items-center justify-center text-sm cursor-pointer hover:bg-blue-50 rounded-lg transition-colors';
+dayElement.textContent = day;
+const dayDate = new Date(year, month, day);
+if (dayDate < new Date().setHours(0, 0, 0, 0)) {
+dayElement.className += ' text-gray-300 cursor-not-allowed';
+dayElement.disabled = true;
+} else {
+dayElement.addEventListener('click', function() {
+selectedDate = new Date(year, month, day);
+selectedDateSpan.textContent = `${year}년 ${month + 1}월 ${day}일`;
+calendarOverlay.classList.remove('calendar-visible');
+calendarOverlay.classList.add('calendar-hidden');
+});
+}
+calendarDays.appendChild(dayElement);
+}
+}
+});
+</script>
+<script id="symptomSelection">
+document.addEventListener('DOMContentLoaded', function() {
+const symptomButton = document.getElementById('symptomButton');
+const symptomOptions = document.getElementById('symptomOptions');
+const selectedSymptomSpan = document.getElementById('selectedSymptom');
+const symptomArrow = document.getElementById('symptomArrow');
+const symptomItems = document.querySelectorAll('.symptom-option');
+let selectedSymptom = null;
+const symptomNames = {
+'musculoskeletal': '근골격계',
+'cold': '감기',
+'headache': '두통',
+'other': '기타'
+};
+symptomButton.addEventListener('click', function() {
+if (symptomOptions.classList.contains('hidden')) {
+symptomOptions.classList.remove('hidden');
+symptomArrow.classList.remove('ri-arrow-down-s-line');
+symptomArrow.classList.add('ri-arrow-up-s-line');
+} else {
+symptomOptions.classList.add('hidden');
+symptomArrow.classList.remove('ri-arrow-up-s-line');
+symptomArrow.classList.add('ri-arrow-down-s-line');
+}
+});
+symptomItems.forEach(option => {
+option.addEventListener('click', function() {
+symptomItems.forEach(opt => {
+opt.classList.remove('border-primary', 'bg-blue-100');
+opt.classList.add('border-blue-100');
+});
+this.classList.remove('border-blue-100');
+this.classList.add('border-primary', 'bg-blue-100');
+selectedSymptom = this.dataset.symptom;
+selectedSymptomSpan.textContent = symptomNames[selectedSymptom];
+symptomOptions.classList.add('hidden');
+symptomArrow.classList.remove('ri-arrow-up-s-line');
+symptomArrow.classList.add('ri-arrow-down-s-line');
+});
+});
+});
+</script>
+<script id="searchButton">
+document.addEventListener('DOMContentLoaded', function() {
+const searchButton = document.getElementById('searchButton');
+searchButton.addEventListener('click', function() {
+const selectedPatient = document.querySelector('.patient-option .border-primary')?.parentElement.dataset.patient;
+const selectedDate = document.getElementById('selectedDate').textContent;
+const selectedSymptom = document.querySelector('.symptom-option.border-primary')?.dataset.symptom;
+if (!selectedPatient) {
+showToast('진료 대상을 선택해주세요.');
+return;
+}
+if (selectedDate === '날짜를 선택해주세요') {
+showToast('진료 날짜를 선택해주세요.');
+return;
+}
+if (!selectedSymptom) {
+showToast('질환 유형을 선택해주세요.');
+return;
+}
+showToast('진료 검색 중입니다...');
+});
+function showToast(message) {
+const toast = document.createElement('div');
+toast.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg z-50 text-sm';
+toast.textContent = message;
+document.body.appendChild(toast);
+setTimeout(() => {
+document.body.removeChild(toast);
+}, 3000);
+}
+});
+</script>
+<script id="tabNavigation">
+document.addEventListener('DOMContentLoaded', function() {
+const tabItems = document.querySelectorAll('.tab-item');
+tabItems.forEach(tab => {
+tab.addEventListener('click', function() {
+tabItems.forEach(t => {
+t.classList.remove('active');
+t.querySelector('i').classList.remove('text-primary');
+t.querySelector('i').classList.add('text-blue-400');
+t.querySelector('span').classList.remove('text-primary', 'font-medium');
+t.querySelector('span').classList.add('text-blue-400');
+});
+this.classList.add('active');
+this.querySelector('i').classList.remove('text-blue-400');
+this.querySelector('i').classList.add('text-primary');
+this.querySelector('span').classList.remove('text-blue-400');
+this.querySelector('span').classList.add('text-primary', 'font-medium');
+});
+});
+});
+</script>
+</body>
+</html>

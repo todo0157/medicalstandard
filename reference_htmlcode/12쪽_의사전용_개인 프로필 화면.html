@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>개인 프로필 화면</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#3B82F6',secondary:'#EFF6FF'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+<div class="flex items-center justify-between px-4 py-3 h-14">
+<button class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-arrow-left-line text-xl text-gray-700"></i>
+</button>
+<h1 class="text-lg font-semibold text-gray-900">개인 프로필 화면</h1>
+<button class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-edit-line text-xl text-gray-700"></i>
+</button>
+</div>
+</header>
+<main class="pt-16 pb-8">
+<section class="bg-white px-4 py-6">
+<div class="flex items-center mb-6">
+<div class="relative mr-4">
+<div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+<img src="https://readdy.ai/api/search-image?query=Professional%20Korean%20doctor%20portrait%2C%20clean%20medical%20professional%20headshot%2C%20friendly%20smile%2C%20medical%20uniform%2C%20studio%20lighting%2C%20high%20quality%2C%20centered%20composition%2C%20isolated%20on%20white%20background&width=64&height=64&seq=profile001&orientation=squarish"
+alt="프로필 이미지"
+class="w-full h-full object-cover">
+</div>
+</div>
+<div class="flex-1">
+<h2 class="text-xl font-semibold text-gray-900 mb-1">김민수</h2>
+<p class="text-gray-600 text-sm">34세 • 남성</p>
+<p class="text-gray-600 text-sm">경기도 용인시 수지구 죽전동</p>
+</div>
+</div>
+</section>
+<section class="bg-white mt-2">
+<div class="px-4 py-3 border-b border-gray-100">
+<h3 class="text-gray-900 font-medium">의료 정보</h3>
+</div>
+<div class="flex">
+<button class="flex-1 px-4 py-4 flex items-center justify-between border-r border-gray-100 cursor-pointer">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+<i class="ri-file-text-line text-lg text-gray-700"></i>
+</div>
+<span class="text-gray-900">진료 기록</span>
+</div>
+<i class="ri-arrow-right-s-line text-lg text-gray-400"></i>
+</button>
+<button class="flex-1 px-4 py-4 flex items-center justify-between cursor-pointer">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+<i class="ri-shield-check-line text-lg text-gray-700"></i>
+</div>
+<span class="text-gray-900">건강보험</span>
+</div>
+<i class="ri-arrow-right-s-line text-lg text-gray-400"></i>
+</button>
+</div>
+</section>
+<section class="bg-white mt-2">
+<div class="px-4 py-3 border-b border-gray-100">
+<h3 class="text-gray-900 font-medium">인증</h3>
+</div>
+<button class="w-full px-4 py-4 flex items-center justify-between cursor-pointer">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+<i class="ri-stethoscope-line text-lg text-green-600"></i>
+</div>
+<div class="flex-1 text-left">
+<span class="text-gray-900 block">한의사 인증</span>
+<span class="text-gray-500 text-sm">전문 자격증을 인증해보세요</span>
+</div>
+</div>
+<i class="ri-arrow-right-s-line text-lg text-gray-400"></i>
+</button>
+</section>
+<section class="bg-white mt-2">
+<div class="px-4 py-3 border-b border-gray-100">
+<h3 class="text-gray-900 font-medium">지원 및 설정</h3>
+</div>
+<button class="w-full px-4 py-4 flex items-center justify-between border-b border-gray-100 cursor-pointer">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+<i class="ri-customer-service-2-line text-lg text-blue-600"></i>
+</div>
+<span class="text-gray-900">고객지원</span>
+</div>
+<i class="ri-arrow-right-s-line text-lg text-gray-400"></i>
+</button>
+<button class="w-full px-4 py-4 flex items-center justify-between border-b border-gray-100 cursor-pointer">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+<i class="ri-settings-3-line text-lg text-gray-700"></i>
+</div>
+<span class="text-gray-900">설정</span>
+</div>
+<i class="ri-arrow-right-s-line text-lg text-gray-400"></i>
+</button>
+<button class="w-full px-4 py-4 flex items-center justify-between cursor-pointer">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+<i class="ri-file-shield-line text-lg text-gray-700"></i>
+</div>
+<span class="text-gray-900">법적 고지</span>
+</div>
+<i class="ri-arrow-right-s-line text-lg text-gray-400"></i>
+</button>
+</section>
+</main>
+<script id="profile-interactions">
+document.addEventListener('DOMContentLoaded', function() {
+const backButton = document.querySelector('header button:first-child');
+const editButton = document.querySelector('header button:last-child');
+const profileImageButton = document.querySelector('.relative button');
+const medicalButtons = document.querySelectorAll('section:nth-child(4) button');
+const certificationButton = document.querySelector('section:nth-child(5) button');
+const supportButtons = document.querySelectorAll('section:last-child button');
+backButton.addEventListener('click', function() {
+console.log('뒤로가기 버튼 클릭');
+});
+editButton.addEventListener('click', function() {
+console.log('편집 버튼 클릭');
+});
+profileImageButton.addEventListener('click', function() {
+console.log('프로필 이미지 변경 버튼 클릭');
+});
+medicalButtons.forEach((button, index) => {
+button.addEventListener('click', function() {
+if (index === 0) {
+console.log('진료 기록 확인 버튼 클릭');
+} else {
+console.log('건강보험 확인 버튼 클릭');
+}
+});
+});
+certificationButton.addEventListener('click', function() {
+console.log('한의사 인증하기 버튼 클릭');
+});
+supportButtons.forEach((button, index) => {
+button.addEventListener('click', function() {
+if (index === 0) {
+console.log('고객지원 버튼 클릭');
+} else if (index === 1) {
+console.log('설정 버튼 클릭');
+} else {
+console.log('법적 고지 버튼 클릭');
+}
+});
+});
+});
+</script>
+</body>
+</html>

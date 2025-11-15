@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프로필 - 의료 앱</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#3B82F6',
+secondary: '#10B981'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+}
+}
+}
+}
+</script>
+<style>
+:where([class^="ri-"])::before {
+content: "\f3c2";
+}
+</style>
+</head>
+<body class="bg-gray-50 font-sans">
+<div class="max-w-sm mx-auto bg-white min-h-screen relative">
+<!-- Navigation Bar -->
+<nav class="fixed top-0 w-full max-w-sm bg-white z-50 px-4 py-3 shadow-sm">
+<div class="flex items-center justify-between">
+<h1 class="text-lg font-semibold text-gray-900">프로필</h1>
+<button class="w-8 h-8 flex items-center justify-center cursor-pointer">
+<i class="ri-settings-3-line text-gray-600 text-xl"></i>
+</button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="pt-16 pb-20 px-4">
+<!-- Profile Section -->
+<section class="bg-white rounded-xl shadow-sm p-6 mb-6">
+<div class="flex items-center space-x-4">
+<div class="w-16 h-16 rounded-full overflow-hidden bg-gray-100">
+<img src="https://readdy.ai/api/search-image?query=Professional%20Korean%20woman%20portrait%2C%20clean%20background%2C%20medical%20patient%20photo%2C%20friendly%20smile%2C%20natural%20lighting%2C%20high%20quality%20headshot&width=64&height=64&seq=profile001&orientation=squarish"
+alt="프로필 사진" class="w-full h-full object-cover object-top">
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<h2 class="text-lg font-semibold text-gray-900">김미영</h2>
+<button class="text-xs text-primary hover:text-blue-700 font-medium cursor-pointer !rounded-button" id="editProfileBtn">
+수정
+</button>
+</div>
+<div class="space-y-1">
+<p class="text-sm text-gray-600">46세 / 여성</p>
+<p class="text-sm text-gray-600">서울특별시 성동구 왑십리로 16</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Statistics Section -->
+<section class="bg-white rounded-xl shadow-sm border border-gray-200 mb-3">
+<div class="grid grid-cols-2">
+<div class="p-4 text-center border-r border-gray-200">
+<div class="text-lg font-bold text-primary mb-0.5">12</div>
+<div class="text-xs text-gray-600">예약</div>
+</div>
+<div class="p-4 text-center">
+<div class="text-lg font-bold text-secondary mb-0.5">8</div>
+<div class="text-xs text-gray-600">진료</div>
+</div>
+</div>
+</section>
+<!-- Main Features Section -->
+<section class="grid grid-cols-2 gap-3 mb-4">
+<button class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center cursor-pointer hover:shadow-md hover:border-gray-300 transition-all !rounded-button">
+<div class="w-10 h-10 mx-auto mb-2 rounded-full bg-blue-50 flex items-center justify-center">
+<i class="ri-file-text-line text-primary text-lg"></i>
+</div>
+<div class="text-sm font-medium text-gray-900">진료 기록</div>
+</button>
+<button class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center cursor-pointer hover:shadow-md hover:border-gray-300 transition-all !rounded-button">
+<div class="w-10 h-10 mx-auto mb-2 rounded-full bg-green-50 flex items-center justify-center">
+<i class="ri-shield-cross-line text-secondary text-lg"></i>
+</div>
+<div class="text-sm font-medium text-gray-900">건강보험</div>
+</button>
+</section>
+<!-- Additional Menu Section -->
+<section class="bg-white rounded-xl shadow-sm p-4">
+<button class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg mb-2 hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer" id="customerSupportBtn">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-customer-service-2-line text-gray-600 text-lg"></i>
+</div>
+<span class="text-gray-900 font-medium">고객지원</span>
+</div>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+</div>
+</button>
+<button class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg mb-2 hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-settings-4-line text-gray-600 text-lg"></i>
+</div>
+<span class="text-gray-900 font-medium">설정</span>
+</div>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+</div>
+</button>
+<button class="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all cursor-pointer">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-file-shield-2-line text-gray-600 text-lg"></i>
+</div>
+<span class="text-gray-900 font-medium">법적 고지</span>
+</div>
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+</div>
+</button>
+</section>
+</main>
+<!-- Customer Support Modal -->
+<div id="supportModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+<div class="bg-white rounded-xl w-full max-w-xs p-6">
+<h3 class="text-lg font-semibold text-gray-900 mb-4 text-center">고객지원</h3>
+<div class="space-y-3">
+<button class="w-full flex items-center justify-center space-x-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer !rounded-button" id="phoneConsultBtn">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-phone-line text-primary text-lg"></i>
+</div>
+<span class="text-primary font-medium">전화 상담</span>
+</button>
+<button class="w-full flex items-center justify-center space-x-3 p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors cursor-pointer !rounded-button" id="chatConsultBtn">
+<div class="w-8 h-8 flex items-center justify-center">
+<i class="ri-chat-3-line text-secondary text-lg"></i>
+</div>
+<span class="text-secondary font-medium">채팅 상담</span>
+</button>
+</div>
+<button class="w-full mt-4 py-3 text-gray-600 text-sm font-medium cursor-pointer" id="cancelSupportBtn">
+취소
+</button>
+</div>
+</div>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 w-full max-w-sm bg-white border-t border-gray-200 z-50">
+<div class="grid grid-cols-4 h-16">
+<button class="flex flex-col items-center justify-center space-y-1 cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-home-line text-gray-400 text-lg"></i>
+</div>
+<span class="text-xs text-gray-400">홈</span>
+</button>
+<button class="flex flex-col items-center justify-center space-y-1 cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-stethoscope-line text-gray-400 text-lg"></i>
+</div>
+<span class="text-xs text-gray-400">생활</span>
+</button>
+<button class="flex flex-col items-center justify-center space-y-1 cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-chat-3-line text-gray-400 text-lg"></i>
+</div>
+<span class="text-xs text-gray-400">채팅</span>
+</button>
+<button class="flex flex-col items-center justify-center space-y-1 cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center">
+<i class="ri-user-3-fill text-primary text-lg"></i>
+</div>
+<span class="text-xs text-primary font-medium">프로필</span>
+</button>
+</div>
+</nav>
+</div>
+<script id="menu-interactions">
+document.addEventListener('DOMContentLoaded', function() {
+const menuButtons = document.querySelectorAll('section button, nav button');
+menuButtons.forEach(button => {
+button.addEventListener('click', function(e) {
+e.preventDefault();
+const buttonText = this.textContent.trim();
+console.log(`${buttonText} 메뉴가 클릭되었습니다.`);
+this.style.transform = 'scale(0.98)';
+setTimeout(() => {
+this.style.transform = 'scale(1)';
+}, 150);
+});
+});
+});
+</script>
+<script id="navigation-interactions">
+document.addEventListener('DOMContentLoaded', function() {
+const navButtons = document.querySelectorAll('nav[class*="bottom"] button');
+navButtons.forEach((button, index) => {
+button.addEventListener('click', function(e) {
+e.preventDefault();
+navButtons.forEach(btn => {
+const icon = btn.querySelector('i');
+const text = btn.querySelector('span');
+if (icon.classList.contains('ri-home-fill')) {
+icon.className = 'ri-home-line text-gray-400 text-lg';
+} else if (icon.classList.contains('ri-stethoscope-fill')) {
+icon.className = 'ri-stethoscope-line text-gray-400 text-lg';
+} else if (icon.classList.contains('ri-chat-3-fill')) {
+icon.className = 'ri-chat-3-line text-gray-400 text-lg';
+} else if (icon.classList.contains('ri-user-3-fill')) {
+icon.className = 'ri-user-3-line text-gray-400 text-lg';
+}
+text.className = 'text-xs text-gray-400';
+});
+const currentIcon = this.querySelector('i');
+const currentText = this.querySelector('span');
+if (index === 0) {
+currentIcon.className = 'ri-home-fill text-primary text-lg';
+} else if (index === 1) {
+currentIcon.className = 'ri-stethoscope-fill text-primary text-lg';
+} else if (index === 2) {
+currentIcon.className = 'ri-chat-3-fill text-primary text-lg';
+} else if (index === 3) {
+currentIcon.className = 'ri-user-3-fill text-primary text-lg';
+}
+currentText.className = 'text-xs text-primary font-medium';
+});
+});
+});
+</script>
+<script id="customer-support">
+document.addEventListener('DOMContentLoaded', function() {
+const customerSupportBtn = document.getElementById('customerSupportBtn');
+const supportModal = document.getElementById('supportModal');
+const cancelSupportBtn = document.getElementById('cancelSupportBtn');
+const phoneConsultBtn = document.getElementById('phoneConsultBtn');
+const chatConsultBtn = document.getElementById('chatConsultBtn');
+customerSupportBtn.addEventListener('click', function(e) {
+e.preventDefault();
+supportModal.classList.remove('hidden');
+});
+cancelSupportBtn.addEventListener('click', function() {
+supportModal.classList.add('hidden');
+});
+supportModal.addEventListener('click', function(e) {
+if (e.target === supportModal) {
+supportModal.classList.add('hidden');
+}
+});
+phoneConsultBtn.addEventListener('click', function() {
+supportModal.classList.add('hidden');
+window.location.href = 'tel:1588-1234';
+});
+chatConsultBtn.addEventListener('click', function() {
+supportModal.classList.add('hidden');
+console.log('채팅 상담이 시작됩니다.');
+});
+});
+</script>
+</body>
+</html>

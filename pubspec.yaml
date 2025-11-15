@@ -11,18 +11,39 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # ▼▼▼ [수정됨] 이 블록이 누락되었습니다. ▼▼▼
   flutter_localizations:
     sdk: flutter
-  # ▲▲▲ [수정됨] 이 블록을 추가했습니다. ▲▲▲
 
+  # Social Authentication
   kakao_flutter_sdk: ^1.9.5
-  intl: 0.20.2  # 날짜 포맷팅용 (추가 필요)
+
+  # State Management
+  flutter_riverpod: ^2.4.0
+  riverpod_annotation: ^2.3.0
+
+  # Navigation
+  go_router: ^13.1.0
+
+  # Utilities
+  intl: 0.20.2
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+  # Image handling
+  image_picker: ^1.0.0
+  cached_network_image: ^3.3.0
+
+  # UI/UX
+  flutter_svg: ^2.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  build_runner: ^2.4.6
+  riverpod_generator: ^2.3.1
+  freezed: ^2.4.0
+  json_serializable: ^6.7.0
 
 flutter:
   uses-material-design: true

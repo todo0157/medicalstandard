@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>방문진료 요청</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#3B82F6',
+secondary: '#10B981'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+}
+}
+}
+}
+</script>
+<style>
+:where([class^="ri-"])::before {
+content: "\f3c2";
+}
+</style>
+</head>
+<body class="bg-gray-50 font-sans">
+<!-- 상단 헤더 -->
+<header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+<div class="flex items-center justify-between px-4 py-4 max-w-sm mx-auto">
+<button class="w-10 h-10 flex items-center justify-center cursor-pointer">
+<i class="ri-arrow-left-line text-xl text-gray-700"></i>
+</button>
+<h1 class="text-lg font-semibold text-gray-900">방문진료 요청</h1>
+<div class="w-10"></div>
+</div>
+</header>
+<!-- 메인 콘텐츠 -->
+<main class="flex items-center justify-center min-h-screen px-4 py-8">
+<!-- 진료 요청 팝업 카드 -->
+<div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+<!-- 환자 정보 -->
+<div class="flex items-center mb-6">
+<div class="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full mr-4">
+<i class="ri-user-line text-xl text-primary"></i>
+</div>
+<div>
+<h2 class="text-lg font-semibold text-gray-900">김영희 님</h2>
+<p class="text-sm text-gray-600">67세 여성</p>
+</div>
+</div>
+<!-- 날짜 및 시간 정보 -->
+<div class="bg-gray-50 rounded-lg p-4 mb-6">
+<div class="flex items-center mb-2">
+<div class="w-5 h-5 flex items-center justify-center mr-3">
+<i class="ri-calendar-line text-gray-600"></i>
+</div>
+<span class="text-sm font-medium text-gray-900">2025년 11월 7일 (금)</span>
+</div>
+<div class="flex items-center">
+<div class="w-5 h-5 flex items-center justify-center mr-3">
+<i class="ri-time-line text-gray-600"></i>
+</div>
+<span class="text-sm font-medium text-gray-900">오후 2:30 - 3:00</span>
+</div>
+</div>
+<!-- 거리 정보 -->
+<div class="text-center py-6 mb-6">
+<div class="flex items-center justify-center mb-2">
+<div class="w-8 h-8 flex items-center justify-center mr-3">
+<i class="ri-map-pin-line text-2xl text-primary"></i>
+</div>
+<span class="text-3xl font-bold text-gray-900">2.3km</span>
+</div>
+<p class="text-sm text-gray-600">예상 소요시간: 약 8분</p>
+<p class="text-xs text-gray-500 mt-1">서울시 강남구 역삼동</p>
+</div>
+<!-- 추가 정보 -->
+<div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-8">
+<div class="flex items-start">
+<div class="w-5 h-5 flex items-center justify-center mr-3 mt-0.5">
+<i class="ri-information-line text-amber-600"></i>
+</div>
+<div>
+<p class="text-sm font-medium text-amber-800">참고사항</p>
+<p class="text-xs text-amber-700 mt-1">환자분이 거동이 불편하시니 1층 현관에서 안내받으실 수 있습니다.</p>
+</div>
+</div>
+</div>
+<!-- 버튼 영역 -->
+<div class="flex gap-3">
+<button class="flex-1 bg-gray-200 text-gray-800 py-4 rounded-button font-semibold text-lg cursor-pointer hover:bg-gray-300 transition-colors !rounded-button" id="rejectBtn">
+거절
+</button>
+<button class="flex-1 bg-primary text-white py-4 rounded-button font-semibold text-lg cursor-pointer hover:bg-blue-600 transition-colors !rounded-button" id="acceptBtn">
+수락
+</button>
+</div>
+</div>
+</main>
+<script id="button-handlers">
+document.addEventListener('DOMContentLoaded', function() {
+const acceptBtn = document.getElementById('acceptBtn');
+const rejectBtn = document.getElementById('rejectBtn');
+acceptBtn.addEventListener('click', function() {
+showConfirmModal('수락', '방문진료 요청을 수락하시겠습니까?', function() {
+showSuccessMessage('진료 요청을 수락했습니다.');
+});
+});
+rejectBtn.addEventListener('click', function() {
+showConfirmModal('거절', '방문진료 요청을 거절하시겠습니까?', function() {
+showSuccessMessage('진료 요청을 거절했습니다.');
+});
+});
+});
+</script>
+<script id="modal-system">
+function showConfirmModal(action, message, callback) {
+const modal = document.createElement('div');
+modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+modal.innerHTML = `
+<div class="bg-white rounded-2xl p-6 w-full max-w-sm mx-4">
+<div class="text-center mb-6">
+<div class="w-16 h-16 flex items-center justify-center mx-auto mb-4 ${action === '수락' ? 'bg-green-100' : 'bg-red-100'} rounded-full">
+<i class="ri-${action === '수락' ? 'check' : 'close'}-line text-2xl ${action === '수락' ? 'text-green-600' : 'text-red-600'}"></i>
+</div>
+<h3 class="text-lg font-semibold text-gray-900 mb-2">진료 요청 ${action}</h3>
+<p class="text-sm text-gray-600">${message}</p>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-button font-medium cursor-pointer !rounded-button" onclick="closeModal()">
+취소
+</button>
+<button class="flex-1 ${action === '수락' ? 'bg-secondary' : 'bg-red-500'} text-white py-3 rounded-button font-medium cursor-pointer !rounded-button" onclick="confirmAction()">
+${action}
+</button>
+</div>
+</div>
+`;
+document.body.appendChild(modal);
+window.closeModal = function() {
+document.body.removeChild(modal);
+};
+window.confirmAction = function() {
+document.body.removeChild(modal);
+callback();
+};
+}
+function showSuccessMessage(message) {
+const toast = document.createElement('div');
+toast.className = 'fixed top-20 left-4 right-4 bg-white border border-green-200 rounded-lg shadow-lg p-4 z-50 max-w-sm mx-auto';
+toast.innerHTML = `
+<div class="flex items-center">
+<div class="w-8 h-8 flex items-center justify-center bg-green-100 rounded-full mr-3">
+<i class="ri-check-line text-green-600"></i>
+</div>
+<p class="text-sm font-medium text-gray-900">${message}</p>
+</div>
+`;
+document.body.appendChild(toast);
+setTimeout(() => {
+if (document.body.contains(toast)) {
+document.body.removeChild(toast);
+}
+}, 3000);
+}
+</script>
+<script id="back-button">
+document.addEventListener('DOMContentLoaded', function() {
+const backBtn = document.querySelector('header button');
+backBtn.addEventListener('click', function() {
+if (window.history.length > 1) {
+window.history.back();
+} else {
+window.close();
+}
+});
+});
+</script>
+</body>
+</html>

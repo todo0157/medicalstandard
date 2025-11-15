@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약하기</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#ec4899',secondary:'#f3f4f6'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before {
+content: "\f3c2";
+}
+.date-time-selector {
+transition: all 0.2s ease;
+}
+.date-time-selector:active {
+transform: scale(0.98);
+}
+.booking-button:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+.modal-overlay {
+backdrop-filter: blur(4px);
+}
+.slide-up {
+animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+from {
+transform: translateY(100%);
+opacity: 0;
+}
+to {
+transform: translateY(0);
+opacity: 1;
+}
+}
+.fade-in {
+animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+from {
+opacity: 0;
+}
+to {
+opacity: 1;
+}
+}
+</style>
+</head>
+<body class="bg-white min-h-screen">
+<!-- Navigation Bar -->
+<nav class="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 z-50">
+<div class="flex items-center justify-between px-4 py-3 h-14">
+<button class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()">
+<i class="ri-arrow-left-line text-xl text-gray-700"></i>
+</button>
+<h1 class="text-lg font-semibold text-gray-900">예약하기</h1>
+<div class="w-8"></div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="pt-14 pb-24 px-4">
+<!-- Doctor Profile -->
+<div class="flex flex-col items-center py-4">
+<div class="relative mb-3">
+<img src="https://readdy.ai/api/search-image?query=Professional%20Korean%20traditional%20medicine%20doctor%2C%20middle-aged%20Asian%20man%2C%20wearing%20white%20medical%20coat%2C%20friendly%20smile%2C%20clean%20professional%20headshot%2C%20soft%20lighting%2C%20medical%20clinic%20background%2C%20high%20quality%20portrait%20photography%2C%20trustworthy%20appearance&width=120&height=120&seq=doctor-profile-001&orientation=squarish"
+alt="한의사 프로필"
+class="w-20 h-20 rounded-full object-cover border-3 border-white shadow-lg">
+</div>
+<h2 class="text-lg font-bold text-gray-900 mb-1">김한의 원장</h2>
+<p class="text-sm text-gray-600 mb-1">한방내과 전문의</p>
+<div class="flex items-center text-sm text-gray-500">
+<i class="ri-star-fill text-yellow-400 mr-1"></i>
+<span class="font-medium">4.9</span>
+<span class="mx-1">·</span>
+<span>경력 15년</span>
+</div>
+</div>
+<!-- Appointment Details -->
+<div class="space-y-3 mb-4">
+<!-- Date Selection -->
+<div class="bg-gray-50 rounded-lg p-3">
+<label class="block text-sm font-medium text-gray-700 mb-2">방문 날짜</label>
+<button class="date-time-selector w-full bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-primary transition-colors" onclick="openDatePicker()">
+<div class="flex items-center">
+<div class="w-5 h-5 flex items-center justify-center mr-3">
+<i class="ri-calendar-line text-primary"></i>
+</div>
+<span id="selectedDate" class="text-gray-900 font-medium text-sm">날짜를 선택해주세요</span>
+</div>
+<div class="w-4 h-4 flex items-center justify-center">
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+</div>
+</button>
+</div>
+<!-- Time Selection -->
+<div class="bg-gray-50 rounded-lg p-3">
+<label class="block text-sm font-medium text-gray-700 mb-2">방문 시간</label>
+<button class="date-time-selector w-full bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between cursor-pointer hover:border-primary transition-colors" onclick="openTimePicker()">
+<div class="flex items-center">
+<div class="w-5 h-5 flex items-center justify-center mr-3">
+<i class="ri-time-line text-primary"></i>
+</div>
+<span id="selectedTime" class="text-gray-900 font-medium text-sm">시간을 선택해주세요</span>
+</div>
+<div class="w-4 h-4 flex items-center justify-center">
+<i class="ri-arrow-right-s-line text-gray-400"></i>
+</div>
+</button>
+</div>
+</div>
+<!-- Additional Info -->
+<div class="bg-blue-50 rounded-lg p-3 mb-4">
+<div class="flex items-start">
+<div class="w-4 h-4 flex items-center justify-center mr-2 mt-0.5">
+<i class="ri-information-line text-blue-600"></i>
+</div>
+<div>
+<p class="text-sm text-blue-800 font-medium mb-1">방문진료 안내</p>
+<p class="text-xs text-blue-700 leading-relaxed">방문진료비는 별도로 책정되며, 예약 확정 후 상세 안내를 받으실 수 있습니다.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Booking Button -->
+<div class="fixed bottom-16 left-0 right-0 px-4 bg-white border-t border-gray-100">
+<button id="bookingButton" class="booking-button w-full bg-primary text-white font-semibold py-3 rounded-button mt-3 mb-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed !rounded-button" onclick="makeBooking()" disabled>
+예약하기
+</button>
+</div>
+<!-- Bottom Tab Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+<div class="grid grid-cols-4 h-16">
+<button class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-home-line text-primary"></i>
+</div>
+<span class="text-xs text-primary font-medium">홈</span>
+</button>
+<button class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-map-pin-line text-gray-400"></i>
+</div>
+<span class="text-xs text-gray-400">상황</span>
+</button>
+<button class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-chat-3-line text-gray-400"></i>
+</div>
+<span class="text-xs text-gray-400">채팅</span>
+</button>
+<button class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center mb-1">
+<i class="ri-user-line text-gray-400"></i>
+</div>
+<span class="text-xs text-gray-400">프로필</span>
+</button>
+</div>
+</nav>
+<!-- Date Picker Modal -->
+<div id="dateModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay z-50 hidden">
+<div class="flex items-end justify-center min-h-screen">
+<div class="bg-white w-full max-w-md rounded-t-xl slide-up">
+<div class="flex items-center justify-between p-4 border-b border-gray-200">
+<button class="text-gray-500 cursor-pointer" onclick="closeDatePicker()">취소</button>
+<h3 class="text-lg font-semibold">날짜 선택</h3>
+<button class="text-primary font-medium cursor-pointer" onclick="confirmDate()">확인</button>
+</div>
+<div class="p-4">
+<div class="grid grid-cols-7 gap-2 mb-4">
+<div class="text-center text-sm font-medium text-gray-500 py-2">일</div>
+<div class="text-center text-sm font-medium text-gray-500 py-2">월</div>
+<div class="text-center text-sm font-medium text-gray-500 py-2">화</div>
+<div class="text-center text-sm font-medium text-gray-500 py-2">수</div>
+<div class="text-center text-sm font-medium text-gray-500 py-2">목</div>
+<div class="text-center text-sm font-medium text-gray-500 py-2">금</div>
+<div class="text-center text-sm font-medium text-gray-500 py-2">토</div>
+</div>
+<div id="calendarGrid" class="grid grid-cols-7 gap-2">
+<!-- Calendar dates will be populated by JavaScript -->
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Time Picker Modal -->
+<div id="timeModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay z-50 hidden">
+<div class="flex items-end justify-center min-h-screen">
+<div class="bg-white w-full max-w-md rounded-t-xl slide-up">
+<div class="flex items-center justify-between p-4 border-b border-gray-200">
+<button class="text-gray-500 cursor-pointer" onclick="closeTimePicker()">취소</button>
+<h3 class="text-lg font-semibold">시간 선택</h3>
+<button class="text-primary font-medium cursor-pointer" onclick="confirmTime()">확인</button>
+</div>
+<div class="p-4 max-h-80 overflow-y-auto">
+<div class="space-y-2" id="timeSlots">
+<!-- Time slots will be populated by JavaScript -->
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 modal-overlay z-50 hidden">
+<div class="flex items-center justify-center min-h-screen p-4">
+<div class="bg-white rounded-xl p-6 w-full max-w-sm fade-in">
+<div class="text-center">
+<div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+<i class="ri-check-line text-2xl text-green-600"></i>
+</div>
+<h3 class="text-lg font-semibold text-gray-900 mb-2">예약이 완료되었습니다</h3>
+<p class="text-sm text-gray-600 mb-6">방문 30분 전에 연락드리겠습니다.</p>
+<button class="w-full bg-primary text-white font-semibold py-3 rounded-button cursor-pointer !rounded-button" onclick="closeSuccessModal()">
+확인
+</button>
+</div>
+</div>
+</div>
+</div>
+<script id="navigation-script">
+function goBack() {
+window.history.back();
+}
+</script>
+<script id="date-picker-script">
+let selectedDateValue = null;
+let tempSelectedDate = null;
+function openDatePicker() {
+document.getElementById('dateModal').classList.remove('hidden');
+generateCalendar();
+}
+function closeDatePicker() {
+document.getElementById('dateModal').classList.add('hidden');
+tempSelectedDate = null;
+}
+function generateCalendar() {
+const today = new Date();
+const currentMonth = today.getMonth();
+const currentYear = today.getFullYear();
+const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+const calendarGrid = document.getElementById('calendarGrid');
+calendarGrid.innerHTML = '';
+for (let i = 0; i < firstDay; i++) {
+const emptyCell = document.createElement('div');
+calendarGrid.appendChild(emptyCell);
+}
+for (let day = 1; day <= daysInMonth; day++) {
+const dateCell = document.createElement('button');
+const currentDate = new Date(currentYear, currentMonth, day);
+const isToday = currentDate.toDateString() === today.toDateString();
+const isPast = currentDate < today && !isToday;
+dateCell.className = `w-10 h-10 rounded-full text-sm font-medium cursor-pointer transition-colors ${
+isPast
+? 'text-gray-300 cursor-not-allowed'
+: 'text-gray-900 hover:bg-primary hover:text-white'
+}`;
+if (isToday) {
+dateCell.classList.add('bg-primary', 'text-white');
+}
+dateCell.textContent = day;
+if (!isPast) {
+dateCell.onclick = () => selectDate(currentYear, currentMonth, day, dateCell);
+}
+calendarGrid.appendChild(dateCell);
+}
+}
+function selectDate(year, month, day, element) {
+const previousSelected = document.querySelector('.calendar-selected');
+if (previousSelected) {
+previousSelected.classList.remove('calendar-selected', 'bg-primary', 'text-white');
+previousSelected.classList.add('hover:bg-primary', 'hover:text-white');
+}
+element.classList.add('calendar-selected', 'bg-primary', 'text-white');
+element.classList.remove('hover:bg-primary', 'hover:text-white');
+tempSelectedDate = new Date(year, month, day);
+}
+function confirmDate() {
+if (tempSelectedDate) {
+selectedDateValue = tempSelectedDate;
+const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
+document.getElementById('selectedDate').textContent = selectedDateValue.toLocaleDateString('ko-KR', options);
+updateBookingButton();
+}
+closeDatePicker();
+}
+</script>
+<script id="time-picker-script">
+let selectedTimeValue = null;
+let tempSelectedTime = null;
+function openTimePicker() {
+document.getElementById('timeModal').classList.remove('hidden');
+generateTimeSlots();
+}
+function closeTimePicker() {
+document.getElementById('timeModal').classList.add('hidden');
+tempSelectedTime = null;
+}
+function generateTimeSlots() {
+const timeSlots = document.getElementById('timeSlots');
+timeSlots.innerHTML = '';
+const slots = [
+'09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+'14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+'17:00', '17:30', '18:00', '18:30'
+];
+slots.forEach(time => {
+const timeButton = document.createElement('button');
+timeButton.className = 'w-full p-3 text-left rounded-lg border border-gray-200 hover:border-primary hover:bg-primary hover:text-white transition-colors cursor-pointer';
+timeButton.textContent = time;
+timeButton.onclick = () => selectTime(time, timeButton);
+timeSlots.appendChild(timeButton);
+});
+}
+function selectTime(time, element) {
+const previousSelected = document.querySelector('.time-selected');
+if (previousSelected) {
+previousSelected.classList.remove('time-selected', 'bg-primary', 'text-white', 'border-primary');
+previousSelected.classList.add('border-gray-200', 'hover:border-primary', 'hover:bg-primary', 'hover:text-white');
+}
+element.classList.add('time-selected', 'bg-primary', 'text-white', 'border-primary');
+element.classList.remove('border-gray-200', 'hover:border-primary', 'hover:bg-primary', 'hover:text-white');
+tempSelectedTime = time;
+}
+function confirmTime() {
+if (tempSelectedTime) {
+selectedTimeValue = tempSelectedTime;
+document.getElementById('selectedTime').textContent = selectedTimeValue;
+updateBookingButton();
+}
+closeTimePicker();
+}
+</script>
+<script id="booking-script">
+function updateBookingButton() {
+const bookingButton = document.getElementById('bookingButton');
+if (selectedDateValue && selectedTimeValue) {
+bookingButton.disabled = false;
+bookingButton.classList.remove('opacity-50', 'cursor-not-allowed');
+} else {
+bookingButton.disabled = true;
+bookingButton.classList.add('opacity-50', 'cursor-not-allowed');
+}
+}
+function makeBooking() {
+if (selectedDateValue && selectedTimeValue) {
+document.getElementById('successModal').classList.remove('hidden');
+}
+}
+function closeSuccessModal() {
+document.getElementById('successModal').classList.add('hidden');
+window.history.back();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#F1F5F9'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 z-50">
+        <div class="flex items-center justify-between px-4 py-3 max-w-sm mx-auto">
+            <button class="w-10 h-10 flex items-center justify-center cursor-pointer">
+                <i class="ri-arrow-left-line text-xl text-gray-700"></i>
+            </button>
+            <h1 class="text-lg font-semibold text-gray-900">회원가입</h1>
+            <div class="w-10"></div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-16 pb-6 px-6 max-w-sm mx-auto min-h-screen">
+        <!-- Welcome Section -->
+        <div class="text-center mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-1">환영합니다!</h2>
+            <p class="text-sm text-gray-600">간편하게 가입하고 서비스를 이용해보세요</p>
+        </div>
+
+        <!-- Kakao Login -->
+        <button class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium py-3.5 px-6 !rounded-button flex items-center justify-center gap-3 mb-4 cursor-pointer transition-colors">
+            <i class="ri-chat-3-fill text-lg"></i>
+            <span class="text-sm">카카오톡으로 간편가입</span>
+        </button>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-4 mb-4">
+            <div class="flex-1 h-px bg-gray-200"></div>
+            <span class="text-xs text-gray-500">또는</span>
+            <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+
+        <!-- Regular Signup Form -->
+        <div class="space-y-3 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                <input 
+                    type="text" 
+                    id="name"
+                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm"
+                    placeholder="실명을 입력해주세요"
+                >
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">주민등록번호</label>
+                <div class="flex items-center gap-2">
+                    <input 
+                        type="text" 
+                        id="idNumber1"
+                        class="w-20 px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm text-center"
+                        placeholder="000000"
+                        maxlength="6"
+                    >
+                    <span class="text-lg text-gray-400 px-1">-</span>
+                    <input 
+                        type="password" 
+                        id="idNumber2"
+                        class="w-20 px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm text-center"
+                        placeholder="0000000"
+                        maxlength="7"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- PASS Authentication -->
+        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3.5 px-6 !rounded-button flex items-center justify-center gap-3 mb-5 cursor-pointer transition-colors">
+            <i class="ri-smartphone-line text-lg"></i>
+            <span class="text-sm">PASS로 본인인증 가입</span>
+        </button>
+
+        <!-- Terms Agreement -->
+        <div class="space-y-3 mb-5">
+            <div class="flex items-center gap-3">
+                <input type="checkbox" id="agreeAll" class="hidden">
+                <label for="agreeAll" class="flex items-center gap-3 cursor-pointer">
+                    <div class="w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center checkbox-custom">
+                        <i class="ri-check-line text-sm text-white hidden"></i>
+                    </div>
+                    <span class="font-medium text-gray-900 text-sm">전체 동의</span>
+                </label>
+            </div>
+            
+            <div class="pl-8 space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="terms1" class="hidden required-term">
+                        <label for="terms1" class="flex items-center gap-3 cursor-pointer">
+                            <div class="w-4 h-4 border border-gray-300 rounded flex items-center justify-center checkbox-custom">
+                                <i class="ri-check-line text-xs text-white hidden"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">[필수] 서비스 이용약관</span>
+                        </label>
+                    </div>
+                    <button class="text-xs text-gray-500 underline cursor-pointer">보기</button>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="terms2" class="hidden required-term">
+                        <label for="terms2" class="flex items-center gap-3 cursor-pointer">
+                            <div class="w-4 h-4 border border-gray-300 rounded flex items-center justify-center checkbox-custom">
+                                <i class="ri-check-line text-xs text-white hidden"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">[필수] 개인정보 처리방침</span>
+                        </label>
+                    </div>
+                    <button class="text-xs text-gray-500 underline cursor-pointer">보기</button>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="terms3" class="hidden">
+                        <label for="terms3" class="flex items-center gap-3 cursor-pointer">
+                            <div class="w-4 h-4 border border-gray-300 rounded flex items-center justify-center checkbox-custom">
+                                <i class="ri-check-line text-xs text-white hidden"></i>
+                            </div>
+                            <span class="text-xs text-gray-700">[선택] 마케팅 정보 수신 동의</span>
+                        </label>
+                    </div>
+                    <button class="text-xs text-gray-500 underline cursor-pointer">보기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Button -->
+        <button id="signupBtn" class="w-full bg-gray-300 text-gray-500 font-medium py-3.5 px-6 !rounded-button cursor-not-allowed transition-all duration-200" disabled>
+            가입하기
+        </button>
+
+        <!-- Login Link -->
+        <div class="text-center mt-4">
+            <p class="text-xs text-gray-600">
+                이미 계정이 있으신가요? 
+                <button class="text-primary font-medium cursor-pointer">로그인</button>
+            </p>
+        </div>
+    </main>
+
+    <script id="checkbox-handler">
+        document.addEventListener('DOMContentLoaded', function() {
+            const agreeAllCheckbox = document.getElementById('agreeAll');
+            const requiredTerms = document.querySelectorAll('.required-term');
+            const allTerms = document.querySelectorAll('input[type="checkbox"]:not(#agreeAll)');
+            const signupBtn = document.getElementById('signupBtn');
+            
+            function updateCheckboxUI(checkbox) {
+                const checkboxCustom = checkbox.nextElementSibling.querySelector('.checkbox-custom');
+                const checkIcon = checkboxCustom.querySelector('i');
+                
+                if (checkbox.checked) {
+                    checkboxCustom.classList.add('bg-primary', 'border-primary');
+                    checkboxCustom.classList.remove('border-gray-300');
+                    checkIcon.classList.remove('hidden');
+                } else {
+                    checkboxCustom.classList.remove('bg-primary', 'border-primary');
+                    checkboxCustom.classList.add('border-gray-300');
+                    checkIcon.classList.add('hidden');
+                }
+            }
+            
+            function checkSignupEligibility() {
+                const name = document.getElementById('name').value.trim();
+                const idNumber1 = document.getElementById('idNumber1').value.trim();
+                const idNumber2 = document.getElementById('idNumber2').value.trim();
+                const allRequiredTermsChecked = Array.from(requiredTerms).every(term => term.checked);
+                
+                const isFormValid = name && idNumber1.length === 6 && idNumber2.length === 7 && allRequiredTermsChecked;
+                
+                if (isFormValid) {
+                    signupBtn.disabled = false;
+                    signupBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                    signupBtn.classList.add('bg-primary', 'text-white', 'cursor-pointer');
+                } else {
+                    signupBtn.disabled = true;
+                    signupBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                    signupBtn.classList.remove('bg-primary', 'text-white', 'cursor-pointer');
+                }
+            }
+            
+            agreeAllCheckbox.addEventListener('change', function() {
+                allTerms.forEach(term => {
+                    term.checked = this.checked;
+                    updateCheckboxUI(term);
+                });
+                updateCheckboxUI(this);
+                checkSignupEligibility();
+            });
+            
+            allTerms.forEach(term => {
+                term.addEventListener('change', function() {
+                    updateCheckboxUI(this);
+                    
+                    const allChecked = Array.from(allTerms).every(t => t.checked);
+                    agreeAllCheckbox.checked = allChecked;
+                    updateCheckboxUI(agreeAllCheckbox);
+                    
+                    checkSignupEligibility();
+                });
+            });
+            
+            document.getElementById('name').addEventListener('input', checkSignupEligibility);
+            document.getElementById('idNumber1').addEventListener('input', checkSignupEligibility);
+            document.getElementById('idNumber2').addEventListener('input', checkSignupEligibility);
+        });
+    </script>
+
+    <script id="input-formatting">
+        document.addEventListener('DOMContentLoaded', function() {
+            const idNumber1 = document.getElementById('idNumber1');
+            const idNumber2 = document.getElementById('idNumber2');
+            
+            idNumber1.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length === 6) {
+                    idNumber2.focus();
+                }
+            });
+            
+            idNumber2.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
+    </script>
+
+    <script id="signup-handler">
+        document.addEventListener('DOMContentLoaded', function() {
+            const signupBtn = document.getElementById('signupBtn');
+            
+            signupBtn.addEventListener('click', function() {
+                if (!this.disabled) {
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    modal.innerHTML = `
+                        <div class="bg-white rounded-2xl p-6 mx-4 max-w-sm w-full">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="ri-check-line text-2xl text-green-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">가입 완료!</h3>
+                                <p class="text-gray-600 mb-6">회원가입이 성공적으로 완료되었습니다.</p>
+                                <button class="w-full bg-primary text-white font-medium py-3 px-6 !rounded-button cursor-pointer" onclick="this.closest('.fixed').remove()">
+                                    확인
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
