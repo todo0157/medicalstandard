@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      LOG_LEVEL: debug
+      ALLOW_ORIGIN: http://localhost:3000
+      API_DOMAIN: http://localhost:8080
+    volumes:
+      - .:/app
+      - /app/node_modules
