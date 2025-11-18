@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:go_router/go_router.dart';
@@ -48,7 +48,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,10 +95,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const Text(
                 "간편하게 가입하고 서비스를 이용해 보세요",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF4B5563),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
               ),
               const SizedBox(height: 24),
 
@@ -161,11 +157,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               // 8. 가입하기 버튼
               _buildButton(
                 text: "가입하기",
-                onPressed: _isSignupButtonEnabled ? _showSignupSuccessModal : null,
-                backgroundColor:
-                    _isSignupButtonEnabled ? kPrimaryColor : kButtonDisabledColor,
-                textColor:
-                    _isSignupButtonEnabled ? Colors.white : kTextDisabledColor,
+                onPressed: _isSignupButtonEnabled
+                    ? _showSignupSuccessModal
+                    : null,
+                backgroundColor: _isSignupButtonEnabled
+                    ? kPrimaryColor
+                    : kButtonDisabledColor,
+                textColor: _isSignupButtonEnabled
+                    ? Colors.white
+                    : kTextDisabledColor,
               ),
               const SizedBox(height: 16),
 
@@ -198,16 +198,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
   // [異붽??? Key Hash 異쒕젰 諛?濡쒓렇??濡쒖쭅 (ANR ?먯씤 異붿쟻??
   void _handleKakaoLogin() async {
     try {
       // ----------------------------------------------------
       // [?꾩떆 肄붾뱶] Key Hash ?뺤씤 諛?異쒕젰 (濡쒓렇???뚯뒪?????꾩떆濡??ъ슜)
       // ----------------------------------------------------
-      String hash = await KakaoSdk.origin;
-      print('===================================================');
-      print('???붾쾭洹????댁떆 (?꾩닔 ?깅줉): $hash');
-      print('===================================================');
+      final hash = await KakaoSdk.origin;
+      debugPrint('===================================================');
+      debugPrint('???붾쾭洹????댁떆 (?꾩닔 ?깅줉): $hash');
+      debugPrint('===================================================');
       // ----------------------------------------------------
 
       // 移댁뭅?ㅽ넚 ?ㅼ튂 ?щ? ?뺤씤
@@ -222,16 +223,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
 
       // 濡쒓렇???깃났 ???ъ슜???뺣낫 媛?몄삤湲?
-      User user = await UserApi.instance.me();
-      print('?ъ슜???뺣낫 媛?몄삤湲??깃났'
-            '\n?대쫫: ${user.kakaoAccount?.profile?.nickname}');
+      final user = await UserApi.instance.me();
+      debugPrint(
+        '?ъ슜???뺣낫 媛?몄삤湲??깃났'
+        '\n?대쫫: ${user.kakaoAccount?.profile?.nickname}',
+      );
 
       if (mounted) {
         _showSignupSuccessModal();
       }
-
     } catch (error) {
-      print('移댁뭅??濡쒓렇???ㅽ뙣: $error');
+      debugPrint('移댁뭅??濡쒓렇???ㅽ뙣: $error');
     }
   }
 
@@ -281,7 +283,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           contentPadding: const EdgeInsets.all(24),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -312,10 +316,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 8),
               const Text(
                 "회원가입이 성공적으로 완료되었습니다.",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF4B5563),
-                ),
+                style: TextStyle(fontSize: 14, color: Color(0xFF4B5563)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -329,7 +330,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                     // 2. 메인 화면으로 이동 (go_router 사용)
                     if (!mounted) return;
-                    Future.microtask(() => context.go('/home'));
+                    context.go('/home');
                   },
                   backgroundColor: kPrimaryColor,
                   textColor: Colors.white,
@@ -341,6 +342,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       },
     );
   }
+
   // [?꾩껜 ?ы븿?? 怨듯넻 踰꾪듉 ?꾩젽 (html??!rounded-button ?ㅽ???諛섏쁺)
   Widget _buildButton({
     required String text,
@@ -369,9 +371,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
             icon,
             const SizedBox(width: 12), // gap-3
           ],
-          Text(text,
-              style:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
@@ -400,11 +403,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
           decoration: InputDecoration(
             hintText: placeholder,
             hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 14), // px-3 py-2.5
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ), // px-3 py-2.5
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFFD1D5DB)), // border-gray-300
+              borderSide: const BorderSide(
+                color: Color(0xFFD1D5DB),
+              ), // border-gray-300
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -482,8 +489,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       hintText: hint,
       hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
       counterText: "", // maxLength 移댁슫???④린湲?
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
@@ -494,7 +500,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
-
 
   // [?꾩껜 ?ы븿?? ?쎄? ?숈쓽 ?뱀뀡
   Widget _buildTermsSection() {
@@ -578,8 +583,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 style: TextStyle(
                   fontSize: isMain ? 14 : 12,
                   fontWeight: isMain ? FontWeight.w500 : FontWeight.normal,
-                  color:
-                      isMain ? const Color(0xFF111827) : const Color(0xFF374151),
+                  color: isMain
+                      ? const Color(0xFF111827)
+                      : const Color(0xFF374151),
                 ),
               ),
             ],
@@ -603,8 +609,3 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 }
-
-
-
-
-

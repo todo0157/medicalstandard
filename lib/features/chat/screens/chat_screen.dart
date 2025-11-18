@@ -32,7 +32,9 @@ class _ChatScreenState extends State<ChatScreen> {
       // 초기 샘플 메시지 로드
       _chatMessages = [
         _buildTimestamp("오늘 오전 10:15"),
-        _buildDoctorMessage("내일 예정된 시간에 방문드리고 필요하면 추후 꾸준히 관리해드릴게요. 도착 전에 한 번 더 연락드리겠습니다 😊"),
+        _buildDoctorMessage(
+          "내일 예정된 시간에 방문드리고 필요하면 추후 꾸준히 관리해드릴게요. 도착 전에 한 번 더 연락드리겠습니다 😊",
+        ),
         _buildUserMessage("네 감사합니다 선생님 🙏"),
         _buildDoctorOptionsMessage(),
         _buildUserMessage("찌르는 듯이 아파요"),
@@ -43,7 +45,6 @@ class _ChatScreenState extends State<ChatScreen> {
       _isInit = false; // 초기화 완료
     }
   }
-
 
   @override
   void dispose() {
@@ -87,7 +88,6 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -127,9 +127,14 @@ class _ChatScreenState extends State<ChatScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             // 모달 내부에서 사용할 상태 변수
-            final TextEditingController addressController = TextEditingController(text: "서울시 강남구 삼성동 100-1, 101동 1503호");
+            final TextEditingController addressController =
+                TextEditingController(text: "서울시 강남구 삼성동 100-1, 101동 1503호");
             String selectedTime = "오늘 오후 2:00";
-            final List<String> timeOptions = ["오늘 오후 2:00", "오늘 오후 3:00", "오늘 오후 4:00"];
+            final List<String> timeOptions = [
+              "오늘 오후 2:00",
+              "오늘 오후 3:00",
+              "오늘 오후 4:00",
+            ];
 
             return Padding(
               padding: EdgeInsets.only(
@@ -158,7 +163,11 @@ class _ChatScreenState extends State<ChatScreen> {
                   const Center(
                     child: Text(
                       "방문진료 요청",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kDarkGray),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: kDarkGray,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -166,17 +175,24 @@ class _ChatScreenState extends State<ChatScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: kChatPrimaryGreen.withOpacity(0.1),
+                      color: kChatPrimaryGreen.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.check_circle, color: kChatPrimaryGreen, size: 20),
+                        Icon(
+                          Icons.check_circle,
+                          color: kChatPrimaryGreen,
+                          size: 20,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           "현재 환자는 재진 환자입니다 → 방문진료 가능",
-                          style: TextStyle(color: kChatPrimaryGreen, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            color: kChatPrimaryGreen,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -184,7 +200,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   const SizedBox(height: 24),
 
                   // 환자 정보 (image_374a60.png 반영)
-                  const Text("환자 정보", style: TextStyle(fontSize: 14, color: kGrayText)),
+                  const Text(
+                    "환자 정보",
+                    style: TextStyle(fontSize: 14, color: kGrayText),
+                  ),
                   const SizedBox(height: 4),
                   Container(
                     width: double.infinity,
@@ -196,16 +215,29 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("이름: 박영수 (남, 65세)", style: TextStyle(fontSize: 16, color: kDarkGray, fontWeight: FontWeight.w500)),
+                        Text(
+                          "이름: 박영수 (남, 65세)",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: kDarkGray,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         SizedBox(height: 4),
-                        Text("최근 진료: 2024.01.15 (요통 치료)", style: TextStyle(fontSize: 14, color: kGrayText)),
+                        Text(
+                          "최근 진료: 2024.01.15 (요통 치료)",
+                          style: TextStyle(fontSize: 14, color: kGrayText),
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
 
                   // [수정됨] 방문 주소 (TextField로 변경)
-                  const Text("방문 주소", style: TextStyle(fontSize: 14, color: kGrayText)),
+                  const Text(
+                    "방문 주소",
+                    style: TextStyle(fontSize: 14, color: kGrayText),
+                  ),
                   const SizedBox(height: 4),
                   TextField(
                     controller: addressController,
@@ -222,15 +254,24 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: kChatPrimaryGreen, width: 2),
+                        borderSide: const BorderSide(
+                          color: kChatPrimaryGreen,
+                          width: 2,
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
 
                   // [수정됨] 희망 방문 시간 (DropdownButton으로 변경)
-                  const Text("희망 방문 시간", style: TextStyle(fontSize: 14, color: kGrayText)),
+                  const Text(
+                    "희망 방문 시간",
+                    style: TextStyle(fontSize: 14, color: kGrayText),
+                  ),
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -243,16 +284,28 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: DropdownButton<String>(
                         isExpanded: true,
                         value: selectedTime,
-                        icon: const Icon(Icons.arrow_drop_down, color: kGrayText),
+                        icon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: kGrayText,
+                        ),
                         onChanged: (String? newValue) {
-                          setModalState(() { // StatefulBuilder의 setState 사용
+                          setModalState(() {
+                            // StatefulBuilder의 setState 사용
                             selectedTime = newValue!;
                           });
                         },
-                        items: timeOptions.map<DropdownMenuItem<String>>((String value) {
+                        items: timeOptions.map<DropdownMenuItem<String>>((
+                          String value,
+                        ) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value, style: const TextStyle(fontSize: 16, color: kDarkGray)),
+                            child: Text(
+                              value,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: kDarkGray,
+                              ),
+                            ),
                           );
                         }).toList(),
                       ),
@@ -270,9 +323,14 @@ class _ChatScreenState extends State<ChatScreen> {
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             side: BorderSide(color: Colors.grey[300]!),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          child: const Text("취소", style: TextStyle(color: kDarkGray)),
+                          child: const Text(
+                            "취소",
+                            style: TextStyle(color: kDarkGray),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -280,13 +338,17 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).pop();
-                            _addSystemMessage("방문진료 요청이 접수되었습니다. 일정 확정 시 알림이 갑니다.");
+                            _addSystemMessage(
+                              "방문진료 요청이 접수되었습니다. 일정 확정 시 알림이 갑니다.",
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kChatPrimaryGreen,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             elevation: 0,
                           ),
                           child: const Text("요청 전송"),
@@ -305,19 +367,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // 모달 내부 정보 행 위젯 (이제 환자 정보만 처리)
-  Widget _buildModalInfoRow({required String title, required String content}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontSize: 14, color: kGrayText)),
-          const SizedBox(height: 4),
-          Text(content, style: const TextStyle(fontSize: 16, color: kDarkGray, fontWeight: FontWeight.w500)),
-        ],
-      ),
-    );
-  }
 
   // 시스템 메시지 위젯 (image_36590c.png)
   Widget _buildSystemMessageWidget(String text) {
@@ -336,7 +385,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: Color(0xFF1E40AF), fontSize: 14)
+              style: const TextStyle(color: Color(0xFF1E40AF), fontSize: 14),
             ),
           ),
         ],
@@ -356,7 +405,10 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         child: Text(
           time,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)), // gray-500
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF6B7280),
+          ), // gray-500
         ),
       ),
     );
@@ -371,19 +423,30 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           const CircleAvatar(
             radius: 16,
-            backgroundImage: NetworkImage("https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor002&orientation=squarish"),
+            backgroundImage: NetworkImage(
+              "https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor002&orientation=squarish",
+            ),
           ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.7,
+            ),
             decoration: BoxDecoration(
               color: kChatBubbleGray,
-              borderRadius: BorderRadius.circular(20).copyWith(
-                bottomLeft: const Radius.circular(4),
+              borderRadius: BorderRadius.circular(
+                20,
+              ).copyWith(bottomLeft: const Radius.circular(4)),
+            ),
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: kDarkGray,
+                fontSize: 14,
+                height: 1.5,
               ),
             ),
-            child: Text(message, style: const TextStyle(color: kDarkGray, fontSize: 14, height: 1.5)),
           ),
         ],
       ),
@@ -399,14 +462,23 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.7,
+            ),
             decoration: BoxDecoration(
               color: kChatPrimaryGreen, // bg-primary (green)
               borderRadius: BorderRadius.circular(20).copyWith(
                 bottomRight: const Radius.circular(4), // rounded-br-md
               ),
             ),
-            child: Text(message, style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.5)),
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
           ),
         ],
       ),
@@ -417,7 +489,9 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildDoctorOptionsMessage() {
     Widget buildOption(String text) {
       return OutlinedButton(
-        onPressed: () { /* (개선) 옵션 선택 시 로직 */ },
+        onPressed: () {
+          /* (개선) 옵션 선택 시 로직 */
+        },
         style: OutlinedButton.styleFrom(
           foregroundColor: kDarkGray,
           backgroundColor: Colors.white,
@@ -435,22 +509,29 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           const CircleAvatar(
             radius: 16,
-            backgroundImage: NetworkImage("https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor004&orientation=squarish"),
+            backgroundImage: NetworkImage(
+              "https://readdy.ai/api/search-image?query=professional%20korean%20traditional%20medicine%20doctor%20portrait%2C%20middle%20aged%20male%2C%20white%20coat%2C%20friendly%20smile%2C%20medical%20professional%20headshot%2C%20clean%20background&width=64&height=64&seq=doctor004&orientation=squarish",
+            ),
           ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.7,
+            ),
             decoration: BoxDecoration(
               color: kChatBubbleGray,
-              borderRadius: BorderRadius.circular(20).copyWith(
-                bottomLeft: const Radius.circular(4),
-              ),
+              borderRadius: BorderRadius.circular(
+                20,
+              ).copyWith(bottomLeft: const Radius.circular(4)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("통증이 심해지신 건 언제부터인가요?", style: TextStyle(color: kDarkGray, fontSize: 14, height: 1.5)),
+                const Text(
+                  "통증이 심해지신 건 언제부터인가요?",
+                  style: TextStyle(color: kDarkGray, fontSize: 14, height: 1.5),
+                ),
                 const SizedBox(height: 12),
                 buildOption("찌르는 듯한 통증"),
                 const SizedBox(height: 8),
@@ -482,12 +563,25 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Icon(Icons.info_outline, color: Color(0xFF2563EB), size: 20),
               SizedBox(width: 8),
-              Text("📌 방문진료 안내", style: TextStyle(color: Color(0xFF1E3A8A), fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(
+                "📌 방문진료 안내",
+                style: TextStyle(
+                  color: Color(0xFF1E3A8A),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
-          const Text("• 원칙: 시범기관 내원 후 1회 이상 진료받은 환자", style: TextStyle(color: Color(0xFF1E40AF), fontSize: 12)),
-          const Text("• 예외: 한의사가 필요하다고 판단 시 초진도 가능", style: TextStyle(color: Color(0xFF1E40AF), fontSize: 12)),
+          const Text(
+            "• 원칙: 시범기관 내원 후 1회 이상 진료받은 환자",
+            style: TextStyle(color: Color(0xFF1E40AF), fontSize: 12),
+          ),
+          const Text(
+            "• 예외: 한의사가 필요하다고 판단 시 초진도 가능",
+            style: TextStyle(color: Color(0xFF1E40AF), fontSize: 12),
+          ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -496,9 +590,14 @@ class _ChatScreenState extends State<ChatScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB), // bg-blue-600
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-              child: const Text("방문진료 요청", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+              child: const Text(
+                "방문진료 요청",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
             ),
           ),
         ],
@@ -523,9 +622,19 @@ class _ChatScreenState extends State<ChatScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("오후 2:00 방문진료가 예약되었습니다.", style: TextStyle(color: Color(0xFF15803D), fontWeight: FontWeight.w500, fontSize: 14)),
+              Text(
+                "오후 2:00 방문진료가 예약되었습니다.",
+                style: TextStyle(
+                  color: Color(0xFF15803D),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+              ),
               SizedBox(height: 2),
-              Text("일정 변경 시 미리 연락드리겠습니다.", style: TextStyle(color: Color(0xFF166534), fontSize: 12)),
+              Text(
+                "일정 변경 시 미리 연락드리겠습니다.",
+                style: TextStyle(color: Color(0xFF166534), fontSize: 12),
+              ),
             ],
           ),
         ],
@@ -544,8 +653,13 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.add_circle_outline, color: Color(0xFF4B5563)),
-            onPressed: () { /* (개선) 파일/사진 첨부 */ },
+            icon: const Icon(
+              Icons.add_circle_outline,
+              color: Color(0xFF4B5563),
+            ),
+            onPressed: () {
+              /* (개선) 파일/사진 첨부 */
+            },
           ),
 
           // 텍스트 필드
@@ -560,7 +674,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
               ),
               onSubmitted: (text) => _handleSendMessage(text),
             ),

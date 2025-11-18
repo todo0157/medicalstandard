@@ -1,107 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../../core/models/user_profile.dart';
+import '../../../core/providers/profile_provider.dart';
 import '../../../shared/theme/app_colors.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+class ProfileScreen extends ConsumerStatefulWidget {
+  const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  late Future<UserProfile> _profileFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _profileFuture = _loadProfile();
-  }
-
-  Future<UserProfile> _loadProfile() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return UserProfile(
-      id: 'user_patient_01',
-      name: '김미영',
-      age: 46,
-      gender: Gender.female,
-      address: '서울특별시 성동구 왕십리로 16',
-      profileImageUrl:
-          'https://readdy.ai/api/search-image?query=Professional%20Korean%20woman%20portrait%2C%20clean%20background%2C%20medical%20patient%20photo%2C%20friendly%20smile%2C%20natural%20lighting%2C%20high%20quality%20headshot&width=256&height=256&seq=profile001&orientation=squarish',
-      phoneNumber: '010-4567-1234',
-      appointmentCount: 12,
-      treatmentCount: 8,
-    );
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  Future<void> _handleRefresh() {
+    return ref
+        .read(profileStateNotifierProvider.notifier)
+        .loadProfile(forceRefresh: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<UserProfile>(
-      future: _profileFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: _buildAppBar(),
-            body: const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-          );
-        }
+    final profileState = ref.watch(profileStateNotifierProvider);
 
-        if (snapshot.hasError) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: _buildAppBar(),
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        size: 56, color: AppColors.error),
-                    const SizedBox(height: 16),
-                    Text(
-                      '프로필을 불러오는 중 오류가 발생했습니다.',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      snapshot.error.toString(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (!snapshot.hasData) {
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: _buildAppBar(),
-            body: const Center(
-              child: Text('프로필 정보를 찾을 수 없습니다.'),
-            ),
-          );
-        }
-
-        final profile = snapshot.data!;
-
-        return Scaffold(
-          backgroundColor: AppColors.background,
-          appBar: _buildAppBar(),
-          body: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: _buildAppBar(),
+      body: profileState.when(
+        loading: () => const _ProfileLoadingView(),
+        error: (error, stackTrace) => _ProfileErrorView(
+          message: _mapErrorMessage(error),
+          onRetry: _handleRefresh,
+          onSupport: _showSupportSheet,
+        ),
+        data: (profile) => RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: _handleRefresh,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
             child: Column(
               children: [
@@ -119,9 +56,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
+  }
+
+  String _mapErrorMessage(Object error) {
+    if (error is AppException) {
+      return error.message;
+    }
+    return '프로필 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
   }
 
   PreferredSizeWidget _buildAppBar() {
@@ -130,9 +74,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: Text(
         '프로필',
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       centerTitle: true,
       backgroundColor: AppColors.surface,
@@ -140,8 +84,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shadowColor: Colors.transparent,
       actions: [
         IconButton(
-          icon: const Icon(Icons.settings_outlined,
-              color: AppColors.iconPrimary),
+          icon: const Icon(
+            Icons.settings_outlined,
+            color: AppColors.iconPrimary,
+          ),
           onPressed: () => _showSnack('설정 화면으로 이동합니다'),
         ),
       ],
@@ -153,17 +99,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _handleEditProfile() {
-    _showSnack('프로필 편집 화면으로 이동합니다');
+    _showSnack('프로필 수정 화면으로 이동합니다');
   }
 
   void _showSnack(String message) {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 2),
-        ),
+        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
       );
   }
 
@@ -186,17 +129,100 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-class _ProfileCard extends StatelessWidget {
-  const _ProfileCard({
-    required this.profile,
-    required this.onEdit,
+class _ProfileLoadingView extends StatelessWidget {
+  const _ProfileLoadingView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(color: AppColors.primary),
+    );
+  }
+}
+
+class _ProfileErrorView extends StatelessWidget {
+  const _ProfileErrorView({
+    required this.message,
+    required this.onRetry,
+    required this.onSupport,
   });
+
+  final String message;
+  final Future<void> Function() onRetry;
+  final VoidCallback onSupport;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text(
+              '프로필 정보를 불러오지 못했습니다.',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: onRetry,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('다시 시도하기'),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton(
+                  onPressed: onSupport,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: const Text('고객센터'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileCard extends StatelessWidget {
+  const _ProfileCard({required this.profile, required this.onEdit});
 
   final UserProfile profile;
   final VoidCallback onEdit;
 
-  String get _genderLabel =>
-      profile.gender == Gender.female ? '여성' : '남성';
+  String get _genderLabel => profile.gender == Gender.female ? '여성' : '남성';
 
   @override
   Widget build(BuildContext context) {
@@ -207,7 +233,7 @@ class _ProfileCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             offset: const Offset(0, 6),
             blurRadius: 16,
           ),
@@ -228,7 +254,8 @@ class _ProfileCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         profile.name,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
@@ -238,8 +265,10 @@ class _ProfileCard extends StatelessWidget {
                       onPressed: onEdit,
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.primary,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
@@ -251,15 +280,15 @@ class _ProfileCard extends StatelessWidget {
                 Text(
                   '${profile.age}세 / $_genderLabel',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   profile.address,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -292,11 +321,7 @@ class _ProfileStats extends StatelessWidget {
               valueColor: AppColors.primary,
             ),
           ),
-          Container(
-            width: 1,
-            height: 64,
-            color: AppColors.border,
-          ),
+          Container(width: 1, height: 64, color: AppColors.border),
           Expanded(
             child: _StatTile(
               value: profile.treatmentCount.toString(),
@@ -335,11 +360,12 @@ class _ProfileAvatar extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor:
-                            const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primary,
+                        ),
                         value: progress.expectedTotalBytes != null
                             ? progress.cumulativeBytesLoaded /
-                                progress.expectedTotalBytes!
+                                  progress.expectedTotalBytes!
                             : null,
                       ),
                     ),
@@ -354,11 +380,7 @@ class _ProfileAvatar extends StatelessWidget {
   Widget _fallback() {
     return Container(
       color: AppColors.surfaceVariant,
-      child: const Icon(
-        Icons.person,
-        size: 36,
-        color: AppColors.iconSecondary,
-      ),
+      child: const Icon(Icons.person, size: 36, color: AppColors.iconSecondary),
     );
   }
 }
@@ -384,16 +406,16 @@ class _StatTile extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: valueColor,
-                  fontWeight: FontWeight.w700,
-                ),
+              color: valueColor,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -463,10 +485,7 @@ class _QuickActionData {
 }
 
 class _QuickActionCard extends StatelessWidget {
-  const _QuickActionCard({
-    required this.data,
-    required this.onTap,
-  });
+  const _QuickActionCard({required this.data, required this.onTap});
 
   final _QuickActionData data;
   final VoidCallback onTap;
@@ -483,7 +502,7 @@ class _QuickActionCard extends StatelessWidget {
           border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               offset: const Offset(0, 3),
               blurRadius: 8,
             ),
@@ -508,9 +527,9 @@ class _QuickActionCard extends StatelessWidget {
               Text(
                 data.title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -557,7 +576,7 @@ class _MenuSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             offset: const Offset(0, 4),
             blurRadius: 12,
           ),
@@ -609,13 +628,16 @@ class _MenuButton extends StatelessWidget {
                 child: Text(
                   data.title,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios,
-                  size: 16, color: AppColors.iconSecondary),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: AppColors.iconSecondary,
+              ),
             ],
           ),
         ),
@@ -625,10 +647,7 @@ class _MenuButton extends StatelessWidget {
 }
 
 class _SupportSheet extends StatelessWidget {
-  const _SupportSheet({
-    required this.onPhoneTap,
-    required this.onChatTap,
-  });
+  const _SupportSheet({required this.onPhoneTap, required this.onChatTap});
 
   final VoidCallback onPhoneTap;
   final VoidCallback onChatTap;
@@ -653,9 +672,9 @@ class _SupportSheet extends StatelessWidget {
             Text(
               '고객지원',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 16),
             _SupportButton(
@@ -713,7 +732,9 @@ class _SupportButton extends StatelessWidget {
           backgroundColor: background,
           shadowColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -723,9 +744,9 @@ class _SupportButton extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: iconColor,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: iconColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

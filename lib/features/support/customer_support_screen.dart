@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/theme/app_colors.dart';
 
 class CustomerSupportScreen extends StatelessWidget {
-  const CustomerSupportScreen({Key? key}) : super(key: key);
+  const CustomerSupportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

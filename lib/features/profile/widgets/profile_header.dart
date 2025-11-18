@@ -7,10 +7,10 @@ class ProfileHeader extends StatelessWidget {
   final VoidCallback? onProfileImageTap;
 
   const ProfileHeader({
-    Key? key,
+    super.key,
     required this.profile,
     this.onProfileImageTap,
-  }) : super(key: key);
+  });
 
   String _getGenderLabel(Gender gender) {
     return gender == Gender.male ? '남성' : '여성';
@@ -33,11 +33,7 @@ class ProfileHeader extends StatelessWidget {
                   ? NetworkImage(profile.profileImageUrl!)
                   : null,
               child: profile.profileImageUrl == null
-                  ? Icon(
-                      Icons.person,
-                      size: 32,
-                      color: AppColors.textSecondary,
-                    )
+                  ? Icon(Icons.person, size: 32, color: AppColors.textSecondary)
                   : null,
             ),
           ),
@@ -51,9 +47,9 @@ class ProfileHeader extends StatelessWidget {
                 Text(
                   profile.name,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -62,16 +58,16 @@ class ProfileHeader extends StatelessWidget {
                 Text(
                   '${profile.age}세 • ${_getGenderLabel(profile.gender)}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 SizedBox(height: 4),
                 // Address
                 Text(
                   profile.address,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

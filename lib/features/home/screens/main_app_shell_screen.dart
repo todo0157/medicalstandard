@@ -74,7 +74,7 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
         ],
         backgroundColor: Colors.white,
         elevation: 1,
-        shadowColor: kPrimaryPink.withOpacity(0.1),
+        shadowColor: kPrimaryPink.withValues(alpha: 0.1),
       ),
 
       body: _getBodyWidget(_selectedIndex),
@@ -82,10 +82,26 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
       // 하단 탭 바
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), activeIcon: Icon(Icons.favorite), label: '생활'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), activeIcon: Icon(Icons.chat_bubble), label: '채팅'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: '프로필'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: '홈',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border),
+            activeIcon: Icon(Icons.favorite),
+            label: '생활',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            activeIcon: Icon(Icons.chat_bubble),
+            label: '채팅',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: '프로필',
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: kPrimaryPink,
@@ -122,7 +138,12 @@ class Patient {
   final String imageUrl;
   final Color color;
 
-  Patient({required this.id, required this.name, required this.imageUrl, required this.color});
+  Patient({
+    required this.id,
+    required this.name,
+    required this.imageUrl,
+    required this.color,
+  });
 }
 
 // HomeScreen
@@ -138,8 +159,9 @@ class _HomeScreenState extends State<HomeScreen> {
     Patient(
       id: "me",
       name: "나",
-      imageUrl: "https://readdy.ai/api/search-image?query=Professional%20young%20Korean%20man%20in%20casual%20clothes%2C%20friendly%20smile%2C%20clean%20background%2C%20portrait%20photography%2C%20soft%20lighting%2C%20natural%20expression%2C%20modern%20style&width=64&height=64&seq=patient_me&orientation=squarish",
-      color: kPrimaryPink
+      imageUrl:
+          "https://readdy.ai/api/search-image?query=Professional%20young%20Korean%20man%20in%20casual%20clothes%2C%20friendly%20smile%2C%20clean%20background%2C%20portrait%20photography%2C%20soft%20lighting%2C%20natural%20expression%2C%20modern%20style&width=64&height=64&seq=patient_me&orientation=squarish",
+      color: kPrimaryPink,
     ),
   ];
 
@@ -156,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: kPrimaryBlue.withOpacity(0.3)),
+        border: Border.all(color: kPrimaryBlue.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,12 +186,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             text,
             style: TextStyle(
-              color: isPlaceholder ? kPrimaryBlue.withOpacity(0.8) : kDarkGray,
+              color: isPlaceholder
+                  ? kPrimaryBlue.withValues(alpha: 0.8)
+                  : kDarkGray,
               fontSize: 15,
               fontWeight: isPlaceholder ? FontWeight.normal : FontWeight.w500,
             ),
           ),
-          Icon(icon, color: kPrimaryBlue.withOpacity(0.6)),
+          Icon(icon, color: kPrimaryBlue.withValues(alpha: 0.6)),
         ],
       ),
     );
@@ -181,7 +205,11 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         const Text(
           "누가 진료를 받을까요?",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: kDarkGray),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: kDarkGray,
+          ),
         ),
         const SizedBox(height: 16),
         Container(
@@ -189,15 +217,21 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: kPrimaryPink.withOpacity(0.3), width: 2, style: BorderStyle.solid),
+            border: Border.all(
+              color: kPrimaryPink.withValues(alpha: 0.3),
+              width: 2,
+              style: BorderStyle.solid,
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              ..._patients.map((patient) => Padding(
-                padding: const EdgeInsets.only(right: 24.0),
-                child: _buildPatientOption(patient),
-              )).toList(),
+              ..._patients.map(
+                (patient) => Padding(
+                  padding: const EdgeInsets.only(right: 24.0),
+                  child: _buildPatientOption(patient),
+                ),
+              ),
               _buildAddPatientButton(),
             ],
           ),
@@ -222,8 +256,10 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 64,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: isSelected ? Border.all(color: patient.color, width: 4) : null,
-              color: patient.color.withOpacity(0.1),
+              border: isSelected
+                  ? Border.all(color: patient.color, width: 4)
+                  : null,
+              color: patient.color.withValues(alpha: 0.1),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -235,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 errorBuilder: (context, error, stackTrace) => Icon(
                   patient.id == "me" ? Icons.person : Icons.elderly,
                   color: patient.color,
-                  size: 30
+                  size: 30,
                 ),
               ),
             ),
@@ -243,7 +279,11 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 8),
           Text(
             patient.name,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: patient.color.withOpacity(0.9)),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: patient.color.withValues(alpha: 0.9),
+            ),
           ),
         ],
       ),
@@ -262,14 +302,26 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 64,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: kPrimaryBlue.withOpacity(0.6), width: 2, style: BorderStyle.solid),
+              border: Border.all(
+                color: kPrimaryBlue.withValues(alpha: 0.6),
+                width: 2,
+                style: BorderStyle.solid,
+              ),
             ),
-            child: Icon(Icons.add, color: kPrimaryBlue.withOpacity(0.8), size: 30),
+            child: Icon(
+              Icons.add,
+              color: kPrimaryBlue.withValues(alpha: 0.8),
+              size: 30,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             "추가",
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: kPrimaryBlue.withOpacity(0.9)),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: kPrimaryBlue.withValues(alpha: 0.9),
+            ),
           ),
         ],
       ),
@@ -281,26 +333,30 @@ class _HomeScreenState extends State<HomeScreen> {
       Patient(
         id: "mother",
         name: "어머니",
-        imageUrl: "https://readdy.ai/api/search-image?query=Kind%20middle%20aged%20Korean%20mother%20with%20warm%20smile%2C%20gentle%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_mother&orientation=squarish",
-        color: kPrimaryBlue
+        imageUrl:
+            "https://readdy.ai/api/search-image?query=Kind%20middle%20aged%20Korean%20mother%20with%20warm%20smile%2C%20gentle%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_mother&orientation=squarish",
+        color: kPrimaryBlue,
       ),
       Patient(
         id: "child",
         name: "자녀",
-        imageUrl: "https://readdy.ai/api/search-image?query=Cute%20Korean%20child%20with%20bright%20smile%2C%20happy%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_child&orientation=squarish",
-        color: kPrimaryBlue
+        imageUrl:
+            "https://readdy.ai/api/search-image?query=Cute%20Korean%20child%20with%20bright%20smile%2C%20happy%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_child&orientation=squarish",
+        color: kPrimaryBlue,
       ),
       Patient(
         id: "grandfather",
         name: "할아버지",
-        imageUrl: "https://readdy.ai/api/search-image?query=Kind%20elderly%20Korean%20grandfather%20with%20gentle%20smile%2C%20warm%20expression%2C%20traditional%20Korean%20style%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_grandfather&orientation=squarish",
-        color: kPrimaryBlue
+        imageUrl:
+            "https://readdy.ai/api/search-image?query=Kind%20elderly%20Korean%20grandfather%20with%20gentle%20smile%2C%20warm%20expression%2C%20traditional%20Korean%20style%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_grandfather&orientation=squarish",
+        color: kPrimaryBlue,
       ),
       Patient(
         id: "spouse",
         name: "배우자",
-        imageUrl: "https://readdy.ai/api/search-image?query=Professional%20Korean%20spouse%20with%20friendly%20smile%2C%20kind%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_spouse&orientation=squarish",
-        color: kPrimaryBlue
+        imageUrl:
+            "https://readdy.ai/api/search-image?query=Professional%20Korean%20spouse%20with%20friendly%20smile%2C%20kind%20expression%2C%20casual%20clothes%2C%20soft%20lighting%2C%20portrait%20photography%2C%20clean%20background&width=80&height=80&seq=patient_spouse&orientation=squarish",
+        color: kPrimaryBlue,
       ),
     ];
 
@@ -322,7 +378,14 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("환자 추가", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: kDarkGray)),
+                  const Text(
+                    "환자 추가",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: kDarkGray,
+                    ),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close, color: kGrayText),
                     onPressed: () => Navigator.of(context).pop(),
@@ -359,19 +422,30 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 80,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            color: kPrimaryBlue.withOpacity(0.1),
+                            color: kPrimaryBlue.withValues(alpha: 0.1),
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: Image.network(
                               patient.imageUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.person_add_alt_1_outlined, color: kPrimaryBlue),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.person_add_alt_1_outlined,
+                                    color: kPrimaryBlue,
+                                  ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Text(patient.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: kDarkGray)),
+                        Text(
+                          patient.name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: kDarkGray,
+                          ),
+                        ),
                       ],
                     ),
                   );
@@ -399,9 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onSurface: kDarkGray,
             ),
             textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: kPrimaryPink,
-              ),
+              style: TextButton.styleFrom(foregroundColor: kPrimaryPink),
             ),
           ),
           child: child!,
@@ -441,13 +513,25 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSpacing: 12,
               childAspectRatio: 2.5,
               children: [
-                _buildSymptomOption("근골격계", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20bone%20and%20joint%20symbol%20with%20gentle%20care%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_musculoskeletal_blue&orientation=squarish"),
-                _buildSymptomOption("감기", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20thermometer%20and%20tissue%20box%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_cold_blue&orientation=squarish"),
-                _buildSymptomOption("두통", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20head%20with%20gentle%20pain%20relief%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_headache_blue&orientation=squarish"),
-                _buildSymptomOption("기타", "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20stethoscope%20and%20health%20check%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_other_blue&orientation=squarish"),
+                _buildSymptomOption(
+                  "근골격계",
+                  "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20bone%20and%20joint%20symbol%20with%20gentle%20care%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_musculoskeletal_blue&orientation=squarish",
+                ),
+                _buildSymptomOption(
+                  "감기",
+                  "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20thermometer%20and%20tissue%20box%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_cold_blue&orientation=squarish",
+                ),
+                _buildSymptomOption(
+                  "두통",
+                  "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20head%20with%20gentle%20pain%20relief%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_headache_blue&orientation=squarish",
+                ),
+                _buildSymptomOption(
+                  "기타",
+                  "https://readdy.ai/api/search-image?query=icon%2C%203D%20cartoon%20medical%20stethoscope%20and%20health%20check%20symbol%2C%20the%20icon%20should%20take%20up%2070%25%20of%20the%20frame%2C%20warm%20blue%20colors%20with%20soft%20gradients%2C%20minimalist%20design%2C%20smooth%20rounded%20shapes%2C%20subtle%20shading%2C%20no%20outlines%2C%20centered%20composition%2C%20isolated%20on%20white%20background%2C%20playful%20and%20friendly%20aesthetic%2C%20isometric%20perspective%2C%20high%20detail%20quality%2C%20clean%20and%20modern%20look%2C%20single%20object%20focus&width=48&height=48&seq=symptom_other_blue&orientation=squarish",
+                ),
               ],
             ),
-          )
+          ),
       ],
     );
   }
@@ -465,27 +549,41 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? kPrimaryBlue.withOpacity(0.1) : Colors.white,
+          color: isSelected
+              ? kPrimaryBlue.withValues(alpha: 0.1)
+              : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? kPrimaryBlue : kPrimaryBlue.withOpacity(0.2),
+            color: isSelected
+                ? kPrimaryBlue
+                : kPrimaryBlue.withValues(alpha: 0.2),
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.network(imageUrl, width: 24, height: 24, errorBuilder: (context, error, stackTrace) => const Icon(Icons.healing_outlined, color: kPrimaryBlue)),
+            Image.network(
+              imageUrl,
+              width: 24,
+              height: 24,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.healing_outlined, color: kPrimaryBlue),
+            ),
             const SizedBox(width: 10),
             Text(
               label,
               style: TextStyle(
                 color: kDarkGray,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-              )
+              ),
             ),
           ],
         ),
@@ -496,7 +594,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: kPrimaryPink.withOpacity(0.05),
+      color: kPrimaryPink.withValues(alpha: 0.05),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -505,13 +603,19 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildPatientSelection(),
             const SizedBox(height: 24),
             GestureDetector(
-              onTap: () { /* 주소 검색 API 연동 */ },
+              onTap: () {
+                /* 주소 검색 API 연동 */
+              },
               child: _buildSelectionButton("주소를 입력해주세요", Icons.place_outlined),
             ),
             const SizedBox(height: 24),
             const Text(
               "언제 진료를 받을까요?",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: kDarkGray),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: kDarkGray,
+              ),
             ),
             const SizedBox(height: 16),
             GestureDetector(
@@ -519,14 +623,21 @@ class _HomeScreenState extends State<HomeScreen> {
               child: _buildSelectionButton(
                 _selectedDate == null
                     ? "날짜를 선택해주세요"
-                    : DateFormat('yyyy년 MM월 dd일 (E)', 'ko_KR').format(_selectedDate!),
-                Icons.calendar_today
+                    : DateFormat(
+                        'yyyy년 MM월 dd일 (E)',
+                        'ko_KR',
+                      ).format(_selectedDate!),
+                Icons.calendar_today,
               ),
             ),
             const SizedBox(height: 24),
             const Text(
               "어떤 질환으로 진료받으시나요?",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: kDarkGray),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: kDarkGray,
+              ),
             ),
             const SizedBox(height: 16),
             _buildSymptomSelection(),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../shared/theme/app_colors.dart';
@@ -17,8 +17,10 @@ class AppointmentBookingScreen extends StatefulWidget {
 }
 
 class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
-  final List<DateTime> _dates =
-      List.generate(10, (index) => DateTime.now().add(Duration(days: index)));
+  final List<DateTime> _dates = List.generate(
+    10,
+    (index) => DateTime.now().add(Duration(days: index)),
+  );
   final List<String> _timeSlots = const [
     '09:00',
     '10:00',
@@ -36,7 +38,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     '피부 컨디션',
     '소화 불편',
     '마음 건강',
-    '기타'
+    '기타',
   ];
 
   DateTime? _selectedDate;
@@ -73,7 +75,10 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.iconPrimary),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: AppColors.iconPrimary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: const [
@@ -92,9 +97,11 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _BookingHeroCard(onChangeAddress: () {
-              _showSnack('주소 변경 기능은 준비 중입니다');
-            }),
+            _BookingHeroCard(
+              onChangeAddress: () {
+                _showSnack('주소 변경 기능은 준비 중입니다');
+              },
+            ),
             const SizedBox(height: 20),
             _buildSectionTitle('언제 방문할까요?'),
             const SizedBox(height: 12),
@@ -153,8 +160,9 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      disabledBackgroundColor:
-                          kBookingPrimary.withOpacity(0.3),
+                      disabledBackgroundColor: kBookingPrimary.withValues(
+                        alpha: 0.3,
+                      ),
                     ),
                     child: const Text(
                       '예약하기',
@@ -179,7 +187,10 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                       selected: true,
                     ),
                     _BottomNavIcon(label: '상황', icon: Icons.pin_drop_outlined),
-                    _BottomNavIcon(label: '채팅', icon: Icons.chat_bubble_outline),
+                    _BottomNavIcon(
+                      label: '채팅',
+                      icon: Icons.chat_bubble_outline,
+                    ),
                     _BottomNavIcon(label: '프로필', icon: Icons.person_outline),
                   ],
                 ),
@@ -235,10 +246,10 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
-                  )
+                  ),
                 ],
               ),
               child: Column(
@@ -247,7 +258,9 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                   Text(
                     dayFormat.format(date),
                     style: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                      color: isSelected
+                          ? Colors.white
+                          : AppColors.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -418,7 +431,8 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                 _needsMedicine = value;
               });
             },
-            activeColor: kBookingPrimary,
+            activeThumbColor: kBookingPrimary,
+            activeTrackColor: kBookingPrimary.withValues(alpha: 0.4),
           ),
         ],
       ),
@@ -426,7 +440,10 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
   }
 
   void _showConfirmationSheet() {
-    final readableDate = DateFormat('M월 d일 (E)', 'ko_KR').format(_selectedDate!);
+    final readableDate = DateFormat(
+      'M월 d일 (E)',
+      'ko_KR',
+    ).format(_selectedDate!);
 
     showModalBottomSheet<void>(
       context: context,
@@ -451,11 +468,15 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
                 Container(
                   width: 64,
                   height: 64,
-                decoration: const BoxDecoration(
-                  color: kBookingPrimaryLight,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: kBookingPrimary, size: 32),
+                  decoration: const BoxDecoration(
+                    color: kBookingPrimaryLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check,
+                    color: kBookingPrimary,
+                    size: 32,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -512,10 +533,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 2),
-        ),
+        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
       );
   }
 }
@@ -535,7 +553,7 @@ class _BookingHeroCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),
@@ -552,8 +570,11 @@ class _BookingHeroCard extends StatelessWidget {
                   color: kBookingPrimaryLight,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.home_filled,
-                    color: kBookingPrimary, size: 26),
+                child: const Icon(
+                  Icons.home_filled,
+                  color: kBookingPrimary,
+                  size: 26,
+                ),
               ),
               const SizedBox(width: 16),
               const Expanded(
@@ -613,6 +634,7 @@ class _BookingHeroCard extends StatelessWidget {
     );
   }
 }
+
 class _VisitTypeCard extends StatelessWidget {
   const _VisitTypeCard({
     required this.title,
@@ -645,7 +667,10 @@ class _VisitTypeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: isSelected ? kBookingPrimary : AppColors.iconPrimary),
+            Icon(
+              icon,
+              color: isSelected ? kBookingPrimary : AppColors.iconPrimary,
+            ),
             const SizedBox(height: 12),
             Text(
               title,
@@ -684,7 +709,7 @@ class _SummaryCard extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 18,
             offset: const Offset(0, 10),
           ),
@@ -719,10 +744,7 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 12),
           const Text(
             '• 방문 진료 기본 비용 포함\n• 보험 청구는 진료 후 진행됩니다\n• 추가 검사가 필요한 경우 비용이 달라질 수 있어요',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              height: 1.5,
-            ),
+            style: TextStyle(color: AppColors.textSecondary, height: 1.5),
           ),
         ],
       ),
@@ -746,10 +768,7 @@ class _BottomNavIcon extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          icon,
-          color: selected ? kBookingPrimary : AppColors.textHint,
-        ),
+        Icon(icon, color: selected ? kBookingPrimary : AppColors.textHint),
         const SizedBox(height: 4),
         Text(
           label,
@@ -763,4 +782,3 @@ class _BottomNavIcon extends StatelessWidget {
     );
   }
 }
-

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/theme/app_colors.dart';
 
 class LegalNoticeScreen extends StatelessWidget {
-  const LegalNoticeScreen({Key? key}) : super(key: key);
+  const LegalNoticeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

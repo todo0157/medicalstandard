@@ -11,7 +11,7 @@ class ProfileMenuItem extends StatelessWidget {
   final bool showDivider;
 
   const ProfileMenuItem({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     this.subtitle,
@@ -19,7 +19,7 @@ class ProfileMenuItem extends StatelessWidget {
     this.iconColor,
     required this.onTap,
     this.showDivider = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,19 +57,15 @@ class ProfileMenuItem extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: AppColors.textPrimary,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(color: AppColors.textPrimary),
                       ),
                       if (subtitle != null) ...[
                         SizedBox(height: 4),
                         Text(
                           subtitle!,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textTertiary,
-                                  ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textTertiary),
                         ),
                       ],
                     ],

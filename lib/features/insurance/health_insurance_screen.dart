@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/theme/app_colors.dart';
 
 class HealthInsuranceScreen extends StatelessWidget {
-  const HealthInsuranceScreen({Key? key}) : super(key: key);
+  const HealthInsuranceScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
