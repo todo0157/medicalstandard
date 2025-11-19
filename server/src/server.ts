@@ -1,4 +1,4 @@
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -7,13 +7,28 @@ import router from './routes';
 
 const app = express();
 
+const allowedOrigins = (env.ALLOW_ORIGIN ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter((origin) => origin.length > 0);
+
+const allowAllOrigins =
+  env.NODE_ENV === 'development' || allowedOrigins.includes('*');
+
+const corsOptions: CorsOptions = allowAllOrigins
+  ? { origin: true }
+  : {
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    };
+
 app.set('trust proxy', true);
 app.use(helmet());
-app.use(
-  cors({
-    origin: env.ALLOW_ORIGIN ?? '*'
-  })
-);
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan(env.LOG_LEVEL === 'debug' ? 'dev' : 'combined'));
 
@@ -26,6 +41,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api', router);
+app.use('/', router);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {

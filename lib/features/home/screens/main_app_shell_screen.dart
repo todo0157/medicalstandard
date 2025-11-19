@@ -362,6 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -369,89 +370,98 @@ class _HomeScreenState extends State<HomeScreen> {
           topRight: Radius.circular(24),
         ),
       ),
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder: (BuildContext sheetContext) {
+        final double bottomPadding = MediaQuery.of(
+          sheetContext,
+        ).viewInsets.bottom;
+
+        return SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomPadding),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    "환자 추가",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: kDarkGray,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "환자 추가",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: kDarkGray,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: kGrayText),
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: kGrayText),
-                    onPressed: () => Navigator.of(context).pop(),
+                  const SizedBox(height: 16),
+                  GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.8,
+                        ),
+                    itemCount: addOptions.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final patient = addOptions[index];
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (!_patients.any((p) => p.id == patient.id)) {
+                              _patients.add(patient);
+                              _selectedPatientId = patient.id;
+                            }
+                          });
+                          Navigator.of(sheetContext).pop();
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: kPrimaryBlue.withValues(alpha: 0.1),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.network(
+                                  patient.imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                        Icons.person_add_alt_1_outlined,
+                                        color: kPrimaryBlue,
+                                      ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              patient.name,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: kDarkGray,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: addOptions.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final patient = addOptions[index];
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (!_patients.any((p) => p.id == patient.id)) {
-                          _patients.add(patient);
-                          _selectedPatientId = patient.id;
-                        }
-                      });
-                      Navigator.of(context).pop();
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: kPrimaryBlue.withValues(alpha: 0.1),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.network(
-                              patient.imageUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                    Icons.person_add_alt_1_outlined,
-                                    color: kPrimaryBlue,
-                                  ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          patient.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: kDarkGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
         );
       },
