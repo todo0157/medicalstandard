@@ -1,0 +1,103 @@
+// Prisma schema for Hanbang App API
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id                  String   @id @default(cuid())
+  name                String
+  age                 Int
+  gender              String   @default("male")
+  address             String
+  profileImageUrl     String?
+  phoneNumber         String?
+  appointmentCount    Int      @default(0)
+  treatmentCount      Int      @default(0)
+  isPractitioner      Boolean  @default(false)
+  certificationStatus String   @default("none")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  account             UserAccount?
+}
+
+model UserAccount {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  provider      String   @default("password")
+  kakaoId       String?  @unique
+  profileId     String   @unique
+  profile       UserProfile @relation(fields: [profileId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions      Session[]
+  appointments  Appointment[]
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  userAccountId  String
+  refreshToken   String   @unique
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  userAccount    UserAccount @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
+}
+
+model Clinic {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  phone     String?
+  doctors   Doctor[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Doctor {
+  id           String   @id @default(cuid())
+  name         String
+  specialty    String
+  bio          String?
+  imageUrl     String?
+  clinicId     String
+  clinic       Clinic   @relation(fields: [clinicId], references: [id])
+  slots        Slot[]
+  appointments Appointment[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Slot {
+  id         String   @id @default(cuid())
+  doctorId   String
+  startsAt   DateTime
+  endsAt     DateTime
+  isBooked   Boolean  @default(false)
+  doctor     Doctor   @relation(fields: [doctorId], references: [id])
+  appointment Appointment?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Appointment {
+  id            String   @id @default(cuid())
+  userAccountId String
+  doctorId      String
+  slotId        String   @unique
+  status        String   @default("confirmed")
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userAccount   UserAccount @relation(fields: [userAccountId], references: [id])
+  doctor        Doctor      @relation(fields: [doctorId], references: [id])
+  slot          Slot        @relation(fields: [slotId], references: [id])
+}

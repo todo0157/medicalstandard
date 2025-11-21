@@ -1,24 +1,58 @@
+import type { UserProfile as PrismaUserProfile } from '@prisma/client';
+import { prisma } from '../lib/prisma';
+import { env } from '../config';
 import type { UserProfile } from '../types/userProfile';
-
-const mockProfile: UserProfile = {
-  id: 'user_123',
-  name: '김민수',
-  age: 34,
-  gender: 'male',
-  address: '경기도 성남시 분당구 불정로 6',
-  profileImageUrl: 'https://readdy.ai/api/images/user/doctor_male_1.jpg',
-  phoneNumber: '010-1234-5678',
-  appointmentCount: 12,
-  treatmentCount: 8,
-  isPractitioner: false,
-  certificationStatus: 'none',
-  createdAt: new Date(Date.now() - 86400 * 365 * 1000).toISOString(),
-  updatedAt: new Date().toISOString()
-};
 
 export class ProfileService {
   async getCurrentUserProfile(): Promise<UserProfile> {
-    // TODO: Replace with DB query once persistence is available.
-    return mockProfile;
+    return this.getUserProfileById(env.DEFAULT_PROFILE_ID);
+  }
+
+  async getUserProfileById(id: string): Promise<UserProfile> {
+    const profile = await prisma.userProfile.findUnique({ where: { id } });
+
+    if (!profile) {
+      throw new Error('요청한 프로필을 찾을 수 없습니다.');
+    }
+
+    return this.map(profile);
+  }
+
+  async updateProfile(id: string, data: Partial<UserProfile>): Promise<UserProfile> {
+    const updated = await prisma.userProfile.update({
+      where: { id },
+      data: {
+        name: data.name,
+        age: data.age,
+        gender: data.gender,
+        address: data.address,
+        profileImageUrl: data.profileImageUrl,
+        phoneNumber: data.phoneNumber,
+        appointmentCount: data.appointmentCount,
+        treatmentCount: data.treatmentCount,
+        isPractitioner: data.isPractitioner,
+        certificationStatus: data.certificationStatus
+      }
+    });
+
+    return this.map(updated);
+  }
+
+  private map(record: PrismaUserProfile): UserProfile {
+    return {
+      id: record.id,
+      name: record.name,
+      age: record.age,
+      gender: record.gender as UserProfile['gender'],
+      address: record.address,
+      profileImageUrl: record.profileImageUrl ?? undefined,
+      phoneNumber: record.phoneNumber ?? undefined,
+      appointmentCount: record.appointmentCount,
+      treatmentCount: record.treatmentCount,
+      isPractitioner: record.isPractitioner,
+      certificationStatus: record.certificationStatus as UserProfile['certificationStatus'],
+      createdAt: record.createdAt.toISOString(),
+      updatedAt: record.updatedAt.toISOString()
+    };
   }
 }

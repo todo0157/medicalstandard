@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/errors/app_exception.dart';
+import '../../../core/models/appointment.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/providers/profile_provider.dart';
+import '../../doctor/providers/doctor_providers.dart';
 import '../../../shared/theme/app_colors.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -14,15 +18,84 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  Future<void> _handleRefresh() {
-    return ref
-        .read(profileStateNotifierProvider.notifier)
-        .loadProfile(forceRefresh: true);
+  Future<void> _handleRefresh() async {
+    await Future.wait([
+      ref.read(profileStateNotifierProvider.notifier).loadProfile(
+            forceRefresh: true,
+          ),
+      ref.read(appointmentsNotifierProvider.notifier).refresh(),
+    ]);
+  }
+
+  Future<void> _cancelAppointment(Appointment appointment) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await _confirm(
+      '예약 취소',
+      '선택한 예약을 취소하시겠어요?',
+    );
+    if (!mounted || !confirmed) return;
+
+    try {
+      await ref
+          .read(appointmentsNotifierProvider.notifier)
+          .cancel(appointment.id);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('예약을 취소했습니다.')));
+    } catch (e) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('취소에 실패했습니다.')));
+    }
+  }
+
+  Future<void> _deleteAppointment(Appointment appointment) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await _confirm(
+      '예약 삭제',
+      '취소된 예약을 목록에서 삭제할까요?',
+    );
+    if (!mounted || !confirmed) return;
+
+    try {
+      await ref
+          .read(appointmentsNotifierProvider.notifier)
+          .remove(appointment.id);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('예약을 삭제했습니다.')));
+    } catch (e) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('삭제에 실패했습니다.')));
+    }
+  }
+
+  Future<bool> _confirm(String title, String message) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('아니오'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('예'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(profileStateNotifierProvider);
+    final appointmentsState = ref.watch(appointmentsNotifierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -45,6 +118,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _ProfileCard(profile: profile, onEdit: _handleEditProfile),
                 const SizedBox(height: 12),
                 _ProfileStats(profile: profile),
+                const SizedBox(height: 16),
+                _AppointmentSection(
+                  state: appointmentsState,
+                  onRetry: () =>
+                      ref.read(appointmentsNotifierProvider.notifier).refresh(),
+                  onCancel: _cancelAppointment,
+                  onDelete: _deleteAppointment,
+                ),
                 const SizedBox(height: 16),
                 _QuickActionGrid(onNavigate: _showSnack),
                 const SizedBox(height: 16),
@@ -98,8 +179,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  void _handleEditProfile() {
-    _showSnack('프로필 수정 화면으로 이동합니다');
+  Future<void> _handleEditProfile() async {
+    final result = await context.push('/profile/edit');
+    if (!mounted) return;
+    if (result == true) {
+      _showSnack('프로필이 저장되었습니다.');
+    }
   }
 
   void _showSnack(String message) {
@@ -220,7 +305,7 @@ class _ProfileCard extends StatelessWidget {
   const _ProfileCard({required this.profile, required this.onEdit});
 
   final UserProfile profile;
-  final VoidCallback onEdit;
+  final Future<void> Function() onEdit;
 
   String get _genderLabel => profile.gender == Gender.female ? '여성' : '남성';
 
@@ -262,7 +347,7 @@ class _ProfileCard extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: onEdit,
+                      onPressed: () => onEdit(),
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(
@@ -329,6 +414,284 @@ class _ProfileStats extends StatelessWidget {
               valueColor: AppColors.success,
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppointmentSection extends StatelessWidget {
+  const _AppointmentSection({
+    required this.state,
+    required this.onRetry,
+    required this.onCancel,
+    required this.onDelete,
+  });
+
+  final AsyncValue<List<Appointment>> state;
+  final Future<void> Function() onRetry;
+  final Future<void> Function(Appointment appointment) onCancel;
+  final Future<void> Function(Appointment appointment) onDelete;
+  static const _maxVisible = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.event_available, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                '내 예약',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          state.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
+            ),
+            error: (error, _) => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '예약 정보를 불러오지 못했습니다.',
+                  style: TextStyle(color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('다시 시도'),
+                ),
+              ],
+            ),
+            data: (appointments) {
+              if (appointments.isEmpty) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '아직 예약이 없습니다. 가까운 한의사를 찾아보세요.',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => context.push('/find-doctor'),
+                      icon: const Icon(Icons.search, color: AppColors.primary),
+                      label: const Text('한의사 찾기'),
+                    ),
+                  ],
+                );
+              }
+
+              final formatter = DateFormat('M월 d일 (E) a h:mm', 'ko');
+              final visible = appointments.take(_maxVisible).toList();
+              final remaining = appointments.length - visible.length;
+
+              return Column(
+                children: [
+                  for (final appointment in visible) ...[
+                    _AppointmentCard(
+                      appointment: appointment,
+                      formatter: formatter,
+                      onCancel: () => onCancel(appointment),
+                      onDelete: () => onDelete(appointment),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (remaining > 0)
+                    Text(
+                      '외 $remaining건의 예약이 있습니다.',
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AppointmentCard extends StatelessWidget {
+  const _AppointmentCard({
+    required this.appointment,
+    required this.formatter,
+    this.onCancel,
+    this.onDelete,
+  });
+
+  final Appointment appointment;
+  final DateFormat formatter;
+  final Future<void> Function()? onCancel;
+  final Future<void> Function()? onDelete;
+
+  String get _statusLabel {
+    switch (appointment.status) {
+      case 'confirmed':
+        return '확정';
+      case 'cancelled':
+        return '취소';
+      case 'completed':
+        return '완료';
+      default:
+        return '대기';
+    }
+  }
+
+  Color get _statusColor {
+    switch (appointment.status) {
+      case 'confirmed':
+        return AppColors.primary;
+      case 'cancelled':
+        return AppColors.error;
+      case 'completed':
+        return AppColors.success;
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canCancel =
+        appointment.status != 'cancelled' && appointment.status != 'completed';
+    final canDelete = appointment.status == 'cancelled';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      appointment.doctor.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      appointment.doctor.specialty,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+              appointment.doctor.clinicName,
+              style: const TextStyle(color: AppColors.textHint),
+            ),
+          ],
+        ),
+      ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _statusColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _statusLabel,
+                  style: TextStyle(
+                    color: _statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.schedule, size: 18, color: AppColors.iconSecondary),
+              const SizedBox(width: 6),
+              Text(
+                formatter.format(appointment.slot.startsAt.toLocal()),
+                style: const TextStyle(color: AppColors.textPrimary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.push_pin_outlined,
+                  size: 18, color: AppColors.iconSecondary),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  appointment.notes?.isNotEmpty == true
+                      ? appointment.notes!
+                      : '메모 없음',
+                  style: const TextStyle(color: AppColors.textSecondary),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+        ),
+          if (canCancel || canDelete) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if (canCancel)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onCancel,
+                      icon: const Icon(Icons.cancel_outlined),
+                      label: const Text('예약 취소'),
+                    ),
+                  ),
+                if (canDelete) ...[
+                  if (canCancel) const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onDelete,
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('삭제'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
         ],
       ),
     );

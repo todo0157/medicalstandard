@@ -43,7 +43,9 @@ class ApiProfileService implements ProfileService {
   Future<void> uploadProfileImage(String userId, String imagePath) async {
     final file = File(imagePath);
     if (!file.existsSync()) {
-      throw const AppException.validation('선택한 이미지를 찾을 수 없습니다.');
+      throw const AppException.validation(
+        message: '선택한 이미지를 찾을 수 없습니다.',
+      );
     }
     final encoded = base64Encode(await file.readAsBytes());
 

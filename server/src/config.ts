@@ -21,6 +21,17 @@ const envSchema = z.object({
   DATABASE_URL: z.string().optional(),
 
   API_DOMAIN: z.string().url().optional(), // URL 형식, Render에서는 optional로 두는 게 안전
+  DEFAULT_PROFILE_ID: z.string().default('user_123'),
+
+  JWT_SECRET: z
+    .string()
+    .min(16, "JWT_SECRET must be at least 16 characters")
+    .default("dev-secret-change-me"),
+  JWT_EXPIRES_IN: z.string().default("7d"),
+
+  KAKAO_REST_API_KEY: z.string().optional(),
+  KAKAO_CLIENT_SECRET: z.string().optional(),
+  KAKAO_REDIRECT_URI: z.string().optional(),
 });
 
 // Safe parsing

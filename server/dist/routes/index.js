@@ -4,7 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const auth_routes_1 = __importDefault(require("./auth.routes"));
 const profile_routes_1 = __importDefault(require("./profile.routes"));
+const doctor_routes_1 = __importDefault(require("./doctor.routes"));
 const router = (0, express_1.Router)();
+router.use('/auth', auth_routes_1.default);
 router.use('/profiles', profile_routes_1.default);
+router.use('/doctors', doctor_routes_1.default);
 exports.default = router;

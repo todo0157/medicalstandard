@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 import '../errors/app_exception.dart';
 import '../network/network_checker.dart';
+import 'auth_session.dart';
 
 class ApiClient {
   ApiClient({http.Client? httpClient})
@@ -38,6 +39,22 @@ class ApiClient {
     return _send(method: 'PUT', path: path, body: body, headers: headers);
   }
 
+  Future<Map<String, dynamic>> patch(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
+    return _send(method: 'PATCH', path: path, body: body, headers: headers);
+  }
+
+  Future<Map<String, dynamic>> delete(
+    String path, {
+    Map<String, dynamic>? body,
+    Map<String, String>? headers,
+  }) async {
+    return _send(method: 'DELETE', path: path, body: body, headers: headers);
+  }
+
   Future<Map<String, dynamic>> _send({
     required String method,
     required String path,
@@ -46,7 +63,12 @@ class ApiClient {
   }) async {
     await NetworkChecker.ensureConnected();
     final uri = Uri.parse('${AppConfig.apiBaseUrl}$path');
-    final mergedHeaders = {'Content-Type': 'application/json', ...?headers};
+    final token = AuthSession.instance.token;
+    final mergedHeaders = <String, String>{
+      'Content-Type': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      ...?headers
+    };
 
     try {
       final response = await _request(
@@ -79,6 +101,10 @@ class ApiClient {
         return _httpClient.post(uri, headers: headers, body: encodedBody);
       case 'PUT':
         return _httpClient.put(uri, headers: headers, body: encodedBody);
+      case 'PATCH':
+        return _httpClient.patch(uri, headers: headers, body: encodedBody);
+      case 'DELETE':
+        return _httpClient.delete(uri, headers: headers, body: encodedBody);
       case 'GET':
       default:
         return _httpClient.get(uri, headers: headers);
@@ -87,36 +113,89 @@ class ApiClient {
 
   Map<String, dynamic> _processResponse(http.Response response) {
     final statusCode = response.statusCode;
-    final body = response.body.trim();
+    final rawBody = response.body.trim();
+    Map<String, dynamic>? decodedBody;
+
+    if (rawBody.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(rawBody);
+        if (decoded is Map<String, dynamic>) {
+          decodedBody = decoded;
+        }
+      } catch (_) {
+        // ignore decode errors, fall back to raw body
+      }
+    }
 
     if (statusCode >= 200 && statusCode < 300) {
-      if (body.isEmpty) return {};
-      final decoded = jsonDecode(body);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      }
+      if (rawBody.isEmpty) return {};
+      if (decodedBody != null) return decodedBody!;
+      final decoded = jsonDecode(rawBody);
       return {'data': decoded};
+    }
+
+    final issues = _extractIssues(decodedBody);
+    final message = _extractErrorMessage(rawBody, decodedBody);
+
+    if (statusCode == 400) {
+      throw AppException.validation(
+        statusCode: statusCode,
+        message: message,
+        issues: issues,
+      );
     }
 
     throw AppException.server(
       statusCode: statusCode,
-      message: _extractErrorMessage(body),
+      message: message,
+      issues: issues,
     );
   }
 
-  String _extractErrorMessage(String body) {
-    if (body.isEmpty) return '알 수 없는 오류가 발생했습니다.';
+  String _extractErrorMessage(
+    String rawBody,
+    Map<String, dynamic>? decodedBody,
+  ) {
+    if (decodedBody != null) {
+      return decodedBody['message']?.toString() ??
+          decodedBody['error']?.toString() ??
+          '알 수 없는 오류가 발생했습니다.';
+    }
+    if (rawBody.isEmpty) return '알 수 없는 오류가 발생했습니다.';
     try {
-      final decoded = jsonDecode(body);
+      final decoded = jsonDecode(rawBody);
       if (decoded is Map<String, dynamic>) {
         return decoded['message']?.toString() ??
             decoded['error']?.toString() ??
             '알 수 없는 오류가 발생했습니다.';
       }
-      return body;
+      return rawBody;
     } catch (_) {
-      return body;
+      return rawBody;
     }
+  }
+
+  Map<String, List<String>>? _extractIssues(Map<String, dynamic>? decodedBody) {
+    if (decodedBody == null) return null;
+    final rawIssues = decodedBody['issues'];
+    if (rawIssues is Map<String, dynamic>) {
+      final result = <String, List<String>>{};
+      rawIssues.forEach((key, value) {
+        if (value is List) {
+          final messages = value
+              .map((item) => item?.toString())
+              .whereType<String>()
+              .map((s) => s.trim())
+              .where((s) => s.isNotEmpty)
+              .toList();
+          if (messages.isNotEmpty) result[key] = messages;
+        } else if (value is String && value.trim().isNotEmpty) {
+          result[key] = [value.trim()];
+        }
+      });
+      return result.isEmpty ? null : result;
+    }
+    return null;
   }
 
   void close() {

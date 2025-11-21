@@ -1,0 +1,34 @@
+import type { NextFunction, Request, Response } from "express";
+
+import { env } from "../config";
+import { AuthService } from "../services/auth.service";
+import type { AuthTokenPayload } from "../types/auth";
+
+export interface AuthenticatedRequest extends Request {
+  user?: AuthTokenPayload;
+}
+
+const authService = new AuthService();
+
+export function authenticate(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "인증 토큰이 없습니다." });
+  }
+
+  const token = header.replace("Bearer ", "").trim();
+  try {
+    const payload = authService.decodeToken(token);
+    req.user = payload;
+    return next();
+  } catch (error) {
+    if (env.NODE_ENV === "development") {
+      console.error("JWT verification failed", error);
+    }
+    return res.status(401).json({ message: "인증에 실패했습니다." });
+  }
+}

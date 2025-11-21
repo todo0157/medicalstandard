@@ -17,6 +17,15 @@ const envSchema = zod_1.z.object({
     ALLOW_ORIGIN: zod_1.z.string().optional(),
     DATABASE_URL: zod_1.z.string().optional(),
     API_DOMAIN: zod_1.z.string().url().optional(), // URL 형식, Render에서는 optional로 두는 게 안전
+    DEFAULT_PROFILE_ID: zod_1.z.string().default('user_123'),
+    JWT_SECRET: zod_1.z
+        .string()
+        .min(16, "JWT_SECRET must be at least 16 characters")
+        .default("dev-secret-change-me"),
+    JWT_EXPIRES_IN: zod_1.z.string().default("7d"),
+    KAKAO_REST_API_KEY: zod_1.z.string().optional(),
+    KAKAO_CLIENT_SECRET: zod_1.z.string().optional(),
+    KAKAO_REDIRECT_URI: zod_1.z.string().optional(),
 });
 // Safe parsing
 const parsed = envSchema.safeParse(process.env);
