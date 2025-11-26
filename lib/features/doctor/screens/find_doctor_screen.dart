@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/models/doctor.dart';
@@ -18,6 +19,8 @@ class FindDoctorScreen extends ConsumerStatefulWidget {
 class _FindDoctorScreenState extends ConsumerState<FindDoctorScreen> {
   final _searchController = TextEditingController();
   String _query = '';
+  Position? _currentPosition;
+  bool _locating = false;
 
   @override
   void initState() {
@@ -35,7 +38,16 @@ class _FindDoctorScreenState extends ConsumerState<FindDoctorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final doctorsAsync = ref.watch(doctorSearchProvider(_query));
+    final doctorsAsync = ref.watch(
+      doctorSearchProvider(
+        DoctorSearchArgs(
+          query: _query,
+          lat: _currentPosition?.latitude,
+          lng: _currentPosition?.longitude,
+          radiusKm: 20,
+        ),
+      ),
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -58,23 +70,51 @@ class _FindDoctorScreenState extends ConsumerState<FindDoctorScreen> {
       ),
       body: Column(
         children: [
-          _SearchBar(
-            controller: _searchController,
-            onSearch: () {
-              setState(() {
-                _query = _searchController.text.trim();
-              });
-            },
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _SearchBar(
+                    controller: _searchController,
+                    onSearch: () {
+                      setState(() {
+                        _query = _searchController.text.trim();
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  onPressed: _locating ? null : _useCurrentLocation,
+                  icon: _locating
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.my_location, size: 16),
+                  label: Text(
+                    _currentPosition == null ? '내 주변' : '갱신',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: doctorsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
-                child: Text('의사 목록을 불러오지 못했습니다.'),
+                child: Text('의사 목록을 불러오지 못했어요: $error'),
               ),
               data: (doctors) => RefreshIndicator(
                 onRefresh: () async {
-                  setState(() {}); // 강제 리빌드로 재호출
+                  setState(() {});
                 },
                 child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -94,6 +134,40 @@ class _FindDoctorScreenState extends ConsumerState<FindDoctorScreen> {
       ),
     );
   }
+
+  Future<void> _useCurrentLocation() async {
+    setState(() {
+      _locating = true;
+    });
+    try {
+      final permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('위치 권한이 필요합니다')),
+        );
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      setState(() {
+        _currentPosition = pos;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('현재 위치를 가져오지 못했어요: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _locating = false;
+        });
+      }
+    }
+  }
 }
 
 class _SearchBar extends StatelessWidget {
@@ -103,37 +177,34 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Material(
-        elevation: 4,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.search, color: AppColors.textHint),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(
-                    hintText: '의사 이름 또는 전문을 검색하세요',
-                    border: InputBorder.none,
-                  ),
-                  onSubmitted: (_) => onSearch(),
+    return Material(
+      elevation: 4,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.search, color: AppColors.textHint),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  hintText: '의사 이름 또는 전문 검색하세요',
+                  border: InputBorder.none,
                 ),
+                onSubmitted: (_) => onSearch(),
               ),
-              IconButton(
-                onPressed: onSearch,
-                icon: const Icon(Icons.tune, color: AppColors.primary),
-              ),
-            ],
-          ),
+            ),
+            IconButton(
+              onPressed: onSearch,
+              icon: const Icon(Icons.tune, color: AppColors.primary),
+            ),
+          ],
         ),
       ),
     );
@@ -196,6 +267,17 @@ class _DoctorCard extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
+                  if (doctor.distanceKm != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '약 ${doctor.distanceKm!.toStringAsFixed(1)} km',
+                      style: const TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -275,7 +357,7 @@ class _SlotSheetState extends State<_SlotSheet> {
             if (!mounted) return;
             messenger
               ..hideCurrentSnackBar()
-              ..showSnackBar(const SnackBar(content: Text('예약이 완료되었습니다.')));
+              ..showSnackBar(const SnackBar(content: Text('예약이 완료되었습니다')));
             navigator.pop();
           } catch (e) {
             setState(() {
@@ -334,7 +416,7 @@ class _SlotSheetState extends State<_SlotSheet> {
                   ),
                   error: (_, __) => const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Text('슬롯을 불러오지 못했습니다.'),
+                    child: Text('슬롯을 불러오지 못했습니다'),
                   ),
                   data: (slots) {
                     if (slots.isEmpty) {

@@ -7,6 +7,7 @@ import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 
 import 'app_router.dart';
 import 'core/services/auth_session.dart';
+import 'core/services/auth_state.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,7 @@ Future<void> main() async {
 
   // 저장된 토큰 복원
   await AuthSession.instance.load();
+  AuthState.instance.setAuthenticated(AuthSession.instance.token != null);
   final GoRouter router = createAppRouter(AuthSession.instance.token != null);
 
   runApp(ProviderScope(child: MyApp(router: router)));

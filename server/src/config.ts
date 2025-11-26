@@ -29,6 +29,13 @@ const envSchema = z.object({
     .default("dev-secret-change-me"),
   JWT_EXPIRES_IN: z.string().default("7d"),
 
+  SENDGRID_API_KEY: z.string().optional(),
+  MAIL_FROM: z.string().email().optional(),
+  MAIL_FROM_NAME: z.string().optional(),
+  RESET_LINK_BASE: z.string().url().optional(),
+  VERIFY_LINK_BASE: z.string().url().optional(),
+  VERIFY_PRE_LINK_BASE: z.string().url().optional(),
+
   KAKAO_REST_API_KEY: z.string().optional(),
   KAKAO_CLIENT_SECRET: z.string().optional(),
   KAKAO_REDIRECT_URI: z.string().optional(),

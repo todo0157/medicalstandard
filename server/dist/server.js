@@ -26,6 +26,8 @@ const corsOptions = allowAllOrigins
         }
     };
 app.set('trust proxy', true);
+app.disable('etag');
+app.disable('x-powered-by');
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());

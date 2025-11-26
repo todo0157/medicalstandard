@@ -37,9 +37,14 @@ model UserAccount {
   profile       UserProfile @relation(fields: [profileId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  emailVerified Boolean  @default(false)
 
   sessions      Session[]
   appointments  Appointment[]
+  chatSessions  ChatSession[]
+  medicalRecords MedicalRecord[]
+  passwordResetTokens PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 }
 
 model Session {
@@ -51,10 +56,41 @@ model Session {
   userAccount    UserAccount @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
 }
 
+model PasswordResetToken {
+  id             String   @id @default(cuid())
+  token          String   @unique
+  userAccountId  String
+  userAccount    UserAccount @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  used           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+model EmailVerificationToken {
+  id             String   @id @default(cuid())
+  token          String   @unique
+  userAccountId  String
+  userAccount    UserAccount @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  used           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
+
+model PreSignupEmailToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 model Clinic {
   id        String   @id @default(cuid())
   name      String
   address   String
+  lat       Float    @default(0)
+  lng       Float    @default(0)
   phone     String?
   doctors   Doctor[]
   createdAt DateTime @default(now())
@@ -73,6 +109,9 @@ model Doctor {
   appointments Appointment[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  chatSessions  ChatSession[]
+  medicalRecords MedicalRecord[]
 }
 
 model Slot {
@@ -100,4 +139,45 @@ model Appointment {
   userAccount   UserAccount @relation(fields: [userAccountId], references: [id])
   doctor        Doctor      @relation(fields: [doctorId], references: [id])
   slot          Slot        @relation(fields: [slotId], references: [id])
+
+  records       MedicalRecord[]
+}
+
+model ChatSession {
+  id            String       @id @default(cuid())
+  userAccountId String
+  doctorId      String?
+  subject       String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  userAccount   UserAccount  @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
+  doctor        Doctor?      @relation(fields: [doctorId], references: [id])
+  messages      ChatMessage[]
+}
+
+model ChatMessage {
+  id         String      @id @default(cuid())
+  sessionId  String
+  sender     String
+  content    String
+  createdAt  DateTime    @default(now())
+
+  session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model MedicalRecord {
+  id            String      @id @default(cuid())
+  userAccountId String
+  doctorId      String
+  appointmentId String?
+  title         String
+  summary       String?
+  prescriptions String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  userAccount   UserAccount @relation(fields: [userAccountId], references: [id])
+  doctor        Doctor      @relation(fields: [doctorId], references: [id])
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
 }

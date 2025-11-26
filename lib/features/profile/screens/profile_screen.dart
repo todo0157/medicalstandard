@@ -7,6 +7,8 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/providers/profile_provider.dart';
+import '../../../core/services/auth_state.dart';
+import '../../../core/services/auth_session.dart';
 import '../../doctor/providers/doctor_providers.dart';
 import '../../../shared/theme/app_colors.dart';
 
@@ -127,12 +129,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   onDelete: _deleteAppointment,
                 ),
                 const SizedBox(height: 16),
-                _QuickActionGrid(onNavigate: _showSnack),
+                _QuickActionGrid(onAction: _handleQuickAction),
                 const SizedBox(height: 16),
                 _MenuSection(
                   onCustomerSupport: _showSupportSheet,
                   onSettings: () => _showSnack('설정 화면으로 이동합니다'),
                   onLegalNotice: () => _showSnack('법적 고지 화면으로 이동합니다'),
+                  onLogout: _logout,
                 ),
               ],
             ),
@@ -195,6 +198,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       );
   }
 
+  void _handleQuickAction(String actionKey) {
+    switch (actionKey) {
+      case 'records':
+        context.push('/medical-records');
+        break;
+      case 'insurance':
+        context.push('/health-insurance');
+        break;
+      default:
+        _showSnack('곧 제공됩니다.');
+    }
+  }
+
   void _showSupportSheet() {
     showModalBottomSheet<void>(
       context: context,
@@ -211,6 +227,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _logout() async {
+    await AuthSession.instance.clear();
+    AuthState.instance.setAuthenticated(false);
+    if (!mounted) return;
+    context.go('/login');
   }
 }
 
@@ -787,9 +810,9 @@ class _StatTile extends StatelessWidget {
 }
 
 class _QuickActionGrid extends StatelessWidget {
-  const _QuickActionGrid({required this.onNavigate});
+  const _QuickActionGrid({required this.onAction});
 
-  final ValueChanged<String> onNavigate;
+  final ValueChanged<String> onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -799,14 +822,14 @@ class _QuickActionGrid extends StatelessWidget {
         icon: Icons.description_outlined,
         iconColor: AppColors.primary,
         backgroundColor: const Color(0xFFEFF6FF),
-        onTapMessage: '진료 기록 화면으로 이동합니다',
+        actionKey: 'records',
       ),
       _QuickActionData(
         title: '건강보험',
         icon: Icons.health_and_safety_outlined,
         iconColor: AppColors.success,
         backgroundColor: const Color(0xFFE7F7EF),
-        onTapMessage: '건강보험 화면으로 이동합니다',
+        actionKey: 'insurance',
       ),
     ];
 
@@ -824,7 +847,7 @@ class _QuickActionGrid extends StatelessWidget {
         final action = actions[index];
         return _QuickActionCard(
           data: action,
-          onTap: () => onNavigate(action.onTapMessage),
+          onTap: () => onAction(action.actionKey),
         );
       },
     );
@@ -837,14 +860,14 @@ class _QuickActionData {
     required this.icon,
     required this.iconColor,
     required this.backgroundColor,
-    required this.onTapMessage,
+    required this.actionKey,
   });
 
   final String title;
   final IconData icon;
   final Color iconColor;
   final Color backgroundColor;
-  final String onTapMessage;
+  final String actionKey;
 }
 
 class _QuickActionCard extends StatelessWidget {
@@ -907,11 +930,13 @@ class _MenuSection extends StatelessWidget {
     required this.onCustomerSupport,
     required this.onSettings,
     required this.onLegalNotice,
+    required this.onLogout,
   });
 
   final VoidCallback onCustomerSupport;
   final VoidCallback onSettings;
   final VoidCallback onLegalNotice;
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -930,6 +955,11 @@ class _MenuSection extends StatelessWidget {
         title: '법적 고지',
         icon: Icons.description_outlined,
         onTap: onLegalNotice,
+      ),
+      _MenuItemData(
+        title: '로그아웃',
+        icon: Icons.logout,
+        onTap: onLogout,
       ),
     ];
 

@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const zod_1 = require("zod");
-const config_1 = require("../config");
 const profile_service_1 = require("../services/profile.service");
+const auth_middleware_1 = require("../middleware/auth.middleware");
 const router = (0, express_1.Router)();
 const profileService = new profile_service_1.ProfileService();
 const profileUpdateSchema = zod_1.z.object({
@@ -31,9 +31,14 @@ const profileUpdateSchema = zod_1.z.object({
     isPractitioner: zod_1.z.coerce.boolean().optional(),
     certificationStatus: zod_1.z.enum(['none', 'pending', 'verified']).optional()
 });
+router.use(auth_middleware_1.authenticate);
 router.get('/me', async (req, res, next) => {
     try {
-        const profile = await profileService.getCurrentUserProfile();
+        const profileId = req.user?.profileId;
+        if (!profileId) {
+            return res.status(401).json({ message: '인증 정보가 없습니다.' });
+        }
+        const profile = await profileService.getCurrentUserProfile(profileId);
         return res.json({ data: profile });
     }
     catch (error) {
@@ -42,8 +47,12 @@ router.get('/me', async (req, res, next) => {
 });
 router.put('/me', async (req, res, next) => {
     try {
+        const profileId = req.user?.profileId;
+        if (!profileId) {
+            return res.status(401).json({ message: '인증 정보가 없습니다.' });
+        }
         const payload = profileUpdateSchema.parse(req.body);
-        const updated = await profileService.updateProfile(config_1.env.DEFAULT_PROFILE_ID, payload);
+        const updated = await profileService.updateProfile(profileId, payload);
         return res.json({ data: updated });
     }
     catch (error) {
@@ -58,8 +67,15 @@ router.put('/me', async (req, res, next) => {
 });
 router.put('/:id', async (req, res, next) => {
     try {
+        const profileId = req.user?.profileId;
+        if (!profileId) {
+            return res.status(401).json({ message: '인증 정보가 없습니다.' });
+        }
+        if (req.params.id !== profileId) {
+            return res.status(403).json({ message: '자신의 프로필만 수정할 수 있습니다.' });
+        }
         const payload = profileUpdateSchema.parse(req.body);
-        const updated = await profileService.updateProfile(req.params.id, payload);
+        const updated = await profileService.updateProfile(profileId, payload);
         return res.json({ data: updated });
     }
     catch (error) {

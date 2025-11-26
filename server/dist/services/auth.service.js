@@ -10,6 +10,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = require("crypto");
 const config_1 = require("../config");
 const prisma_1 = require("../lib/prisma");
+const token_service_1 = require("./token.service");
+const mailer_service_1 = require("./mailer.service");
 const SALT_ROUNDS = 10;
 const REFRESH_TTL_DAYS = 14;
 const KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
@@ -20,6 +22,7 @@ class AuthService {
         const passwordHash = await bcryptjs_1.default.hash(input.password, SALT_ROUNDS);
         const cleanedAddress = input.address?.trim() ?? "";
         const cleanedPhone = input.phoneNumber?.trim() ?? "";
+        // (옵션) precheck 토큰 검증은 라우트에서 처리하거나 여기에서 처리할 수 있습니다.
         try {
             const profile = await prisma_1.prisma.userProfile.create({
                 data: {
@@ -76,6 +79,24 @@ class AuthService {
             ...tokens,
             profile: this.toProfile(profile),
         };
+    }
+    async sendVerificationEmail(accountId, email) {
+        if (!config_1.env.VERIFY_LINK_BASE)
+            return;
+        const { token } = await (0, token_service_1.issueEmailVerificationToken)(accountId);
+        const link = `${config_1.env.VERIFY_LINK_BASE}?token=${token}`;
+        await (0, mailer_service_1.sendMail)({
+            to: email,
+            subject: "이메일 인증을 완료해 주세요",
+            html: `<p>이메일 인증을 완료하려면 아래 링크를 클릭하세요.</p><p><a href="${link}">${link}</a></p>`,
+            text: `이메일 인증 링크: ${link}`,
+        });
+    }
+    async markEmailVerified(accountId) {
+        await prisma_1.prisma.userAccount.update({
+            where: { id: accountId },
+            data: { emailVerified: true },
+        });
     }
     decodeToken(token) {
         const payload = jsonwebtoken_1.default.verify(token, config_1.env.JWT_SECRET);

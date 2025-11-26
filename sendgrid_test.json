@@ -1,0 +1,10 @@
+﻿{
+  "personalizations": [
+    { "to": [ { "email": "omch5662@gmail.com" } ] }
+  ],
+  "from": { "email": "2021145049@yonsei.ac.kr", "name": "KCH" },
+  "subject": "Test mail",
+  "content": [
+    { "type": "text/plain", "value": "Hello from SendGrid API test" }
+  ]
+}

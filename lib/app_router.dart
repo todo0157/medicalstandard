@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/services/auth_session.dart';
+import 'core/services/auth_state.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/signup_screen.dart';
+import 'features/auth/screens/password_reset_screen.dart';
+import 'features/auth/screens/email_verify_screen.dart';
+import 'features/auth/screens/pre_email_verify_screen.dart';
 import 'features/booking/appointment_booking_screen.dart';
 import 'features/doctor/screens/find_doctor_screen.dart';
 import 'features/home/screens/main_app_shell_screen.dart';
@@ -18,6 +22,7 @@ import 'features/support/customer_support_screen.dart';
 
 GoRouter createAppRouter(bool isAuthenticated) {
   return GoRouter(
+    refreshListenable: AuthState.instance.listenable,
     initialLocation: isAuthenticated ? '/home' : '/signup',
     routes: [
       // Auth Routes
@@ -29,21 +34,45 @@ GoRouter createAppRouter(bool isAuthenticated) {
       GoRoute(
         path: '/login',
         name: 'login',
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/kakao-callback',
-      name: 'kakao-callback',
-      builder: (context, state) {
-        final code = state.uri.queryParameters['code'];
-        if (code == null || code.isEmpty) {
-          return const Scaffold(
-            body: Center(child: Text('Kakao 인증 코드가 없습니다.')),
-          );
-        }
-        return KakaoCallbackScreen(code: code);
-      },
-    ),
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/kakao-callback',
+        name: 'kakao-callback',
+        builder: (context, state) {
+          final code = state.uri.queryParameters['code'];
+          if (code == null || code.isEmpty) {
+            return const Scaffold(
+              body: Center(child: Text('Kakao 인증 코드가 없습니다.')),
+            );
+          }
+          return KakaoCallbackScreen(code: code);
+        },
+      ),
+      GoRoute(
+        path: '/reset-password',
+        name: 'reset-password',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          return PasswordResetScreen(token: token);
+        },
+      ),
+      GoRoute(
+        path: '/verify-email',
+        name: 'verify-email',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          return EmailVerifyScreen(token: token);
+        },
+      ),
+      GoRoute(
+        path: '/verify-pre',
+        name: 'verify-pre',
+        builder: (context, state) {
+          final token = state.uri.queryParameters['token'];
+          return PreEmailVerifyScreen(token: token);
+        },
+      ),
 
       // Main App Shell (with nested navigation)
       GoRoute(
@@ -127,30 +156,30 @@ GoRouter createAppRouter(bool isAuthenticated) {
         pageBuilder: (context, state) => MaterialPage(
           child: const LegalNoticeScreen(),
         ),
-    ),
-  ],
+      ),
+    ],
     redirect: (context, state) {
-      final hasToken = AuthSession.instance.token != null;
+      final hasToken = AuthState.instance.isAuthenticated && AuthSession.instance.token != null;
       final location = state.matchedLocation;
-      final isAuthPage = location == '/login' || location == '/signup';
-      final isKakaoCallback = location == '/kakao-callback';
+      final allowUnauthed = location == '/login' ||
+          location == '/signup' ||
+          location == '/kakao-callback' ||
+          location == '/reset-password' ||
+          location == '/verify-email';
 
-      // 카카오 콜백은 토큰 없더라도 그대로 통과
-      if (isKakaoCallback) return null;
-
-      if (!hasToken && !isAuthPage) return '/signup';
-      if (hasToken && isAuthPage) return '/home';
+      if (!hasToken && !allowUnauthed) return '/signup';
+      if (hasToken && (location == '/login' || location == '/signup')) return '/home';
       return null;
     },
     errorBuilder: (context, state) => Scaffold(
-      appBar: AppBar(title: const Text('오류')),
+      appBar: AppBar(title: const Text('에러')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, size: 48),
             const SizedBox(height: 16),
-            const Text('페이지를 찾을 수 없습니다'),
+            Text(state.error.toString()),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => context.go('/home'),

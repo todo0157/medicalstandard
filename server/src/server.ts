@@ -27,6 +27,8 @@ const corsOptions: CorsOptions = allowAllOrigins
     };
 
 app.set('trust proxy', true);
+app.disable('etag');
+app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.json());

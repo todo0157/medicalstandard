@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/services/auth_service.dart';
@@ -12,15 +12,6 @@ const Color kKakaoColor = Color(0xFFFEE500);
 const Color kPassColor = Color(0xFF3B82F6);
 const Color kButtonDisabledColor = Color(0xFFE5E7EB);
 const Color kTextDisabledColor = Color(0xFF9CA3AF);
-
-const String _kakaoRestApiKey = String.fromEnvironment(
-  'KAKAO_REST_API_KEY',
-  defaultValue: '3309a66be70c0eb8cd0e89701445a7e2',
-);
-const String _kakaoRedirectUri = String.fromEnvironment(
-  'KAKAO_REDIRECT_URI',
-  defaultValue: 'http://localhost:5173/kakao-callback',
-);
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -46,6 +37,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   bool _isSignupButtonEnabled = false;
   bool _isLoading = false;
+  bool _emailVerifySending = false;
+  bool _emailVerified = false;
+  String? _verifyMessage;
 
   @override
   void initState() {
@@ -57,6 +51,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _nameController.addListener(_validateForm);
     _idNumber1Controller.addListener(_validateForm);
     _idNumber2Controller.addListener(_validateForm);
+    _loadPreverifiedEmail();
+  }
+
+  Future<void> _loadPreverifiedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString('preverified_email');
+    if (stored != null && stored.isNotEmpty) {
+      final currentEmail = _emailController.text.trim().toLowerCase();
+      if (currentEmail == stored.toLowerCase()) {
+        setState(() {
+          _emailVerified = true;
+          _verifyMessage = '인증된 이메일입니다.';
+        });
+      }
+    }
   }
 
   @override
@@ -145,12 +154,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 16),
 
-              _buildTextField(
-                label: '이메일',
-                placeholder: 'example@domain.com',
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-              ),
+              _buildEmailField(),
               const SizedBox(height: 12),
 
               _buildTextField(
@@ -163,7 +167,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               _buildTextField(
                 label: '비밀번호 확인',
-                placeholder: '비밀번호를 다시 입력해주세요',
+                placeholder: '비밀번호를 다시 입력해 주세요',
                 controller: _confirmPasswordController,
                 obscureText: true,
               ),
@@ -171,14 +175,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               _buildTextField(
                 label: '주소',
-                placeholder: '방문 진료 받을 주소를 입력해주세요',
+                placeholder: '방문 진료 받을 주소를 입력해 주세요',
                 controller: _addressController,
               ),
               const SizedBox(height: 12),
 
               _buildTextField(
                 label: '이름',
-                placeholder: '실명을 입력해주세요',
+                placeholder: '실명으로 입력해 주세요',
                 controller: _nameController,
               ),
               const SizedBox(height: 12),
@@ -190,7 +194,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
 
               _buildButton(
-                text: 'PASS로 본인인증 가입',
+                text: 'PASS로 본인인증 (준비 중)',
                 onPressed: () {},
                 backgroundColor: kPassColor,
                 textColor: Colors.white,
@@ -203,13 +207,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
               _buildButton(
                 text: '가입하기',
-                onPressed: _isSignupButtonEnabled && !_isLoading
+                onPressed: _isSignupButtonEnabled && !_isLoading && _emailVerified
                     ? _handleSignup
                     : null,
-                backgroundColor:
-                    _isSignupButtonEnabled ? kPrimaryColor : kButtonDisabledColor,
-                textColor:
-                    _isSignupButtonEnabled ? Colors.white : kTextDisabledColor,
+                backgroundColor: _isSignupButtonEnabled && _emailVerified
+                    ? kPrimaryColor
+                    : kButtonDisabledColor,
+                textColor: _isSignupButtonEnabled && _emailVerified
+                    ? Colors.white
+                    : kTextDisabledColor,
                 isLoading: _isLoading,
               ),
               const SizedBox(height: 16),
@@ -234,6 +240,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
+              if (_verifyMessage != null)
+                Text(
+                  _verifyMessage!,
+                  style: TextStyle(
+                    color: _emailVerified ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
             ],
           ),
         ),
@@ -242,12 +258,42 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _launchKakaoAuth() async {
-    final uri = Uri.https('kauth.kakao.com', '/oauth/authorize', {
-      'response_type': 'code',
-      'client_id': _kakaoRestApiKey,
-      'redirect_uri': _kakaoRedirectUri,
+    // TODO: kakao auth flow (existing)
+  }
+
+  Future<void> _sendVerifyEmail() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() {
+        _verifyMessage = '올바른 이메일을 입력해 주세요.';
+        _emailVerified = false;
+      });
+      return;
+    }
+    setState(() {
+      _emailVerifySending = true;
+      _verifyMessage = null;
+      _emailVerified = false;
     });
-    await launchUrlString(uri.toString(), mode: LaunchMode.externalApplication);
+    try {
+      await AuthService().sendPreVerifyEmail(email: email);
+      setState(() {
+        _verifyMessage = '인증 메일을 발송했습니다. 메일의 링크를 눌러 인증을 완료해 주세요.';
+      });
+    } catch (error) {
+      final msg = error is AppException ? error.message : '인증 메일 발송에 실패했습니다.';
+      setState(() {
+        _verifyMessage = msg;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _emailVerifySending = false;
+        });
+        await _loadPreverifiedEmail();
+        _validateForm();
+      }
+    }
   }
 
   void _validateForm() {
@@ -270,11 +316,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
           id1Valid &&
           id2Valid &&
           termsValid;
+      if (!emailValid) {
+        _emailVerified = false;
+      }
     });
   }
 
   Future<void> _handleSignup() async {
-    if (!_isSignupButtonEnabled || _isLoading) return;
+    if (!_isSignupButtonEnabled || _isLoading || !_emailVerified) return;
     setState(() => _isLoading = true);
     try {
       final request = SignUpRequest(
@@ -290,12 +339,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         token: tokens.accessToken,
         refreshToken: tokens.refreshToken,
       );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('preverified_email');
       if (!mounted) return;
       _showSignupSuccessModal();
     } catch (error) {
       final message = error is AppException
           ? error.message
-          : '회원가입 중 알 수 없는 오류가 발생했습니다.';
+          : '회원가입 중 오류가 발생했습니다.';
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -483,6 +534,76 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  Widget _buildEmailField() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '이메일',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF374151),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'example@domain.com',
+                  hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFD1D5DB),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: kPrimaryColor, width: 2),
+                  ),
+                ),
+                onChanged: (_) async {
+                  _emailVerified = false;
+                  _verifyMessage = null;
+                  await _loadPreverifiedEmail();
+                  _validateForm();
+                },
+              ),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: _emailVerifySending ? null : _sendVerifyEmail,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              ),
+              child: _emailVerifySending
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text('인증'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildIdNumberField({
     required TextEditingController idNumber1Controller,
     required TextEditingController idNumber2Controller,
@@ -573,7 +694,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             children: [
               _buildCheckboxRow(
-                title: '[필수] 서비스 이용약관',
+                title: '[필수] 이용약관',
                 value: _terms1,
                 onChanged: (val) => _onTermChanged(1, val),
                 showLink: true,

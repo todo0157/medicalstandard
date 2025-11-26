@@ -6,10 +6,37 @@ import '../../../core/models/slot.dart';
 import '../../../core/services/appointment_service.dart';
 import '../../../core/services/doctor_service.dart';
 
+class DoctorSearchArgs {
+  const DoctorSearchArgs({this.query = '', this.lat, this.lng, this.radiusKm});
+
+  final String query;
+  final double? lat;
+  final double? lng;
+  final double? radiusKm;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is DoctorSearchArgs &&
+        other.query == query &&
+        other.lat == lat &&
+        other.lng == lng &&
+        other.radiusKm == radiusKm;
+  }
+
+  @override
+  int get hashCode => Object.hash(query, lat, lng, radiusKm);
+}
+
 final doctorSearchProvider =
-    FutureProvider.autoDispose.family<List<Doctor>, String>((ref, query) async {
+    FutureProvider.autoDispose.family<List<Doctor>, DoctorSearchArgs>((ref, args) async {
       final service = DoctorService();
-      return service.searchDoctors(query: query);
+      return service.searchDoctors(
+        query: args.query,
+        lat: args.lat,
+        lng: args.lng,
+        radiusKm: args.radiusKm,
+      );
     });
 
 final slotsProvider =

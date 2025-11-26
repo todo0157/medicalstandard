@@ -87,4 +87,44 @@ class AuthService {
     }
     return AuthTokens(accessToken: access, refreshToken: refresh);
   }
+
+  Future<void> verifyEmail({required String token}) async {
+    await _apiClient.post(
+      '/auth/verify-email/confirm',
+      body: {'token': token},
+    );
+  }
+
+  Future<void> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    await _apiClient.post(
+      '/auth/reset',
+      body: {'token': token, 'password': password},
+    );
+  }
+
+  Future<void> sendResetEmail({required String email}) async {
+    await _apiClient.post(
+      '/auth/forgot',
+      body: {'email': email},
+    );
+  }
+
+  Future<void> sendPreVerifyEmail({required String email}) async {
+    await _apiClient.post(
+      '/auth/verify-email/precheck',
+      body: {'email': email},
+    );
+  }
+
+  Future<String> confirmPreVerify({required String token}) async {
+    final res = await _apiClient.post(
+      '/auth/verify-email/precheck/confirm',
+      body: {'token': token},
+    );
+    final data = res['data'] as Map<String, dynamic>? ?? {};
+    return data['email']?.toString() ?? '';
+  }
 }

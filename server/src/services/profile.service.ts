@@ -4,8 +4,9 @@ import { env } from '../config';
 import type { UserProfile } from '../types/userProfile';
 
 export class ProfileService {
-  async getCurrentUserProfile(): Promise<UserProfile> {
-    return this.getUserProfileById(env.DEFAULT_PROFILE_ID);
+  async getCurrentUserProfile(profileId: string): Promise<UserProfile> {
+    const targetId = profileId || env.DEFAULT_PROFILE_ID;
+    return this.getUserProfileById(targetId);
   }
 
   async getUserProfileById(id: string): Promise<UserProfile> {

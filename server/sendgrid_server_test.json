@@ -1,0 +1,6 @@
+﻿{
+  "personalizations":[{"to":[{"email":"omch5662@gmail.com"}]}],
+  "from":{"email":process.env.MAIL_FROM,"name":process.env.MAIL_FROM_NAME},
+  "subject":"Server env test",
+  "content":[{"type":"text/plain","value":"Hello from server env test"}]
+}

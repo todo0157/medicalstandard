@@ -6,11 +6,25 @@ class DoctorService {
   DoctorService({ApiClient? apiClient}) : _apiClient = apiClient ?? ApiClient();
   final ApiClient _apiClient;
 
-  Future<List<Doctor>> searchDoctors({String? query}) async {
+  Future<List<Doctor>> searchDoctors({
+    String? query,
+    double? lat,
+    double? lng,
+    double? radiusKm,
+  }) async {
     final q = (query ?? '').trim();
-    final res = await _apiClient.get(
-      q.isEmpty ? '/doctors' : '/doctors?query=$q',
-    );
+    final params = <String, String>{};
+    if (q.isNotEmpty) params['query'] = q;
+    if (lat != null && lng != null) {
+      params['lat'] = lat.toString();
+      params['lng'] = lng.toString();
+      if (radiusKm != null) params['radiusKm'] = radiusKm.toString();
+    }
+    final queryString = params.entries.isEmpty
+        ? ''
+        : '?' + params.entries.map((e) => '${e.key}=${e.value}').join('&');
+
+    final res = await _apiClient.get('/doctors$queryString');
     final data = res['data'] as List<dynamic>? ?? [];
     return data.map((e) => Doctor.fromJson(e as Map<String, dynamic>)).toList();
   }

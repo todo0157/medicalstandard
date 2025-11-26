@@ -9,10 +9,27 @@ const querySchema = zod_1.z.object({
     query: zod_1.z.string().optional(),
     limit: zod_1.z.coerce.number().int().min(1).max(50).optional().default(20),
     offset: zod_1.z.coerce.number().int().min(0).optional().default(0),
+    lat: zod_1.z.coerce.number().optional(),
+    lng: zod_1.z.coerce.number().optional(),
+    radiusKm: zod_1.z.coerce.number().min(0.5).max(100).optional().default(20),
 });
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const toRad = (deg) => (deg * Math.PI) / 180;
+    const R = 6371; // km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) *
+            Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
 router.get("/", async (req, res, next) => {
     try {
-        const { query, limit, offset } = querySchema.parse(req.query);
+        const { query, limit, offset, lat, lng, radiusKm } = querySchema.parse(req.query);
+        const hasCoords = typeof lat === "number" && typeof lng === "number";
         const where = query
             ? {
                 OR: [
@@ -22,17 +39,38 @@ router.get("/", async (req, res, next) => {
                 ],
             }
             : {};
-        const [items, total] = await Promise.all([
-            prisma_1.prisma.doctor.findMany({
-                where,
-                include: { clinic: true },
-                skip: offset,
-                take: limit,
-                orderBy: { name: "asc" },
-            }),
-            prisma_1.prisma.doctor.count({ where }),
-        ]);
-        return res.json({ data: items, total, limit, offset });
+        const doctors = await prisma_1.prisma.doctor.findMany({
+            where,
+            include: { clinic: true },
+        });
+        let enriched = doctors.map((doc) => {
+            const clinic = doc.clinic;
+            let distanceKm;
+            if (hasCoords && clinic?.lat != null && clinic?.lng != null) {
+                distanceKm = haversineKm(lat, lng, clinic.lat, clinic.lng);
+            }
+            return {
+                ...doc,
+                distanceKm,
+            };
+        });
+        if (hasCoords) {
+            enriched = enriched
+                .filter((d) => d.distanceKm == null || d.distanceKm <= radiusKm)
+                .sort((a, b) => {
+                if (a.distanceKm == null)
+                    return 1;
+                if (b.distanceKm == null)
+                    return -1;
+                return a.distanceKm - b.distanceKm;
+            });
+        }
+        else {
+            enriched = enriched.sort((a, b) => a.name.localeCompare(b.name));
+        }
+        const sliced = enriched.slice(offset, offset + limit);
+        res.setHeader('Cache-Control', 'no-store');
+        return res.status(200).json({ data: sliced, total: enriched.length, limit, offset });
     }
     catch (error) {
         return next(error);

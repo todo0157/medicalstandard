@@ -20,7 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "@sendgrid/mail": "^7.7.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

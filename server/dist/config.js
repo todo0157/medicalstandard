@@ -23,6 +23,12 @@ const envSchema = zod_1.z.object({
         .min(16, "JWT_SECRET must be at least 16 characters")
         .default("dev-secret-change-me"),
     JWT_EXPIRES_IN: zod_1.z.string().default("7d"),
+    SENDGRID_API_KEY: zod_1.z.string().optional(),
+    MAIL_FROM: zod_1.z.string().email().optional(),
+    MAIL_FROM_NAME: zod_1.z.string().optional(),
+    RESET_LINK_BASE: zod_1.z.string().url().optional(),
+    VERIFY_LINK_BASE: zod_1.z.string().url().optional(),
+    VERIFY_PRE_LINK_BASE: zod_1.z.string().url().optional(),
     KAKAO_REST_API_KEY: zod_1.z.string().optional(),
     KAKAO_CLIENT_SECRET: zod_1.z.string().optional(),
     KAKAO_REDIRECT_URI: zod_1.z.string().optional(),

@@ -9,6 +9,7 @@ import '../config/app_config.dart';
 import '../errors/app_exception.dart';
 import '../network/network_checker.dart';
 import 'auth_session.dart';
+import 'auth_state.dart';
 
 class ApiClient {
   ApiClient({http.Client? httpClient})
@@ -60,6 +61,7 @@ class ApiClient {
     required String path,
     Map<String, dynamic>? body,
     Map<String, String>? headers,
+    bool isRetry = false,
   }) async {
     await NetworkChecker.ensureConnected();
     final uri = Uri.parse('${AppConfig.apiBaseUrl}$path');
@@ -77,6 +79,22 @@ class ApiClient {
         headers: mergedHeaders,
         body: body,
       ).timeout(AppConfig.apiTimeout);
+
+      if (response.statusCode == 401 && !isRetry && !_isRefreshPath(path)) {
+        final refreshed = await _tryRefreshToken();
+        if (refreshed) {
+          return _send(
+            method: method,
+            path: path,
+            body: body,
+            headers: headers,
+            isRetry: true,
+          );
+        }
+        // refresh 실패: 세션 정리 + 인증 상태 false
+        await AuthSession.instance.clear();
+        AuthState.instance.setAuthenticated(false);
+      }
 
       _logResponse(method, uri, response);
       return _processResponse(response);
@@ -150,6 +168,42 @@ class ApiClient {
       message: message,
       issues: issues,
     );
+  }
+
+  bool _isRefreshPath(String path) {
+    return path.contains('/auth/refresh');
+  }
+
+  Future<bool> _tryRefreshToken() async {
+    final refreshToken = AuthSession.instance.refreshToken;
+    if (refreshToken == null || refreshToken.isEmpty) return false;
+
+    try {
+      final uri = Uri.parse('${AppConfig.apiBaseUrl}/auth/refresh');
+      final response = await _httpClient
+          .post(
+            uri,
+            headers: const {'Content-Type': 'application/json'},
+            body: jsonEncode({'refreshToken': refreshToken}),
+          )
+          .timeout(AppConfig.apiTimeout);
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return false;
+      }
+
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
+      final data = decoded['data'] as Map<String, dynamic>? ?? {};
+      final access = data['token']?.toString();
+      final refresh = data['refreshToken']?.toString();
+      if (access == null || access.isEmpty || refresh == null || refresh.isEmpty) {
+        return false;
+      }
+      await AuthSession.instance.saveTokens(token: access, refreshToken: refresh);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   String _extractErrorMessage(

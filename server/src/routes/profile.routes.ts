@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { env } from '../config';
 import { ProfileService } from '../services/profile.service';
+import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 
 const router = Router();
 const profileService = new ProfileService();
@@ -32,19 +32,29 @@ const profileUpdateSchema = z.object({
   certificationStatus: z.enum(['none', 'pending', 'verified']).optional()
 });
 
-router.get('/me', async (req, res, next) => {
+router.use(authenticate);
+
+router.get('/me', async (req: AuthenticatedRequest, res, next) => {
   try {
-    const profile = await profileService.getCurrentUserProfile();
+    const profileId = req.user?.profileId;
+    if (!profileId) {
+      return res.status(401).json({ message: '인증 정보가 없습니다.' });
+    }
+    const profile = await profileService.getCurrentUserProfile(profileId);
     return res.json({ data: profile });
   } catch (error) {
     return next(error);
   }
 });
 
-router.put('/me', async (req, res, next) => {
+router.put('/me', async (req: AuthenticatedRequest, res, next) => {
   try {
+    const profileId = req.user?.profileId;
+    if (!profileId) {
+      return res.status(401).json({ message: '인증 정보가 없습니다.' });
+    }
     const payload = profileUpdateSchema.parse(req.body);
-    const updated = await profileService.updateProfile(env.DEFAULT_PROFILE_ID, payload);
+    const updated = await profileService.updateProfile(profileId, payload);
     return res.json({ data: updated });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -57,10 +67,17 @@ router.put('/me', async (req, res, next) => {
   }
 });
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', async (req: AuthenticatedRequest, res, next) => {
   try {
+    const profileId = req.user?.profileId;
+    if (!profileId) {
+      return res.status(401).json({ message: '인증 정보가 없습니다.' });
+    }
+    if (req.params.id !== profileId) {
+      return res.status(403).json({ message: '자신의 프로필만 수정할 수 있습니다.' });
+    }
     const payload = profileUpdateSchema.parse(req.body);
-    const updated = await profileService.updateProfile(req.params.id, payload);
+    const updated = await profileService.updateProfile(profileId, payload);
     return res.json({ data: updated });
   } catch (error) {
     if (error instanceof z.ZodError) {

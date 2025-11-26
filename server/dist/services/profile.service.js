@@ -4,8 +4,9 @@ exports.ProfileService = void 0;
 const prisma_1 = require("../lib/prisma");
 const config_1 = require("../config");
 class ProfileService {
-    async getCurrentUserProfile() {
-        return this.getUserProfileById(config_1.env.DEFAULT_PROFILE_ID);
+    async getCurrentUserProfile(profileId) {
+        const targetId = profileId || config_1.env.DEFAULT_PROFILE_ID;
+        return this.getUserProfileById(targetId);
     }
     async getUserProfileById(id) {
         const profile = await prisma_1.prisma.userProfile.findUnique({ where: { id } });

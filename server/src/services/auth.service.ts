@@ -7,6 +7,8 @@ import { env } from "../config";
 import { prisma } from "../lib/prisma";
 import type { AuthResult, AuthTokenPayload } from "../types/auth";
 import type { UserProfile } from "../types/userProfile";
+import { issueEmailVerificationToken } from "./token.service";
+import { sendMail } from "./mailer.service";
 
 export interface SignupInput {
   email: string;
@@ -34,6 +36,7 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(input.password, SALT_ROUNDS);
     const cleanedAddress = input.address?.trim() ?? "";
     const cleanedPhone = input.phoneNumber?.trim() ?? "";
+    // (옵션) precheck 토큰 검증은 라우트에서 처리하거나 여기에서 처리할 수 있습니다.
 
     try {
       const profile = await prisma.userProfile.create({
@@ -98,6 +101,25 @@ export class AuthService {
       ...tokens,
       profile: this.toProfile(profile),
     };
+  }
+
+  async sendVerificationEmail(accountId: string, email: string) {
+    if (!env.VERIFY_LINK_BASE) return;
+    const { token } = await issueEmailVerificationToken(accountId);
+    const link = `${env.VERIFY_LINK_BASE}?token=${token}`;
+    await sendMail({
+      to: email,
+      subject: "이메일 인증을 완료해 주세요",
+      html: `<p>이메일 인증을 완료하려면 아래 링크를 클릭하세요.</p><p><a href="${link}">${link}</a></p>`,
+      text: `이메일 인증 링크: ${link}`,
+    });
+  }
+
+  async markEmailVerified(accountId: string) {
+    await prisma.userAccount.update({
+      where: { id: accountId },
+      data: { emailVerified: true },
+    });
   }
 
   decodeToken(token: string): AuthTokenPayload {
