@@ -4,12 +4,9 @@ import { env } from "../config";
 import { AuthService } from "../services/auth.service";
 import type { AuthTokenPayload } from "../types/auth";
 
-export interface AuthenticatedRequest extends Request {
+export type AuthenticatedRequest = Request & {
   user?: AuthTokenPayload;
-  headers: Request["headers"];
-  body: any;
-  params: any;
-}
+};
 
 const authService = new AuthService();
 
