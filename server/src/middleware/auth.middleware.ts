@@ -6,6 +6,9 @@ import type { AuthTokenPayload } from "../types/auth";
 
 export interface AuthenticatedRequest extends Request {
   user?: AuthTokenPayload;
+  headers: Request["headers"];
+  body: any;
+  params: any;
 }
 
 const authService = new AuthService();
