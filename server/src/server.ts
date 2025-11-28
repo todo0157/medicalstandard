@@ -1,9 +1,11 @@
+import { createServer } from 'http';
 import cors, { CorsOptions } from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config';
 import router from './routes';
+import { setupChatGateway } from './services/chat.gateway';
 
 const app = express();
 
@@ -55,7 +57,9 @@ app.use((err: Error, req: express.Request, res: express.Response, _next: express
 });
 
 const port = env.PORT;
+const server = createServer(app);
+setupChatGateway(server);
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`🚀 API server running on port ${port} (${env.NODE_ENV})`);
 });

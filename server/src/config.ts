@@ -39,6 +39,10 @@ const envSchema = z.object({
   KAKAO_REST_API_KEY: z.string().optional(),
   KAKAO_CLIENT_SECRET: z.string().optional(),
   KAKAO_REDIRECT_URI: z.string().optional(),
+
+  // 네이버 지도 API
+  NAVER_MAP_CLIENT_ID: z.string().optional(),
+  NAVER_MAP_CLIENT_SECRET: z.string().optional(),
 });
 
 // Safe parsing

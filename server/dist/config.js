@@ -32,6 +32,9 @@ const envSchema = zod_1.z.object({
     KAKAO_REST_API_KEY: zod_1.z.string().optional(),
     KAKAO_CLIENT_SECRET: zod_1.z.string().optional(),
     KAKAO_REDIRECT_URI: zod_1.z.string().optional(),
+    // 네이버 지도 API
+    NAVER_MAP_CLIENT_ID: zod_1.z.string().optional(),
+    NAVER_MAP_CLIENT_SECRET: zod_1.z.string().optional(),
 });
 // Safe parsing
 const parsed = envSchema.safeParse(process.env);

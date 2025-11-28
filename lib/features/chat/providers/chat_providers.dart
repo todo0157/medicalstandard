@@ -46,25 +46,46 @@ class ChatMessagesNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> 
   }
 
   Future<void> send(String content) async {
-    if (content.trim().isEmpty) return;
+    final trimmed = content.trim();
+    if (trimmed.isEmpty) return;
     final current = state.asData?.value ?? <ChatMessage>[];
+    final tempId = 'temp-${DateTime.now().millisecondsSinceEpoch}';
     state = AsyncValue.data([
       ...current,
       ChatMessage(
-        id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
+        id: tempId,
         sessionId: _sessionId,
         sender: 'user',
-        content: content,
+        content: trimmed,
         createdAt: DateTime.now(),
       ),
     ]);
 
     try {
-      await _service.sendMessage(sessionId: _sessionId, content: content);
-      await load();
+      final saved =
+          await _service.sendMessage(sessionId: _sessionId, content: trimmed);
+      _replaceMessage(tempId, saved);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
+  }
+
+  void addRealtimeMessage(ChatMessage message) {
+    final current = state.asData?.value ?? <ChatMessage>[];
+    final alreadyExists = current.any((item) => item.id == message.id);
+    if (alreadyExists) return;
+    final updated = [...current, message]
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    state = AsyncValue.data(updated);
+  }
+
+  void _replaceMessage(String tempId, ChatMessage saved) {
+    final current = state.asData?.value ?? <ChatMessage>[];
+    final updated = current
+        .map((item) => item.id == tempId ? saved : item)
+        .toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    state = AsyncValue.data(updated);
   }
 }
 

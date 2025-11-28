@@ -4,6 +4,7 @@ const express_1 = require("express");
 const zod_1 = require("zod");
 const prisma_1 = require("../lib/prisma");
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const chat_gateway_1 = require("../services/chat.gateway");
 const router = (0, express_1.Router)();
 const sessionSchema = zod_1.z.object({
     doctorId: zod_1.z.string().min(1).optional(),
@@ -38,13 +39,14 @@ router.post("/sessions", async (req, res, next) => {
             include: { doctor: { include: { clinic: true } } },
         });
         // 기본 안내 메시지
-        await prisma_1.prisma.chatMessage.create({
+        const initialMessage = await prisma_1.prisma.chatMessage.create({
             data: {
                 sessionId: session.id,
                 sender: "doctor",
                 content: "상담 요청이 접수되었습니다. 곧 답변드리겠습니다.",
             },
         });
+        chat_gateway_1.chatGateway.broadcastMessage(session.id, initialMessage);
         return res.status(201).json({ data: session });
     }
     catch (error) {
@@ -97,18 +99,20 @@ router.post("/sessions/:id/messages", async (req, res, next) => {
                 content: payload.content.trim(),
             },
         });
+        chat_gateway_1.chatGateway.broadcastMessage(session.id, message);
         await prisma_1.prisma.chatSession.update({
             where: { id: session.id },
             data: { updatedAt: new Date() },
         });
         // 간단한 자동 응답
-        await prisma_1.prisma.chatMessage.create({
+        const autoReply = await prisma_1.prisma.chatMessage.create({
             data: {
                 sessionId: session.id,
                 sender: "doctor",
                 content: "메시지를 확인하고 있습니다. 잠시만 기다려 주세요.",
             },
         });
+        chat_gateway_1.chatGateway.broadcastMessage(session.id, autoReply);
         return res.status(201).json({ data: message });
     }
     catch (error) {

@@ -50,6 +50,14 @@ router.get("/:id", async (req, res, next) => {
 router.post("/", async (req, res, next) => {
     try {
         const payload = recordSchema.parse(req.body);
+        const profileId = req.user?.profileId;
+        if (!profileId) {
+            return res.status(401).json({ message: "인증 정보가 없습니다." });
+        }
+        const profile = await prisma_1.prisma.userProfile.findUnique({ where: { id: profileId } });
+        if (!profile?.isPractitioner) {
+            return res.status(403).json({ message: "진료 기록은 인증된 한의사만 등록할 수 있습니다." });
+        }
         const created = await prisma_1.prisma.medicalRecord.create({
             data: {
                 userAccountId: req.user.sub,

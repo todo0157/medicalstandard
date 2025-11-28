@@ -133,7 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 const SizedBox(height: 16),
                 _MenuSection(
                   onCustomerSupport: _showSupportSheet,
-                  onSettings: () => _showSnack('설정 화면으로 이동합니다'),
+                  onSettings: _handleEditProfile,
                   onLegalNotice: () => _showSnack('법적 고지 화면으로 이동합니다'),
                   onLogout: _logout,
                 ),
@@ -172,7 +172,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Icons.settings_outlined,
             color: AppColors.iconPrimary,
           ),
-          onPressed: () => _showSnack('설정 화면으로 이동합니다'),
+          onPressed: _handleEditProfile,
         ),
       ],
       bottom: const PreferredSize(
@@ -186,6 +186,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final result = await context.push('/profile/edit');
     if (!mounted) return;
     if (result == true) {
+      // 프로필이 저장되었으므로 강제로 새로고침
+      await ref.read(profileStateNotifierProvider.notifier).loadProfile(
+        forceRefresh: true,
+      );
       _showSnack('프로필이 저장되었습니다.');
     }
   }

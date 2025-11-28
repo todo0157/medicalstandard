@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../chat/screens/chat_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../../core/models/address.dart';
 
 // 4쪽&7쪽_대표 화면 설명&초기 화면.html의 Primary Color (#ec4899) 반영
 const Color kPrimaryPink = Color(0xFFEC4899);
@@ -169,6 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _symptomsVisible = false;
   DateTime? _selectedDate;
   String? _selectedSymptom;
+  Address? _selectedAddress;
 
   Widget _buildSelectionButton(String text, IconData icon) {
     bool isPlaceholder = text.contains("선택") || text.contains("입력");
@@ -613,10 +615,20 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildPatientSelection(),
             const SizedBox(height: 24),
             GestureDetector(
-              onTap: () {
-                /* 주소 검색 API 연동 */
+              onTap: () async {
+                final address = await context.push<Address>(
+                  '/address/search',
+                );
+                if (address != null && mounted) {
+                  setState(() {
+                    _selectedAddress = address;
+                  });
+                }
               },
-              child: _buildSelectionButton("주소를 입력해주세요", Icons.place_outlined),
+              child: _buildSelectionButton(
+                _selectedAddress?.roadAddress ?? "주소를 입력해주세요",
+                Icons.place_outlined,
+              ),
             ),
             const SizedBox(height: 24),
             const Text(

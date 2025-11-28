@@ -88,4 +88,63 @@ router.put('/:id', async (req, res, next) => {
         return next(error);
     }
 });
+const photoSchema = zod_1.z.object({
+    imageData: zod_1.z.string().min(32),
+    fileName: zod_1.z.string().max(200).optional(),
+});
+router.post('/:id/photo', async (req, res, next) => {
+    try {
+        const profileId = req.user?.profileId;
+        if (!profileId || profileId !== req.params.id) {
+            return res.status(403).json({ message: '자신의 프로필 사진만 변경할 수 있습니다.' });
+        }
+        const payload = photoSchema.parse(req.body);
+        const imageData = payload.imageData.replace(/\s/g, '');
+        const extension = payload.fileName?.split('.').pop()?.toLowerCase() ?? 'png';
+        const allowed = new Set(['png', 'jpg', 'jpeg', 'webp']);
+        const normalized = allowed.has(extension) ? extension : 'png';
+        const mime = normalized === 'jpg' ? 'jpeg' : normalized;
+        const dataUrl = `data:image/${mime};base64,${imageData}`;
+        const updated = await profileService.updateProfile(profileId, {
+            profileImageUrl: dataUrl,
+        });
+        return res.json({ data: updated });
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({
+                message: '입력값이 올바르지 않습니다.',
+                issues: error.flatten().fieldErrors,
+            });
+        }
+        return next(error);
+    }
+});
+const certificationSchema = zod_1.z.object({
+    status: zod_1.z.enum(['none', 'pending', 'verified']),
+    isPractitioner: zod_1.z.boolean().optional(),
+});
+router.post('/:id/certification', async (req, res, next) => {
+    try {
+        const profileId = req.user?.profileId;
+        if (!profileId || profileId !== req.params.id) {
+            return res.status(403).json({ message: '자신의 프로필만 인증 상태를 변경할 수 있습니다.' });
+        }
+        const payload = certificationSchema.parse(req.body);
+        const updated = await profileService.updateProfile(profileId, {
+            certificationStatus: payload.status,
+            isPractitioner: payload.isPractitioner ?? payload.status === 'verified',
+        });
+        return res.json({ data: updated });
+    }
+    catch (error) {
+        if (error instanceof zod_1.z.ZodError) {
+            return res.status(400).json({
+                message: '입력값이 올바르지 않습니다.',
+                issues: error.flatten().fieldErrors,
+            });
+        }
+        return next(error);
+    }
+});
 exports.default = router;

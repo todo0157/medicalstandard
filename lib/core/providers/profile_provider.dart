@@ -12,17 +12,11 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 });
 
 final profileServiceProvider = Provider<ProfileService>((ref) {
-  final fallback = MockProfileService();
-
   if (AppConfig.useMockServices) {
-    return fallback;
+    return MockProfileService();
   }
-
   final apiClient = ref.watch(apiClientProvider);
-  return ResilientProfileService(
-    primary: ApiProfileService(apiClient),
-    fallback: fallback,
-  );
+  return ApiProfileService(apiClient);
 });
 
 // Async provider for current user profile

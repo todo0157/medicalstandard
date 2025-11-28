@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/chat_message.dart';
 import '../../../core/models/chat_session.dart';
+import '../../../core/services/auth_session.dart';
+import '../../../core/services/chat_realtime_service.dart';
 import '../providers/chat_providers.dart';
 
 // Primary colors for chat UI
@@ -21,11 +23,14 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  ChatRealtimeService? _realtime;
+  String? _currentRealtimeSessionId;
 
   @override
   void dispose() {
     _chatController.dispose();
     _scrollController.dispose();
+    _realtime?.close();
     super.dispose();
   }
 
@@ -50,6 +55,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
   }
 
+  void _ensureRealtime(ChatSession session) {
+    final token = AuthSession.instance.token;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+    if (_currentRealtimeSessionId == session.id &&
+        _realtime?.isConnected == true) {
+      return;
+    }
+    _realtime?.close();
+    _currentRealtimeSessionId = session.id;
+    _realtime = ChatRealtimeService(
+      sessionId: session.id,
+      token: token,
+      onMessage: (message) {
+        if (!mounted) return;
+        ref
+            .read(chatMessagesNotifierProvider(session.id).notifier)
+            .addRealtimeMessage(message);
+        _scrollToBottom();
+      },
+    )..connect();
+  }
+
   @override
   Widget build(BuildContext context) {
     final sessionAsync = ref.watch(activeChatSessionProvider);
@@ -61,6 +90,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         onRetry: () => ref.refresh(activeChatSessionProvider),
       ),
       data: (session) {
+        _ensureRealtime(session);
         final messagesState = ref.watch(chatMessagesNotifierProvider(session.id));
 
         return Column(

@@ -19,6 +19,7 @@ import 'features/profile/screens/profile_edit_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/support/customer_support_screen.dart';
+import 'features/address/screens/address_search_screen.dart';
 
 GoRouter createAppRouter(bool isAuthenticated) {
   return GoRouter(
@@ -155,6 +156,15 @@ GoRouter createAppRouter(bool isAuthenticated) {
         name: 'legal',
         pageBuilder: (context, state) => MaterialPage(
           child: const LegalNoticeScreen(),
+        ),
+      ),
+
+      // Address Search
+      GoRoute(
+        path: '/address/search',
+        name: 'address-search',
+        pageBuilder: (context, state) => MaterialPage(
+          child: const AddressSearchScreen(),
         ),
       ),
     ],

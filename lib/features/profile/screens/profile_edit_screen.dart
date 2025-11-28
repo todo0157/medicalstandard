@@ -102,6 +102,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       await ref
           .read(profileStateNotifierProvider.notifier)
           .updateProfile(updated);
+      // 프로필 상태를 강제로 새로고침하여 최신 데이터를 가져옴
+      await ref
+          .read(profileStateNotifierProvider.notifier)
+          .loadProfile(forceRefresh: true);
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
@@ -115,11 +119,23 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
           _serverIssues = error.issues;
         });
         _formKey.currentState!.validate();
+        if (!mounted) return;
+        // 검증 에러는 필드별로 표시되므로 전체 메시지는 표시하지 않음
+        return;
       }
       if (!mounted) return;
+      final errorMessage = error is AppException
+          ? error.message
+          : '저장 중 오류가 발생했습니다: $error';
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('저장 중 오류가 발생했습니다: $error')));
+        ..showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 4),
+            backgroundColor: Colors.red,
+          ),
+        );
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);

@@ -22,7 +22,7 @@ class DoctorService {
     }
     final queryString = params.entries.isEmpty
         ? ''
-        : '?' + params.entries.map((e) => '${e.key}=${e.value}').join('&');
+        : '?${params.entries.map((e) => '${e.key}=${e.value}').join('&')}';
 
     final res = await _apiClient.get('/doctors$queryString');
     final data = res['data'] as List<dynamic>? ?? [];

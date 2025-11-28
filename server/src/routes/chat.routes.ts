@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "../lib/prisma";
 import { authenticate, AuthenticatedRequest } from "../middleware/auth.middleware";
+import { chatGateway } from "../services/chat.gateway";
 
 const router = Router();
 
@@ -43,13 +44,14 @@ router.post("/sessions", async (req: AuthenticatedRequest, res, next) => {
     });
 
     // 기본 안내 메시지
-    await prisma.chatMessage.create({
+    const initialMessage = await prisma.chatMessage.create({
       data: {
         sessionId: session.id,
         sender: "doctor",
         content: "상담 요청이 접수되었습니다. 곧 답변드리겠습니다.",
       },
     });
+    chatGateway.broadcastMessage(session.id, initialMessage);
 
     return res.status(201).json({ data: session });
   } catch (error) {
@@ -110,6 +112,7 @@ router.post(
           content: payload.content.trim(),
         },
       });
+      chatGateway.broadcastMessage(session.id, message);
 
       await prisma.chatSession.update({
         where: { id: session.id },
@@ -117,13 +120,14 @@ router.post(
       });
 
       // 간단한 자동 응답
-      await prisma.chatMessage.create({
+      const autoReply = await prisma.chatMessage.create({
         data: {
           sessionId: session.id,
           sender: "doctor",
           content: "메시지를 확인하고 있습니다. 잠시만 기다려 주세요.",
         },
       });
+      chatGateway.broadcastMessage(session.id, autoReply);
 
       return res.status(201).json({ data: message });
     } catch (error) {

@@ -47,6 +47,18 @@ class AppConfig {
   /// Global timeout for HTTP requests.
   static const Duration apiTimeout = Duration(seconds: 12);
 
+  /// Derived WebSocket base URL matching the REST API host.
+  static String get wsBaseUrl {
+    final base = apiBaseUrl;
+    if (base.startsWith('https://')) {
+      return base.replaceFirst('https://', 'wss://');
+    }
+    if (base.startsWith('http://')) {
+      return base.replaceFirst('http://', 'ws://');
+    }
+    return 'ws://$base';
+  }
+
   static const bool _mockOverride = bool.fromEnvironment(
     'ENABLE_MOCK_SERVICES',
     defaultValue: false,

@@ -147,7 +147,7 @@ class ApiClient {
 
     if (statusCode >= 200 && statusCode < 300) {
       if (rawBody.isEmpty) return {};
-      if (decodedBody != null) return decodedBody!;
+      if (decodedBody != null) return decodedBody;
       final decoded = jsonDecode(rawBody);
       return {'data': decoded};
     }

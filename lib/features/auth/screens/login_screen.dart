@@ -178,6 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         content: Text('비밀번호 재설정 메일을 발송했습니다.'),
                       ),
                     );
+                  if (!ctx.mounted) return;
                   Navigator.of(ctx).pop();
                 } catch (error) {
                   final msg = error is AppException

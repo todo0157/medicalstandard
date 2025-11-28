@@ -16,20 +16,35 @@ class ProfileService {
         return this.map(profile);
     }
     async updateProfile(id, data) {
+        const updateData = {};
+        if (typeof data.name !== 'undefined')
+            updateData.name = data.name;
+        if (typeof data.age !== 'undefined')
+            updateData.age = data.age;
+        if (typeof data.gender !== 'undefined')
+            updateData.gender = data.gender;
+        if (typeof data.address !== 'undefined')
+            updateData.address = data.address;
+        if (typeof data.profileImageUrl !== 'undefined') {
+            updateData.profileImageUrl = data.profileImageUrl;
+        }
+        if (typeof data.phoneNumber !== 'undefined')
+            updateData.phoneNumber = data.phoneNumber;
+        if (typeof data.appointmentCount !== 'undefined') {
+            updateData.appointmentCount = data.appointmentCount;
+        }
+        if (typeof data.treatmentCount !== 'undefined') {
+            updateData.treatmentCount = data.treatmentCount;
+        }
+        if (typeof data.isPractitioner !== 'undefined') {
+            updateData.isPractitioner = data.isPractitioner;
+        }
+        if (typeof data.certificationStatus !== 'undefined') {
+            updateData.certificationStatus = data.certificationStatus;
+        }
         const updated = await prisma_1.prisma.userProfile.update({
             where: { id },
-            data: {
-                name: data.name,
-                age: data.age,
-                gender: data.gender,
-                address: data.address,
-                profileImageUrl: data.profileImageUrl,
-                phoneNumber: data.phoneNumber,
-                appointmentCount: data.appointmentCount,
-                treatmentCount: data.treatmentCount,
-                isPractitioner: data.isPractitioner,
-                certificationStatus: data.certificationStatus
-            }
+            data: updateData,
         });
         return this.map(updated);
     }

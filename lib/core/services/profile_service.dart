@@ -36,7 +36,30 @@ class ApiProfileService implements ProfileService {
 
   @override
   Future<void> updateUserProfile(UserProfile profile) async {
-    await _apiClient.put('/profiles/${profile.id}', body: profile.toJson());
+    // 서버가 기대하는 필드만 전송 (서버 스키마에 맞춤)
+    final body = <String, dynamic>{
+      'name': profile.name,
+      'age': profile.age,
+      'gender': profile.gender.name, // 'male' or 'female'
+      'address': profile.address,
+      if (profile.profileImageUrl != null)
+        'profileImageUrl': profile.profileImageUrl,
+      if (profile.phoneNumber != null) 'phoneNumber': profile.phoneNumber,
+      'appointmentCount': profile.appointmentCount,
+      'treatmentCount': profile.treatmentCount,
+      'isPractitioner': profile.isPractitioner,
+      'certificationStatus': profile.certificationStatus.name, // 'none', 'pending', 'verified'
+    };
+    
+    // /profiles/me 엔드포인트 사용 (인증된 사용자의 프로필 업데이트)
+    final response = await _apiClient.put('/profiles/me', body: body);
+    // 서버 응답 확인 (에러가 있으면 예외가 발생함)
+    final data = _extractProfile(response);
+    if (data.isEmpty) {
+      throw const AppException.server(
+        message: '프로필 업데이트 응답을 받지 못했습니다.',
+      );
+    }
   }
 
   @override
