@@ -201,6 +201,62 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildAddressButton(Address? address) {
+    final bool isPlaceholder = address == null;
+    final String displayText = address == null
+        ? "주소를 입력해주세요"
+        : (address.roadAddress.isNotEmpty
+            ? address.roadAddress
+            : address.jibunAddress);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: kPrimaryBlue.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayText,
+                  style: TextStyle(
+                    color: isPlaceholder
+                        ? kPrimaryBlue.withValues(alpha: 0.8)
+                        : kDarkGray,
+                    fontSize: 15,
+                    fontWeight:
+                        isPlaceholder ? FontWeight.normal : FontWeight.w500,
+                  ),
+                ),
+                if (address?.detailAddress != null &&
+                    address!.detailAddress!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    address.detailAddress!,
+                    style: TextStyle(
+                      color: kDarkGray,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Icon(Icons.place_outlined,
+              color: kPrimaryBlue.withValues(alpha: 0.6)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPatientSelection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -625,10 +681,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 }
               },
-              child: _buildSelectionButton(
-                _selectedAddress?.roadAddress ?? "주소를 입력해주세요",
-                Icons.place_outlined,
-              ),
+              child: _buildAddressButton(_selectedAddress),
             ),
             const SizedBox(height: 24),
             const Text(

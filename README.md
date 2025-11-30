@@ -2,6 +2,14 @@
 
 Flutter + Node/Prisma stack for the 한방 방문 진료 MVP.
 
+## What changed in ver1.3.9
+- **우편번호 검색 기능**: 로컬 우편번호 DB 통합으로 우편번호 검색 기능 추가
+- **PostalCodeService 구현**: TSV 형식 우편번호 파일 파싱 및 검색 서비스 구현
+- **타임아웃 설정 최적화**: 우편번호 검색용 30초 타임아웃 추가 (기본 12초)
+- **세부 주소 입력**: 주소 선택 후 상세 주소(동/호수 등) 입력 기능 추가
+- **에러 처리 개선**: 상세한 에러 로깅 및 디바운싱 로직 개선
+- **API 엔드포인트 추가**: `/api/addresses/geocode` 엔드포인트 추가 (주소 문자열로 좌표 조회)
+
 ## What changed in ver1.3.8
 - **네이버 지도 API 통합**: 주소 검색(Geocoding) 및 역지오코딩(Reverse Geocoding) 기능 추가
 - **주소 검색 UI**: 실시간 주소 검색 화면 구현, 디바운싱 및 최소 검색어 길이 제한 적용

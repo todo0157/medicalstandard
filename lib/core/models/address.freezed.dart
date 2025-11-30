@@ -28,7 +28,8 @@ mixin _$Address {
   double get y => throw _privateConstructorUsedError; // 위도
   double get distance => throw _privateConstructorUsedError; // 거리 (미터)
   List<AddressElement> get addressElements =>
-      throw _privateConstructorUsedError;
+      throw _privateConstructorUsedError; // 주소 구성 요소
+  String? get detailAddress => throw _privateConstructorUsedError;
 
   /// Serializes this Address to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -52,6 +53,7 @@ abstract class $AddressCopyWith<$Res> {
     double y,
     double distance,
     List<AddressElement> addressElements,
+    String? detailAddress,
   });
 }
 
@@ -77,6 +79,7 @@ class _$AddressCopyWithImpl<$Res, $Val extends Address>
     Object? y = null,
     Object? distance = null,
     Object? addressElements = null,
+    Object? detailAddress = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -108,6 +111,10 @@ class _$AddressCopyWithImpl<$Res, $Val extends Address>
                 ? _value.addressElements
                 : addressElements // ignore: cast_nullable_to_non_nullable
                       as List<AddressElement>,
+            detailAddress: freezed == detailAddress
+                ? _value.detailAddress
+                : detailAddress // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -130,6 +137,7 @@ abstract class _$$AddressImplCopyWith<$Res> implements $AddressCopyWith<$Res> {
     double y,
     double distance,
     List<AddressElement> addressElements,
+    String? detailAddress,
   });
 }
 
@@ -154,6 +162,7 @@ class __$$AddressImplCopyWithImpl<$Res>
     Object? y = null,
     Object? distance = null,
     Object? addressElements = null,
+    Object? detailAddress = freezed,
   }) {
     return _then(
       _$AddressImpl(
@@ -185,6 +194,10 @@ class __$$AddressImplCopyWithImpl<$Res>
             ? _value._addressElements
             : addressElements // ignore: cast_nullable_to_non_nullable
                   as List<AddressElement>,
+        detailAddress: freezed == detailAddress
+            ? _value.detailAddress
+            : detailAddress // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -201,6 +214,7 @@ class _$AddressImpl implements _Address {
     required this.y,
     this.distance = 0,
     final List<AddressElement> addressElements = const [],
+    this.detailAddress,
   }) : _addressElements = addressElements;
 
   factory _$AddressImpl.fromJson(Map<String, dynamic> json) =>
@@ -235,9 +249,13 @@ class _$AddressImpl implements _Address {
     return EqualUnmodifiableListView(_addressElements);
   }
 
+  // 주소 구성 요소
+  @override
+  final String? detailAddress;
+
   @override
   String toString() {
-    return 'Address(roadAddress: $roadAddress, jibunAddress: $jibunAddress, englishAddress: $englishAddress, x: $x, y: $y, distance: $distance, addressElements: $addressElements)';
+    return 'Address(roadAddress: $roadAddress, jibunAddress: $jibunAddress, englishAddress: $englishAddress, x: $x, y: $y, distance: $distance, addressElements: $addressElements, detailAddress: $detailAddress)';
   }
 
   @override
@@ -258,7 +276,9 @@ class _$AddressImpl implements _Address {
             const DeepCollectionEquality().equals(
               other._addressElements,
               _addressElements,
-            ));
+            ) &&
+            (identical(other.detailAddress, detailAddress) ||
+                other.detailAddress == detailAddress));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -272,6 +292,7 @@ class _$AddressImpl implements _Address {
     y,
     distance,
     const DeepCollectionEquality().hash(_addressElements),
+    detailAddress,
   );
 
   /// Create a copy of Address
@@ -297,6 +318,7 @@ abstract class _Address implements Address {
     required final double y,
     final double distance,
     final List<AddressElement> addressElements,
+    final String? detailAddress,
   }) = _$AddressImpl;
 
   factory _Address.fromJson(Map<String, dynamic> json) = _$AddressImpl.fromJson;
@@ -314,7 +336,9 @@ abstract class _Address implements Address {
   @override
   double get distance; // 거리 (미터)
   @override
-  List<AddressElement> get addressElements;
+  List<AddressElement> get addressElements; // 주소 구성 요소
+  @override
+  String? get detailAddress;
 
   /// Create a copy of Address
   /// with the given fields replaced by the non-null parameter values.

@@ -46,6 +46,9 @@ class AppConfig {
 
   /// Global timeout for HTTP requests.
   static const Duration apiTimeout = Duration(seconds: 12);
+  
+  /// Timeout for address search requests (longer for postal code searches).
+  static const Duration addressSearchTimeout = Duration(seconds: 30);
 
   /// Derived WebSocket base URL matching the REST API host.
   static String get wsBaseUrl {

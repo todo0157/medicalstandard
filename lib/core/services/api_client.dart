@@ -20,8 +20,9 @@ class ApiClient {
   Future<Map<String, dynamic>> get(
     String path, {
     Map<String, String>? headers,
+    Duration? timeout,
   }) async {
-    return _send(method: 'GET', path: path, headers: headers);
+    return _send(method: 'GET', path: path, headers: headers, timeout: timeout);
   }
 
   Future<Map<String, dynamic>> post(
@@ -62,6 +63,7 @@ class ApiClient {
     Map<String, dynamic>? body,
     Map<String, String>? headers,
     bool isRetry = false,
+    Duration? timeout,
   }) async {
     await NetworkChecker.ensureConnected();
     final uri = Uri.parse('${AppConfig.apiBaseUrl}$path');
@@ -73,12 +75,13 @@ class ApiClient {
     };
 
     try {
+      final requestTimeout = timeout ?? AppConfig.apiTimeout;
       final response = await _request(
         method: method,
         uri: uri,
         headers: mergedHeaders,
         body: body,
-      ).timeout(AppConfig.apiTimeout);
+      ).timeout(requestTimeout);
 
       if (response.statusCode == 401 && !isRetry && !_isRefreshPath(path)) {
         final refreshed = await _tryRefreshToken();
@@ -97,11 +100,28 @@ class ApiClient {
       }
 
       _logResponse(method, uri, response);
-      return _processResponse(response);
+      try {
+        return _processResponse(response);
+      } catch (e) {
+        // 응답 처리 중 에러 발생 시 상세 로그
+        if (kDebugMode && AppConfig.enableHttpLogging) {
+          debugPrint('[API] Error processing response: $e');
+          debugPrint('[API] Response status: ${response.statusCode}');
+          debugPrint('[API] Response body length: ${response.body.length}');
+          debugPrint('[API] Response body (first 500 chars): ${response.body.substring(0, response.body.length > 500 ? 500 : response.body.length)}');
+        }
+        rethrow;
+      }
     } on SocketException {
       throw const AppException.network();
     } on TimeoutException {
       throw const AppException.timeout();
+    } catch (e) {
+      // 기타 예외 처리
+      if (kDebugMode && AppConfig.enableHttpLogging) {
+        debugPrint('[API] Unexpected error: $e');
+      }
+      rethrow;
     }
   }
 
@@ -139,8 +159,18 @@ class ApiClient {
         final decoded = jsonDecode(rawBody);
         if (decoded is Map<String, dynamic>) {
           decodedBody = decoded;
+        } else {
+          // 배열이나 다른 타입인 경우
+          if (kDebugMode && AppConfig.enableHttpLogging) {
+            debugPrint('[API] Response is not a Map, type: ${decoded.runtimeType}');
+          }
         }
-      } catch (_) {
+      } catch (e) {
+        // JSON 파싱 에러
+        if (kDebugMode && AppConfig.enableHttpLogging) {
+          debugPrint('[API] JSON decode error: $e');
+          debugPrint('[API] Raw body (first 500 chars): ${rawBody.length > 500 ? rawBody.substring(0, 500) : rawBody}');
+        }
         // ignore decode errors, fall back to raw body
       }
     }
@@ -148,8 +178,25 @@ class ApiClient {
     if (statusCode >= 200 && statusCode < 300) {
       if (rawBody.isEmpty) return {};
       if (decodedBody != null) return decodedBody;
-      final decoded = jsonDecode(rawBody);
-      return {'data': decoded};
+      
+      // decodedBody가 null인 경우 다시 시도
+      try {
+        final decoded = jsonDecode(rawBody);
+        if (decoded is Map<String, dynamic>) {
+          return decoded;
+        } else {
+          // 배열이나 다른 타입인 경우 data로 감싸기
+          return {'data': decoded};
+        }
+      } catch (e) {
+        if (kDebugMode && AppConfig.enableHttpLogging) {
+          debugPrint('[API] Failed to decode response body: $e');
+        }
+        throw AppException.server(
+          statusCode: statusCode,
+          message: '응답을 파싱할 수 없습니다: $e',
+        );
+      }
     }
 
     final issues = _extractIssues(decodedBody);

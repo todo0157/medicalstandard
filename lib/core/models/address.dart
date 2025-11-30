@@ -13,6 +13,7 @@ class Address with _$Address {
     required double y, // 위도
     @Default(0) double distance, // 거리 (미터)
     @Default([]) List<AddressElement> addressElements, // 주소 구성 요소
+    String? detailAddress, // 세부 주소 (예: 101동 301호)
   }) = _Address;
 
   factory Address.fromJson(Map<String, dynamic> json) =>

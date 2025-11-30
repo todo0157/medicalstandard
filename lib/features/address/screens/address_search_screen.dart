@@ -63,12 +63,17 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
       setState(() {
         _debouncedQuery = '';
       });
+      // provider도 무효화
+      if (mounted) {
+        ref.invalidate(addressSearchProvider(''));
+      }
       return;
     }
 
     // 새로운 타이머 시작
     _debounceTimer = Timer(_debounceDuration, () {
-      if (mounted) {
+      if (mounted && _currentQuery == trimmedValue) {
+        // 쿼리가 변경되지 않았을 때만 업데이트
         setState(() {
           _debouncedQuery = trimmedValue;
         });
@@ -76,12 +81,101 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
     });
   }
 
-  void _selectAddress(Address address) {
+  void _selectAddress(Address address) async {
+    // 좌표가 없는 경우 (우편번호 검색 결과) 네이버 지도 API로 좌표 가져오기
+    Address finalAddress = address;
+    if (address.x == 0 && address.y == 0 && address.roadAddress.isNotEmpty) {
+      try {
+        final service = ref.read(addressServiceProvider);
+        final geocodedAddress = await service.geocodeAddress(
+          address.roadAddress,
+          address.jibunAddress.isNotEmpty ? address.jibunAddress : null,
+        );
+        finalAddress = address.copyWith(
+          x: geocodedAddress.x,
+          y: geocodedAddress.y,
+        );
+      } catch (e) {
+        // 좌표 가져오기 실패해도 계속 진행 (좌표 없이 사용)
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('좌표 정보를 가져오지 못했습니다. 주소만 사용합니다.'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+    
+    // 세부 주소 입력 다이얼로그 표시
+    final detailAddress = await _showDetailAddressDialog(finalAddress);
+    
+    // 세부 주소가 입력된 경우 주소에 추가
+    final finalAddressWithDetail = detailAddress != null
+        ? finalAddress.copyWith(detailAddress: detailAddress)
+        : finalAddress;
+    
     setState(() {
-      _selectedAddress = address;
+      _selectedAddress = finalAddressWithDetail;
     });
-    widget.onAddressSelected?.call(address);
-    Navigator.of(context).pop(address);
+    widget.onAddressSelected?.call(finalAddressWithDetail);
+    Navigator.of(context).pop(finalAddressWithDetail);
+  }
+
+  Future<String?> _showDetailAddressDialog(Address address) async {
+    final detailController = TextEditingController();
+    
+    return showDialog<String?>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('세부 주소 입력'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              address.roadAddress.isNotEmpty
+                  ? address.roadAddress
+                  : address.jibunAddress,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: detailController,
+              decoration: const InputDecoration(
+                labelText: '세부 주소 (선택)',
+                hintText: '예: 101동 301호',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '동, 호수 등을 입력해주세요',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(null),
+            child: const Text('건너뛰기'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final detail = detailController.text.trim();
+              Navigator.of(context).pop(detail.isEmpty ? null : detail);
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -125,7 +219,7 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
               focusNode: _searchFocusNode,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: '도로명, 지번, 건물명으로 검색 (최소 $_minQueryLength자 이상)',
+                hintText: '도로명, 지번, 건물명, 우편번호로 검색 (최소 $_minQueryLength자 이상)',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _currentQuery.isNotEmpty
                     ? IconButton(
@@ -194,13 +288,25 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
 
     // API 요청 결과 표시
     if (searchAsync == null) {
-      return _buildEmptyState();
+      return _buildLoadingState(); // null이면 로딩 상태로 표시
     }
 
     return searchAsync.when(
-      data: (result) => _buildSearchResults(result),
+      data: (result) {
+        // 데이터가 있지만 주소 목록이 비어있으면 빈 상태 표시
+        if (result.addresses.isEmpty) {
+          return _buildEmptyState();
+        }
+        return _buildSearchResults(result);
+      },
       loading: () => _buildLoadingState(),
-      error: (error, stack) => _buildErrorState(error),
+      error: (error, stack) {
+        // 에러 발생 시 상세 로그
+        debugPrint('[AddressSearchScreen] Error: $error');
+        debugPrint('[AddressSearchScreen] Stack: $stack');
+        debugPrint('[AddressSearchScreen] Query: $_debouncedQuery');
+        return _buildErrorState(error);
+      },
     );
   }
 
@@ -223,7 +329,7 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '도로명, 지번, 건물명으로 검색할 수 있습니다',
+            '도로명, 지번, 건물명, 우편번호로 검색할 수 있습니다',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -240,6 +346,9 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
   }
 
   Widget _buildErrorState(Object error) {
+    // 우편번호 검색인지 확인 (5자리 숫자)
+    final isPostalCode = RegExp(r'^\d{5}$').hasMatch(_debouncedQuery);
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -251,14 +360,16 @@ class _AddressSearchScreenState extends ConsumerState<AddressSearchScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            '주소 검색에 실패했습니다',
+            isPostalCode ? '우편번호 검색에 실패했습니다' : '주소 검색에 실패했습니다',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: AppColors.textPrimary,
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            error.toString(),
+            isPostalCode
+                ? '네이버 지도 API가 우편번호 검색을 지원하지 않을 수 있습니다.\n도로명, 지번, 건물명으로 검색해보세요.'
+                : error.toString(),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                 ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/app_config.dart';
 import '../models/address.dart';
@@ -20,7 +21,15 @@ final addressSearchProvider = FutureProvider.family
   }
 
   final service = ref.watch(addressServiceProvider);
-  return await service.searchAddress(trimmedQuery);
+  
+  try {
+    return await service.searchAddress(trimmedQuery);
+  } catch (e) {
+    // 에러 발생 시 상세 로그
+    debugPrint('[AddressSearchProvider] Error searching address: $e');
+    debugPrint('[AddressSearchProvider] Query: $trimmedQuery');
+    rethrow;
+  }
 });
 
 final reverseGeocodeProvider = FutureProvider.family

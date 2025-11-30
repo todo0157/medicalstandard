@@ -828,15 +828,33 @@ class _BookingHeroCard extends StatelessWidget {
           ),
           if (address != null) ...[
             const SizedBox(height: 16),
-            Text(
-              address!.roadAddress.isNotEmpty
-                  ? address!.roadAddress
-                  : address!.jibunAddress,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-                height: 1.5,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  address!.roadAddress.isNotEmpty
+                      ? address!.roadAddress
+                      : address!.jibunAddress,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                ),
+                if (address!.detailAddress != null &&
+                    address!.detailAddress!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    address!.detailAddress!,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ] else ...[
             const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
 import { env } from '../config';
+import postalCodeService from '../services/postal-code.service';
 
 const router = Router();
 
@@ -14,6 +15,80 @@ router.get('/search', authenticate, async (req: AuthenticatedRequest, res, next)
   try {
     const { query } = searchSchema.parse(req.query);
     
+    // 우편번호 감지 (5자리 숫자)
+    const isPostalCode = /^\d{5}$/.test(query.trim());
+    
+    if (env.NODE_ENV === 'development') {
+      console.log('[Address Search] Query:', query);
+      console.log('[Address Search] Is postal code:', isPostalCode);
+    }
+    
+    // 우편번호 검색인 경우 우편번호 DB에서 검색
+    if (isPostalCode) {
+      try {
+        const postalResults = await postalCodeService.searchByPostalCode(query.trim());
+        
+        if (postalResults.length === 0) {
+          return res.status(404).json({
+            message: '해당 우편번호로 주소를 찾을 수 없습니다.',
+            details: '우편번호를 확인해주세요.',
+            data: {
+              addresses: [],
+              total: 0,
+            },
+          });
+        }
+
+        // 네이버 지도 API 키 확인 (좌표 가져오기용)
+        const clientId = env.NAVER_MAP_CLIENT_ID;
+        const clientSecret = env.NAVER_MAP_CLIENT_SECRET;
+        
+        // Address 형식으로 변환
+        // 사용자 제안 방식: 우편번호 DB에서 주소 목록만 반환하고, 
+        // 사용자가 선택한 주소를 네이버 지도 API로 검색하여 좌표 가져오기
+        // 따라서 여기서는 좌표 없이 주소 정보만 반환 (최대 100개)
+        const maxResults = 100;
+        const addresses = postalResults.slice(0, maxResults).map((result) => {
+          // roadAddress와 jibunAddress가 비어있지 않은지 확인
+          const roadAddr = result.roadAddress || '';
+          const jibunAddr = result.jibunAddress || '';
+          
+          if (!roadAddr && !jibunAddr) {
+            console.warn('[PostalCodeService] Empty address found:', result);
+            return null;
+          }
+          
+          return {
+            roadAddress: roadAddr,
+            jibunAddress: jibunAddr,
+            englishAddress: '',
+            x: 0.0, // double 타입으로 명시
+            y: 0.0, // double 타입으로 명시
+            distance: 0.0,
+            addressElements: [] as any[],
+          };
+        }).filter((addr): addr is NonNullable<typeof addr> => addr !== null);
+
+        if (env.NODE_ENV === 'development') {
+          console.log('[PostalCodeService] Found', addresses.length, 'addresses for postal code', query);
+        }
+
+        return res.json({
+          data: {
+            addresses,
+            total: addresses.length,
+          },
+        });
+      } catch (error) {
+        console.error('[PostalCodeService] Error:', error);
+        return res.status(500).json({
+          message: '우편번호 검색 중 오류가 발생했습니다.',
+          details: error instanceof Error ? error.message : '알 수 없는 오류',
+        });
+      }
+    }
+    
+    // 일반 주소 검색인 경우 네이버 지도 API 사용
     // 네이버 지도 API 키 확인
     const clientId = env.NAVER_MAP_CLIENT_ID;
     const clientSecret = env.NAVER_MAP_CLIENT_SECRET;
@@ -41,7 +116,11 @@ router.get('/search', authenticate, async (req: AuthenticatedRequest, res, next)
     // 네이버 지도 Geocoding API 호출
     // 공식 문서: https://api.ncloud-docs.com/docs/ko/application-maps-geocoding
     const naverApiUrl = 'https://maps.apigw.ntruss.com/map-geocode/v2/geocode';
-    const requestUrl = `${naverApiUrl}?query=${encodeURIComponent(query)}`;
+    
+    // 우편번호인 경우 그대로 전달 (네이버 지도 API가 우편번호를 지원하는지 확인)
+    // 우편번호는 5자리 숫자이므로 그대로 전달해도 작동할 수 있음
+    const searchQuery = query.trim();
+    const requestUrl = `${naverApiUrl}?query=${encodeURIComponent(searchQuery)}`;
     
     // API 키 값 검증 및 로깅
     const trimmedClientId = clientId.trim();
@@ -203,7 +282,18 @@ router.get('/search', authenticate, async (req: AuthenticatedRequest, res, next)
         status: data.status,
         errorMessage: data.errorMessage,
         fullResponse: data,
+        isPostalCode,
       });
+      
+      // 우편번호 검색인 경우 더 구체적인 에러 메시지 제공
+      if (isPostalCode) {
+        return res.status(404).json({
+          message: '우편번호로 주소를 찾을 수 없습니다.',
+          details: data.errorMessage || `네이버 지도 API가 해당 우편번호를 찾지 못했습니다: ${data.status}`,
+          suggestion: '우편번호 대신 도로명, 지번, 건물명으로 검색해보세요.',
+        });
+      }
+      
       return res.status(500).json({
         message: '주소 검색에 실패했습니다.',
         details: data.errorMessage || `네이버 지도 API 오류: ${data.status}`,
@@ -220,6 +310,25 @@ router.get('/search', authenticate, async (req: AuthenticatedRequest, res, next)
       y: parseFloat(addr.y || '0'), // 위도
       distance: addr.distance || 0,
     }));
+
+    // 우편번호 검색인데 결과가 없는 경우
+    if (isPostalCode && addresses.length === 0) {
+      if (env.NODE_ENV === 'development') {
+        console.log('[Address Search] Postal code search returned no results:', searchQuery);
+      }
+      return res.status(404).json({
+        message: '해당 우편번호로 주소를 찾을 수 없습니다.',
+        details: '네이버 지도 API가 해당 우편번호를 지원하지 않을 수 있습니다.',
+        suggestion: '도로명, 지번, 건물명으로 검색해보세요.',
+      });
+    }
+
+    if (env.NODE_ENV === 'development') {
+      console.log('[Address Search] Results count:', addresses.length);
+      if (isPostalCode) {
+        console.log('[Address Search] Postal code search successful');
+      }
+    }
 
     return res.json({
       data: {
@@ -398,6 +507,73 @@ router.get('/reverse', authenticate, async (req: AuthenticatedRequest, res, next
 
     return res.json({ data: address });
   } catch (error) {
+    return next(error);
+  }
+});
+
+// 주소 선택 시 좌표 가져오기 (우편번호 검색 결과 선택 후 사용)
+router.post('/geocode', authenticate, async (req: AuthenticatedRequest, res, next) => {
+  try {
+    const { roadAddress, jibunAddress } = req.body;
+    
+    if (!roadAddress && !jibunAddress) {
+      return res.status(400).json({
+        message: '도로명 주소 또는 지번 주소가 필요합니다.',
+      });
+    }
+
+    const clientId = env.NAVER_MAP_CLIENT_ID;
+    const clientSecret = env.NAVER_MAP_CLIENT_SECRET;
+    
+    if (!clientId || !clientSecret) {
+      return res.status(500).json({
+        message: '네이버 지도 API가 설정되지 않았습니다.',
+      });
+    }
+
+    // 우선 도로명 주소로 검색, 없으면 지번 주소로 검색
+    const searchQuery = roadAddress || jibunAddress;
+    const naverApiUrl = 'https://maps.apigw.ntruss.com/map-geocode/v2/geocode';
+    const requestUrl = `${naverApiUrl}?query=${encodeURIComponent(searchQuery)}`;
+
+    const response = await fetch(requestUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'x-ncp-apigw-api-key-id': clientId.trim(),
+        'x-ncp-apigw-api-key': clientSecret.trim(),
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Naver Map API] Geocode error:', response.status, errorText);
+      return res.status(500).json({
+        message: '주소 좌표 변환에 실패했습니다.',
+        details: '네이버 지도 API 오류가 발생했습니다.',
+      });
+    }
+
+    const data = await response.json();
+
+    if (data.status !== 'OK' || !data.addresses || data.addresses.length === 0) {
+      return res.status(404).json({
+        message: '해당 주소의 좌표를 찾을 수 없습니다.',
+        details: data.errorMessage || '주소를 확인해주세요.',
+      });
+    }
+
+    const address = data.addresses[0];
+    return res.json({
+      data: {
+        roadAddress: address.roadAddress || roadAddress,
+        jibunAddress: address.jibunAddress || jibunAddress,
+        x: parseFloat(address.x || '0'),
+        y: parseFloat(address.y || '0'),
+      },
+    });
+  } catch (error) {
+    console.error('[Address Geocode] Error:', error);
     return next(error);
   }
 });

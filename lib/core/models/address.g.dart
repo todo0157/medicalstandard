@@ -19,6 +19,7 @@ _$AddressImpl _$$AddressImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => AddressElement.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      detailAddress: json['detailAddress'] as String?,
     );
 
 Map<String, dynamic> _$$AddressImplToJson(_$AddressImpl instance) =>
@@ -30,6 +31,7 @@ Map<String, dynamic> _$$AddressImplToJson(_$AddressImpl instance) =>
       'y': instance.y,
       'distance': instance.distance,
       'addressElements': instance.addressElements,
+      'detailAddress': instance.detailAddress,
     };
 
 _$AddressElementImpl _$$AddressElementImplFromJson(Map<String, dynamic> json) =>
