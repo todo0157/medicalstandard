@@ -2,6 +2,12 @@
 
 Flutter + Node/Prisma stack for the 한방 방문 진료 MVP.
 
+## What changed in ver1.3.9.1
+- **배포 환경 우편번호 검색 지원**: Docker 및 배포 환경에서 우편번호 검색 기능이 정상 작동하도록 개선
+- **Dockerfile 최적화**: 프로젝트 루트를 build context로 설정하여 Git LFS 파일 자동 다운로드
+- **PostalCodeService 경로 개선**: Docker 환경(`/app/search_number`) 경로 추가 및 경로 탐색 로직 개선
+- **배포 문서 업데이트**: Render/EC2 배포 시 Git LFS 사용 안내 추가
+
 ## What changed in ver1.3.9
 - **우편번호 검색 기능**: 로컬 우편번호 DB 통합으로 우편번호 검색 기능 추가
 - **PostalCodeService 구현**: TSV 형식 우편번호 파일 파싱 및 검색 서비스 구현

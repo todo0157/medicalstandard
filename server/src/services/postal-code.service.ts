@@ -49,6 +49,7 @@ class PostalCodeService {
     const possiblePaths: string[] = [];
     
     // __dirname 기반 경로 (컴파일된 파일 위치 기준)
+    // dist/services/postal-code.service.js -> ../../.. -> /app (Docker) or 프로젝트 루트
     try {
       const projectRootFromDirname = path.resolve(__dirname, '..', '..', '..');
       possiblePaths.push(path.join(projectRootFromDirname, 'search_number'));
@@ -59,9 +60,9 @@ class PostalCodeService {
     // process.cwd() 기반 경로들
     const cwd = process.cwd();
     possiblePaths.push(
+      path.join(cwd, 'search_number'), // 프로젝트 루트 또는 /app에서 실행 시 (가장 일반적)
       path.join(cwd, '..', 'search_number'), // server 디렉토리에서 실행 시
-      path.join(cwd, 'search_number'), // 프로젝트 루트에서 실행 시
-      path.join('/app', 'search_number'), // Docker 환경에서 실행 시
+      path.join('/app', 'search_number'), // Docker 환경에서 실행 시 (절대 경로)
     );
     
     // 절대 경로로도 시도 (프로젝트 루트가 C:\Users\thf56\Documents\medicalstandard인 경우)
