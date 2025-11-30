@@ -42,11 +42,18 @@ npm run build
 npm start    # runs on http://localhost:8080
 ```
 
-**Note**: 우편번호 검색 기능을 사용하려면 `search_number/` 폴더의 우편번호 DB 파일이 필요합니다. 이 파일들은 Git LFS로 관리되므로, 저장소를 클론한 후 다음 명령어로 파일을 다운로드하세요:
+**Note**: 우편번호 검색 기능을 사용하려면 `search_number/` 폴더의 우편번호 DB 파일이 필요합니다. 이 파일들은 Git LFS로 관리되므로:
+
+**로컬 개발 환경:**
 ```bash
 git lfs install
 git lfs pull
 ```
+
+**배포 환경:**
+- Docker를 사용하는 경우: Dockerfile에 Git LFS 설치 및 pull이 포함되어 있습니다.
+- 직접 배포하는 경우: 배포 전에 `git lfs pull`을 실행하여 우편번호 DB 파일을 다운로드하세요.
+- 또는 `npm run setup` 명령어를 실행하세요 (자동으로 Git LFS 설치 및 파일 다운로드).
 
 Set `server/.env` (copy from `.env.example`):
 - `SENDGRID_API_KEY`, `MAIL_FROM`, `MAIL_FROM_NAME`

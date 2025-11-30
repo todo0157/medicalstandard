@@ -84,15 +84,19 @@ deploy directly from Docker images if desired; EC2 certainly can.
 
 ## 5. Deploying to Render (free tier)
 
-1. Push the `server/` folder to its own Git repo (or keep it in this monorepo).
+1. Push the entire project (including `search_number/` folder managed by Git LFS) to Git repo.
 2. Connect the repo to [Render](https://render.com/) and create a **Web Service**.
-3. Choose “Node” runtime or supply the Dockerfile. Set build command
-   `npm install && npm run build`, start command `npm run start:prod`.
-4. Add environment variables in Render’s dashboard.
+3. **Important for postal code search**: 
+   - If using Dockerfile: Build context must be project root, Dockerfile is at project root
+   - If using Node runtime: Set build command to `git lfs install && git lfs pull && cd server && npm install && npm run build`
+   - Start command: `cd server && npm start`
+4. Add environment variables in Render's dashboard.
 5. Obtain the Render-provided URL (e.g., `https://hanbang-api.onrender.com`).
 6. **Create a domain alias** (e.g., `api.medicalstandard.dev`) pointing to the
    Render host via CNAME. The Flutter app should always use the domain, not the
    raw Render URL.
+
+**Note**: 우편번호 검색 기능을 사용하려면 `search_number/` 폴더의 우편번호 DB 파일이 필요합니다. Git LFS로 관리되므로 배포 시 Git LFS가 설치되어 있고 `git lfs pull`이 실행되어야 합니다.
 
 ## 6. Future migration to AWS EC2 (or similar)
 

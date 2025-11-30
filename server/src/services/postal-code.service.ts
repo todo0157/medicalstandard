@@ -61,6 +61,7 @@ class PostalCodeService {
     possiblePaths.push(
       path.join(cwd, '..', 'search_number'), // server 디렉토리에서 실행 시
       path.join(cwd, 'search_number'), // 프로젝트 루트에서 실행 시
+      path.join('/app', 'search_number'), // Docker 환경에서 실행 시
     );
     
     // 절대 경로로도 시도 (프로젝트 루트가 C:\Users\thf56\Documents\medicalstandard인 경우)

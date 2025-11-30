@@ -6,6 +6,7 @@ completed before shipping the **Hanbang App** to production stores.
 ## 1. Backend & Environment
 - [ ] Confirm the production API base URL matches the current release target.
 - [ ] Issue real client credentials (Kakao, payment providers, push, etc.) per environment.
+- [ ] **우편번호 DB 파일 확인**: 배포 환경에서 `git lfs pull` 실행하여 `search_number/` 폴더의 우편번호 DB 파일이 포함되었는지 확인
 - [ ] Configure build-time values:
   - `APP_ENV` (`development`, `staging`, `production`)
   - `API_BASE_URL` overrides (only when pointing to a custom host)

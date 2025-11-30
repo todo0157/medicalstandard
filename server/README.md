@@ -17,7 +17,17 @@
 
 ## Docker
 
+**Important**: Docker build context must be the project root (not server/), so that it can access the `search_number/` folder and `.git` for Git LFS.
+
 ```bash
-"docker build -t hanbang-api ."
-"docker run -p 8080:8080 --env-file .env hanbang-api"
+# Build from project root
+cd ..  # Go to project root
+docker build -f Dockerfile -t hanbang-api .
+docker run -p 8080:8080 --env-file server/.env hanbang-api
+```
+
+Or using docker-compose (from project root):
+```bash
+docker-compose -f server/docker-compose.yml build
+docker-compose -f server/docker-compose.yml up
 ```

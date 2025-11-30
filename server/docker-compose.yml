@@ -2,7 +2,9 @@ version: "3.9"
 
 services:
   api:
-    build: .
+    build:
+      context: ..  # Build from project root to access search_number/ and .git
+      dockerfile: Dockerfile  # Use Dockerfile from project root
     ports:
       - "${PORT:-8080}:8080"
     environment:
@@ -12,5 +14,6 @@ services:
       ALLOW_ORIGIN: http://localhost:3000
       API_DOMAIN: http://localhost:8080
     volumes:
-      - .:/app
+      - ../search_number:/app/search_number  # Mount postal code DB
+      - .:/app/server
       - /app/node_modules
