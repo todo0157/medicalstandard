@@ -42,6 +42,12 @@ npm run build
 npm start    # runs on http://localhost:8080
 ```
 
+**Note**: 우편번호 검색 기능을 사용하려면 `search_number/` 폴더의 우편번호 DB 파일이 필요합니다. 이 파일들은 Git LFS로 관리되므로, 저장소를 클론한 후 다음 명령어로 파일을 다운로드하세요:
+```bash
+git lfs install
+git lfs pull
+```
+
 Set `server/.env` (copy from `.env.example`):
 - `SENDGRID_API_KEY`, `MAIL_FROM`, `MAIL_FROM_NAME`
 - `RESET_LINK_BASE`, `VERIFY_LINK_BASE`, `VERIFY_PRE_LINK_BASE`  
