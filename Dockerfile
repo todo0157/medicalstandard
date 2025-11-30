@@ -17,12 +17,12 @@ COPY server/src ./server/src
 # Copy Git files for LFS
 COPY .gitattributes ./.gitattributes
 # Copy entire .git folder for LFS (needed for git lfs pull)
-# Note: If .git is not available (e.g., in CI/CD), the files should already be in search_number/
-COPY .git ./.git 2>/dev/null || echo "Warning: .git folder not found, assuming LFS files are already present"
+# Note: In CI/CD environments without .git, ensure LFS files are already in search_number/
+COPY .git ./.git
 
 # Pull Git LFS files (postal code database)
-# This will download the actual postal code .txt files if .git is available
-RUN if [ -d .git ]; then git lfs pull || echo "Git LFS pull failed, continuing..."; else echo "Skipping git lfs pull (no .git folder)"; fi
+# This will download the actual postal code .txt files
+RUN git lfs pull || echo "Git LFS pull failed, continuing..."
 
 # Verify postal code files exist
 RUN if [ -d search_number ]; then \
