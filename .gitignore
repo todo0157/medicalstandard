@@ -14,8 +14,7 @@ migrate_working_dir/
 **/node_modules/
 server/prisma/dev.db
 
-# Postal code database files (too large for GitHub)
-search_number/
+# Postal code database files are managed by Git LFS (see .gitattributes)
 
 # IntelliJ related
 *.iml
