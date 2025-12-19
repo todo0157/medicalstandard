@@ -92,4 +92,4 @@ flutter run -d chrome --web-port 5173 \
 4. **프로필 저장 버그 수정**: `/profiles/me` 엔드포인트 사용 및 서버 스키마에 맞는 데이터 전송으로 프로필 업데이트가 정상 작동하도록 수정.
 
 ## 📊 코드베이스 분석 및 개선 계획
-상세한 분석과 개선 계획은 [ver1.3.7_analysis_and_improvements.md](docs/ver1.3.7_analysis_and_improvements.md)를 참고하세요.
+상세한 분석과 개선 계획은 [ver1.3.9.1_analysis_and_improvements.md](docs/ver1.3.9.1_analysis_and_improvements.md)를 참고하세요.
