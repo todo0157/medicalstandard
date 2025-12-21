@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/errors/app_exception.dart';
 import '../../core/models/address.dart';
+import '../../core/models/appointment.dart';
 import '../../core/models/doctor.dart';
 import '../../core/models/slot.dart';
 import '../../core/services/doctor_service.dart';
@@ -17,7 +18,20 @@ const Color kBookingPrimaryLight = Color(0xFFFCE7F3);
 const Color kBookingInfoBlue = Color(0xFF2563EB);
 
 class AppointmentBookingScreen extends ConsumerStatefulWidget {
-  const AppointmentBookingScreen({super.key});
+  const AppointmentBookingScreen({
+    super.key,
+    this.selectedDoctor,
+    this.selectedAddress,
+    this.selectedDate,
+    this.selectedSymptom,
+    this.existingAppointment, // 기존 예약 정보 (수정 모드)
+  });
+
+  final Doctor? selectedDoctor;
+  final Address? selectedAddress;
+  final DateTime? selectedDate;
+  final String? selectedSymptom;
+  final Appointment? existingAppointment; // 기존 예약 정보 (수정 모드)
 
   @override
   ConsumerState<AppointmentBookingScreen> createState() =>
@@ -41,11 +55,54 @@ class _AppointmentBookingScreenState
   List<Slot> _slots = [];
   Slot? _selectedSlot;
   Address? _selectedAddress;
+  DateTime? _selectedDate; // 선택된 날짜
+  DateTime? _selectedTimeSlot; // 선택된 시간대 (정확한 시간)
+
+  String? _existingAppointmentId; // 수정 중인 예약 ID
 
   @override
   void initState() {
     super.initState();
-    _loadDoctors();
+    // 기존 예약 정보가 있으면 수정 모드로 초기화
+    if (widget.existingAppointment != null) {
+      final appointment = widget.existingAppointment!;
+      _existingAppointmentId = appointment.id;
+      _selectedDoctor = appointment.doctor;
+      _selectedDate = (appointment.appointmentTime ?? appointment.slot.startsAt).toLocal();
+      _selectedTimeSlot = appointment.appointmentTime?.toLocal();
+      _selectedSlot = appointment.slot; // 기존 슬롯 설정
+      if (appointment.notes != null && appointment.notes!.isNotEmpty) {
+        // notes에서 "한약 처방 요청" 등 메모 파싱
+        final notes = appointment.notes!;
+        if (notes.contains('한약 처방 요청')) {
+          _needsMedicine = true;
+        }
+        // 증상이나 요청사항이 있으면 noteController에 설정
+        if (notes.contains('증상:')) {
+          final symptomMatch = RegExp(r'증상:\s*(.+?)(?:\n|$)').firstMatch(notes);
+          if (symptomMatch != null) {
+            _symptomController.text = symptomMatch.group(1)?.trim() ?? '';
+          }
+        }
+        if (notes.contains('요청사항:')) {
+          final noteMatch = RegExp(r'요청사항:\s*(.+?)(?:\n|$)').firstMatch(notes);
+          if (noteMatch != null) {
+            _noteController.text = noteMatch.group(1)?.trim() ?? '';
+          }
+        }
+      }
+      // 기존 예약이 있을 때도 한의사 목록을 로드하되, 선택된 한의사를 유지
+      _loadDoctorsForEdit(appointment.doctor);
+    } else {
+      // 전달받은 값들로 초기화
+      _selectedDoctor = widget.selectedDoctor;
+      _selectedAddress = widget.selectedAddress;
+      _selectedDate = widget.selectedDate;
+      if (widget.selectedSymptom != null) {
+        _symptomController.text = widget.selectedSymptom!;
+      }
+      _loadDoctors();
+    }
   }
 
   @override
@@ -88,10 +145,49 @@ class _AppointmentBookingScreenState
     }
   }
 
+  // 수정 모드에서 한의사 목록 로드 (선택된 한의사 유지)
+  Future<void> _loadDoctorsForEdit(Doctor selectedDoctor) async {
+    setState(() {
+      _loadingDoctors = true;
+      _error = null;
+    });
+    try {
+      final doctors = await _doctorService.searchDoctors();
+      setState(() {
+        _doctors = doctors;
+        // 선택된 한의사가 목록에 있으면 유지, 없으면 첫 번째 한의사 선택
+        final foundDoctor = doctors.firstWhere(
+          (d) => d.id == selectedDoctor.id,
+          orElse: () => doctors.isNotEmpty ? doctors.first : selectedDoctor,
+        );
+        _selectedDoctor = foundDoctor;
+      });
+      // 선택된 한의사의 슬롯 로드
+      if (_selectedDoctor != null) {
+        await _loadSlots(_selectedDoctor!.id);
+      } else {
+        setState(() => _slots = []);
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _error = '의사 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingDoctors = false;
+        });
+      }
+    }
+  }
+
   Future<void> _loadSlots(String doctorId) async {
     setState(() {
       _loadingSlots = true;
       _selectedSlot = null;
+      _selectedTimeSlot = null; // 슬롯 로드 시 시간대 선택도 초기화
       _error = null;
     });
     try {
@@ -125,17 +221,31 @@ class _AppointmentBookingScreenState
     final notifier = ref.read(appointmentsNotifierProvider.notifier);
 
     try {
-      await notifier.book(
-        doctorId: _selectedDoctor!.id,
-        slotId: _selectedSlot!.id,
-        notes: notes.isEmpty ? null : notes,
-      );
+      // 기존 예약이 있으면 수정, 없으면 새로 생성
+      if (_existingAppointmentId != null) {
+        await notifier.update(
+          appointmentId: _existingAppointmentId!,
+          doctorId: _selectedDoctor!.id,
+          slotId: _selectedSlot!.id,
+          appointmentTime: _selectedTimeSlot,
+          notes: notes.isEmpty ? null : notes,
+        );
+      } else {
+        await notifier.book(
+          doctorId: _selectedDoctor!.id,
+          slotId: _selectedSlot!.id,
+          appointmentTime: _selectedTimeSlot, // 선택한 정확한 시간대 전달
+          notes: notes.isEmpty ? null : notes,
+        );
+      }
       if (!mounted) return;
       _showConfirmationSheet();
     } catch (error) {
       final message = error is AppException
           ? error.message
-          : '예약에 실패했습니다. 네트워크 상태를 확인해 주세요.';
+          : (_existingAppointmentId != null
+              ? '예약 수정에 실패했습니다. 네트워크 상태를 확인해 주세요.'
+              : '예약에 실패했습니다. 네트워크 상태를 확인해 주세요.');
       setState(() {
         _error = message;
       });
@@ -166,6 +276,7 @@ class _AppointmentBookingScreenState
     setState(() {
       _selectedDoctor = doctor;
       _selectedSlot = null;
+      _selectedTimeSlot = null;
     });
     _loadSlots(doctor.id);
   }
@@ -173,7 +284,94 @@ class _AppointmentBookingScreenState
   void _onSlotSelected(Slot slot) {
     setState(() {
       _selectedSlot = slot;
+      _selectedTimeSlot = null;
     });
+  }
+
+  void _onDateSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+      _selectedSlot = null; // 날짜 변경 시 시간 선택 초기화
+      _selectedTimeSlot = null; // 날짜 변경 시 시간대 선택 초기화
+    });
+  }
+
+  // 선택된 날짜에 해당하는 슬롯만 필터링
+  List<Slot> get _filteredSlots {
+    if (_selectedDate == null) return [];
+    final selectedDateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+    return _slots.where((slot) {
+      final slotDateStr = DateFormat('yyyy-MM-dd').format(slot.startsAt.toLocal());
+      return slotDateStr == selectedDateStr;
+    }).toList();
+  }
+
+  // 선택된 날짜의 30분 간격 시간대 목록 생성
+  List<TimeSlotOption> get _timeSlotOptions {
+    if (_selectedDate == null || _filteredSlots.isEmpty) return [];
+    
+    final timeSlots = <TimeSlotOption>[];
+    
+    for (final slot in _filteredSlots) {
+      final startsAt = slot.startsAt.toLocal();
+      final endsAt = slot.endsAt.toLocal();
+      
+      // 시작 시간부터 종료 시간까지 30분 간격으로 시간대 생성
+      var currentTime = DateTime(
+        startsAt.year,
+        startsAt.month,
+        startsAt.day,
+        startsAt.hour,
+        startsAt.minute,
+      );
+      
+      final endTime = DateTime(
+        endsAt.year,
+        endsAt.month,
+        endsAt.day,
+        endsAt.hour,
+        endsAt.minute,
+      );
+      
+      while (currentTime.isBefore(endTime)) {
+        timeSlots.add(TimeSlotOption(
+          time: currentTime,
+          slot: slot,
+        ));
+        currentTime = currentTime.add(const Duration(minutes: 30));
+      }
+    }
+    
+    // 시간순으로 정렬 (중복 제거하지 않음 - 같은 시간대가 여러 슬롯에 속할 수 있음)
+    timeSlots.sort((a, b) {
+      final timeCompare = a.time.compareTo(b.time);
+      if (timeCompare != 0) return timeCompare;
+      // 같은 시간이면 슬롯 ID로 정렬 (일관성 유지)
+      return a.slot.id.compareTo(b.slot.id);
+    });
+    
+    return timeSlots;
+  }
+
+  void _onTimeSlotSelected(TimeSlotOption option) {
+    setState(() {
+      _selectedSlot = option.slot;
+      _selectedTimeSlot = option.time; // 선택된 정확한 시간대 저장
+    });
+  }
+
+  // 사용 가능한 날짜 목록 (슬롯이 있는 날짜만)
+  List<DateTime> get _availableDates {
+    final dates = <DateTime>{};
+    for (final slot in _slots) {
+      final date = DateTime(
+        slot.startsAt.toLocal().year,
+        slot.startsAt.toLocal().month,
+        slot.startsAt.toLocal().day,
+      );
+      dates.add(date);
+    }
+    return dates.toList()..sort();
   }
 
   Future<void> _selectAddress() async {
@@ -226,7 +424,7 @@ class _AppointmentBookingScreenState
                   onSelected: _onDoctorSelected,
                 ),
               const SizedBox(height: 24),
-              _buildSectionTitle('예약 가능한 시간'),
+              _buildSectionTitle('예약 날짜 선택'),
               const SizedBox(height: 12),
               if (_loadingSlots)
                 const Padding(
@@ -240,12 +438,29 @@ class _AppointmentBookingScreenState
                   message: '예약 가능한 시간이 없습니다. 다른 한의사를 선택해 주세요.',
                 )
               else
-                _SlotSelector(
-                  slots: _slots,
-                  formatter: formatter,
-                  selectedSlot: _selectedSlot,
-                  onSelected: _onSlotSelected,
+                _DateSelector(
+                  availableDates: _availableDates,
+                  selectedDate: _selectedDate,
+                  onDateSelected: _onDateSelected,
                 ),
+              if (_selectedDate != null && _filteredSlots.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                _buildSectionTitle('예약 가능한 시간'),
+                const SizedBox(height: 12),
+                _TimeSlotGrid(
+                  timeSlots: _timeSlotOptions,
+                  selectedSlot: _selectedSlot,
+                  selectedTimeSlot: _selectedTimeSlot,
+                  onTimeSlotSelected: _onTimeSlotSelected,
+                ),
+              ] else if (_selectedDate != null && _filteredSlots.isEmpty) ...[
+                const SizedBox(height: 24),
+                _buildSectionTitle('예약 가능한 시간'),
+                const SizedBox(height: 12),
+                const _EmptyPlaceholder(
+                  message: '선택한 날짜에 예약 가능한 시간이 없습니다. 다른 날짜를 선택해 주세요.',
+                ),
+              ],
               const SizedBox(height: 24),
               _buildSectionTitle('증상 및 요청사항'),
               const SizedBox(height: 12),
@@ -285,6 +500,7 @@ class _AppointmentBookingScreenState
       bottomNavigationBar: _BottomActionBar(
         isEnabled: _isReady && !_booking,
         isLoading: _booking,
+        isEditMode: _existingAppointmentId != null,
         onPressed: _bookAppointment,
       ),
     );
@@ -295,9 +511,9 @@ class _AppointmentBookingScreenState
       backgroundColor: AppColors.surface,
       elevation: 0,
       shadowColor: Colors.transparent,
-      title: const Text(
-        '예약하기',
-        style: TextStyle(
+      title: Text(
+        _existingAppointmentId != null ? '예약 수정' : '예약하기',
+        style: const TextStyle(
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
@@ -328,8 +544,10 @@ class _AppointmentBookingScreenState
   void _showConfirmationSheet() {
     final doctor = _selectedDoctor!;
     final slot = _selectedSlot!;
+    // 선택한 시간대가 있으면 그것을 사용, 없으면 슬롯의 시작 시간 사용
+    final displayTime = _selectedTimeSlot ?? slot.startsAt.toLocal();
     final dateLabel = DateFormat('M월 d일 (E) a h:mm', 'ko')
-        .format(slot.startsAt.toLocal());
+        .format(displayTime);
 
     showModalBottomSheet<void>(
       context: context,
@@ -516,59 +734,166 @@ class _DoctorSelector extends StatelessWidget {
   }
 }
 
-class _SlotSelector extends StatelessWidget {
-  const _SlotSelector({
-    required this.slots,
-    required this.formatter,
-    required this.selectedSlot,
-    required this.onSelected,
+class _DateSelector extends StatelessWidget {
+  const _DateSelector({
+    required this.availableDates,
+    required this.selectedDate,
+    required this.onDateSelected,
   });
 
-  final List<Slot> slots;
-  final DateFormat formatter;
-  final Slot? selectedSlot;
-  final ValueChanged<Slot> onSelected;
+  final List<DateTime> availableDates;
+  final DateTime? selectedDate;
+  final ValueChanged<DateTime> onDateSelected;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: slots
-          .map(
-            (slot) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                tileColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(
-                    color: slot.id == selectedSlot?.id
-                        ? kBookingPrimary
-                        : AppColors.border,
+    if (availableDates.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: availableDates.map((date) {
+          final isSelected = selectedDate != null &&
+              date.year == selectedDate!.year &&
+              date.month == selectedDate!.month &&
+              date.day == selectedDate!.day;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              onTap: () => onDateSelected(date),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: isSelected ? kBookingPrimary : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? kBookingPrimary : AppColors.border,
+                    width: isSelected ? 2 : 1,
                   ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: kBookingPrimary.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
                 ),
-                title: Text(
-                  formatter.format(slot.startsAt.toLocal()),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      DateFormat('E', 'ko_KR').format(date),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isSelected ? Colors.white : AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('M/d', 'ko_KR').format(date),
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
-                subtitle: Text(
-                  '${formatter.format(slot.startsAt.toLocal())} - '
-                  '${formatter.format(slot.endsAt.toLocal())}',
-                  style: const TextStyle(color: AppColors.textSecondary),
-                ),
-                trailing: Radio<Slot>(
-                  value: slot,
-                  groupValue: selectedSlot,
-                  activeColor: kBookingPrimary,
-                  onChanged: (_) => onSelected(slot),
-                ),
-                onTap: () => onSelected(slot),
               ),
             ),
-          )
-          .toList(),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// 시간대 옵션 클래스
+class TimeSlotOption {
+  final DateTime time;
+  final Slot slot;
+
+  TimeSlotOption({
+    required this.time,
+    required this.slot,
+  });
+}
+
+class _TimeSlotGrid extends StatelessWidget {
+  const _TimeSlotGrid({
+    required this.timeSlots,
+    required this.selectedSlot,
+    required this.selectedTimeSlot,
+    required this.onTimeSlotSelected,
+  });
+
+  final List<TimeSlotOption> timeSlots;
+  final Slot? selectedSlot;
+  final DateTime? selectedTimeSlot;
+  final ValueChanged<TimeSlotOption> onTimeSlotSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (timeSlots.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: timeSlots.map((option) {
+        // 선택된 정확한 시간대와 일치하는지 확인
+        final isSelected = selectedTimeSlot != null &&
+            option.time.year == selectedTimeSlot!.year &&
+            option.time.month == selectedTimeSlot!.month &&
+            option.time.day == selectedTimeSlot!.day &&
+            option.time.hour == selectedTimeSlot!.hour &&
+            option.time.minute == selectedTimeSlot!.minute;
+        final timeStr = DateFormat('HH:mm').format(option.time);
+        final period = option.time.hour < 12 ? '오전' : '오후';
+        final displayHour = option.time.hour > 12 
+            ? option.time.hour - 12 
+            : (option.time.hour == 0 ? 12 : option.time.hour);
+        final displayTime = '$period $displayHour:${option.time.minute.toString().padLeft(2, '0')}';
+
+        return InkWell(
+          onTap: () => onTimeSlotSelected(option),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: isSelected ? kBookingPrimary : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? kBookingPrimary : AppColors.border,
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: kBookingPrimary.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Text(
+              displayTime,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -710,11 +1035,13 @@ class _BottomActionBar extends StatelessWidget {
   const _BottomActionBar({
     required this.isEnabled,
     required this.isLoading,
+    required this.isEditMode,
     required this.onPressed,
   });
 
   final bool isEnabled;
   final bool isLoading;
+  final bool isEditMode;
   final VoidCallback onPressed;
 
   @override
@@ -747,9 +1074,9 @@ class _BottomActionBar extends StatelessWidget {
                       child:
                           CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text(
-                      '예약하기',
-                      style: TextStyle(
+                  : Text(
+                      isEditMode ? '수정하기' : '예약하기',
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         color: Colors.white,

@@ -73,6 +73,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _editAppointment(Appointment appointment) async {
+    // 예약 수정 화면으로 이동
+    if (!mounted) return;
+    await context.push(
+      '/booking',
+      extra: appointment,
+    );
+  }
+
   Future<bool> _confirm(String title, String message) async {
     final result = await showDialog<bool>(
       context: context,
@@ -129,6 +138,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ref.read(appointmentsNotifierProvider.notifier).refresh(),
                   onCancel: _cancelAppointment,
                   onDelete: _deleteAppointment,
+                  onEdit: _editAppointment,
                 ),
                 const SizedBox(height: 16),
                 _QuickActionGrid(onAction: _handleQuickAction),
@@ -569,12 +579,14 @@ class _AppointmentSection extends StatelessWidget {
     required this.onRetry,
     required this.onCancel,
     required this.onDelete,
+    required this.onEdit,
   });
 
   final AsyncValue<List<Appointment>> state;
   final Future<void> Function() onRetry;
   final Future<void> Function(Appointment appointment) onCancel;
   final Future<void> Function(Appointment appointment) onDelete;
+  final Future<void> Function(Appointment appointment) onEdit;
   static const _maxVisible = 5;
 
   @override
@@ -664,6 +676,7 @@ class _AppointmentSection extends StatelessWidget {
                       formatter: formatter,
                       onCancel: () => onCancel(appointment),
                       onDelete: () => onDelete(appointment),
+                      onEdit: () => onEdit(appointment),
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -688,12 +701,14 @@ class _AppointmentCard extends StatelessWidget {
     required this.formatter,
     this.onCancel,
     this.onDelete,
+    this.onEdit,
   });
 
   final Appointment appointment;
   final DateFormat formatter;
   final Future<void> Function()? onCancel;
   final Future<void> Function()? onDelete;
+  final Future<void> Function()? onEdit;
 
   String get _statusLabel {
     switch (appointment.status) {
@@ -787,7 +802,10 @@ class _AppointmentCard extends StatelessWidget {
               const Icon(Icons.schedule, size: 18, color: AppColors.iconSecondary),
               const SizedBox(width: 6),
               Text(
-                formatter.format(appointment.slot.startsAt.toLocal()),
+                // 선택한 시간대가 있으면 그것을 사용, 없으면 슬롯의 시작 시간 사용
+                formatter.format(
+                  (appointment.appointmentTime ?? appointment.slot.startsAt).toLocal(),
+                ),
                 style: const TextStyle(color: AppColors.textPrimary),
               ),
             ],
@@ -810,11 +828,20 @@ class _AppointmentCard extends StatelessWidget {
               ),
           ],
         ),
-          if (canCancel || canDelete) ...[
+          if (canCancel || canDelete || onEdit != null) ...[
             const SizedBox(height: 12),
             Row(
               children: [
-                if (canCancel)
+                if (onEdit != null && canCancel)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onEdit,
+                      icon: const Icon(Icons.edit_outlined),
+                      label: const Text('시간 변경'),
+                    ),
+                  ),
+                if (canCancel) ...[
+                  if (onEdit != null) const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onCancel,
@@ -822,8 +849,9 @@ class _AppointmentCard extends StatelessWidget {
                       label: const Text('예약 취소'),
                     ),
                   ),
+                ],
                 if (canDelete) ...[
-                  if (canCancel) const SizedBox(width: 8),
+                  if (canCancel || onEdit != null) const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onDelete,

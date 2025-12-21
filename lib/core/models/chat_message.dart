@@ -5,6 +5,7 @@ class ChatMessage {
     required this.sender,
     required this.content,
     required this.createdAt,
+    this.readAt,
   });
 
   final String id;
@@ -12,6 +13,7 @@ class ChatMessage {
   final String sender;
   final String content;
   final DateTime createdAt;
+  final DateTime? readAt;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
@@ -20,6 +22,9 @@ class ChatMessage {
       sender: json['sender']?.toString() ?? 'user',
       content: json['content']?.toString() ?? '',
       createdAt: DateTime.parse(json['createdAt'] as String),
+      readAt: json['readAt'] != null
+          ? DateTime.parse(json['readAt'] as String)
+          : null,
     );
   }
 }

@@ -143,6 +143,120 @@ router.post("/certifications/:profileId/approve", async (req, res, next) => {
             certificationStatus: "verified",
             isPractitioner: true,
         });
+        // Doctor 테이블에 한의사 정보 추가 또는 업데이트 (강제로 처리)
+        try {
+            console.log(`[Admin] Starting Doctor creation/update for profile ${profileId}, name: ${profile.name}`);
+            // Clinic 찾기 또는 생성
+            let clinic = await prisma_1.prisma.clinic.findFirst({
+                where: {
+                    name: profile.clinicName || `${profile.name} 클리닉`,
+                },
+            });
+            if (!clinic) {
+                clinic = await prisma_1.prisma.clinic.create({
+                    data: {
+                        name: profile.clinicName || `${profile.name} 클리닉`,
+                        address: profile.address,
+                        lat: 0, // TODO: 주소를 기반으로 좌표 변환 필요
+                        lng: 0,
+                    },
+                });
+                console.log(`[Admin] Clinic created: ${clinic.name} (${clinic.id})`);
+            }
+            else {
+                console.log(`[Admin] Clinic found: ${clinic.name} (${clinic.id})`);
+            }
+            // 이름으로 Doctor 찾기 (정확히 일치하는 경우만)
+            let existingDoctor = await prisma_1.prisma.doctor.findFirst({
+                where: {
+                    name: profile.name,
+                },
+                include: {
+                    clinic: true,
+                },
+            });
+            if (!existingDoctor) {
+                // Doctor 생성
+                const newDoctor = await prisma_1.prisma.doctor.create({
+                    data: {
+                        name: profile.name,
+                        specialty: "한의학", // 기본값, 추후 수정 가능
+                        bio: `자격증 번호: ${profile.licenseNumber || "없음"}`,
+                        imageUrl: profile.profileImageUrl || null,
+                        clinicId: clinic.id,
+                    },
+                    include: {
+                        clinic: true,
+                    },
+                });
+                console.log(`[Admin] ✅ Doctor record CREATED for profile ${profileId}:`, {
+                    doctorId: newDoctor.id,
+                    name: newDoctor.name,
+                    specialty: newDoctor.specialty,
+                    clinicId: clinic.id,
+                    clinicName: clinic.name,
+                });
+                // 생성 후 바로 조회하여 검증
+                const verifyDoctor = await prisma_1.prisma.doctor.findUnique({
+                    where: { id: newDoctor.id },
+                    include: { clinic: true },
+                });
+                if (verifyDoctor) {
+                    console.log(`[Admin] ✅ Doctor verification successful: ${verifyDoctor.name} exists in database`);
+                }
+                else {
+                    console.error(`[Admin] ❌ Doctor verification FAILED: ${newDoctor.name} not found after creation!`);
+                }
+            }
+            else {
+                // 기존 Doctor가 있으면 정보 업데이트
+                const updateData = {
+                    clinicId: clinic.id,
+                };
+                // 이미지가 있으면 업데이트
+                if (profile.profileImageUrl) {
+                    updateData.imageUrl = profile.profileImageUrl;
+                }
+                // 자격증 번호가 있으면 bio 업데이트
+                if (profile.licenseNumber) {
+                    updateData.bio = `자격증 번호: ${profile.licenseNumber}`;
+                }
+                const updatedDoctor = await prisma_1.prisma.doctor.update({
+                    where: { id: existingDoctor.id },
+                    data: updateData,
+                    include: {
+                        clinic: true,
+                    },
+                });
+                console.log(`[Admin] ✅ Doctor record UPDATED for profile ${profileId}:`, {
+                    doctorId: updatedDoctor.id,
+                    name: updatedDoctor.name,
+                    clinicId: clinic.id,
+                    clinicName: clinic.name,
+                });
+            }
+            // 최종 검증: Doctor 목록에 포함되는지 확인
+            const allDoctors = await prisma_1.prisma.doctor.findMany({
+                where: {
+                    name: profile.name,
+                },
+                include: {
+                    clinic: true,
+                },
+            });
+            console.log(`[Admin] Final verification: Found ${allDoctors.length} doctor(s) with name "${profile.name}"`);
+            if (allDoctors.length > 0) {
+                console.log(`[Admin] ✅ Doctor "${profile.name}" is in the database and will appear in the list`);
+            }
+            else {
+                console.error(`[Admin] ❌ Doctor "${profile.name}" NOT FOUND in database after creation/update!`);
+            }
+        }
+        catch (doctorError) {
+            console.error(`[Admin] ❌ Error creating/updating doctor record for profile ${profileId}:`, doctorError);
+            console.error(`[Admin] Error details:`, JSON.stringify(doctorError, null, 2));
+            // Doctor 생성 실패해도 인증 승인은 완료
+        }
         console.log(`[Admin] Certification approved for profile ${profileId} by admin ${req.user?.email}`);
         return res.json({
             data: updated,

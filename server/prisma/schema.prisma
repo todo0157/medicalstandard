@@ -133,6 +133,7 @@ model Appointment {
   userAccountId String
   doctorId      String
   slotId        String   @unique
+  appointmentTime DateTime? // 사용자가 선택한 정확한 시간대
   status        String   @default("confirmed")
   notes         String?
   createdAt     DateTime @default(now())
@@ -152,10 +153,16 @@ model ChatSession {
   subject       String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+  lastMessageAt DateTime?
 
   userAccount   UserAccount  @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
   doctor        Doctor?      @relation(fields: [doctorId], references: [id])
   messages      ChatMessage[]
+  
+  // 읽지 않은 메시지 수 (환자 기준)
+  userUnreadCount Int @default(0)
+  // 읽지 않은 메시지 수 (한의사 기준)
+  doctorUnreadCount Int @default(0)
 }
 
 model ChatMessage {
@@ -164,6 +171,7 @@ model ChatMessage {
   sender     String
   content    String
   createdAt  DateTime    @default(now())
+  readAt     DateTime?
 
   session    ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }

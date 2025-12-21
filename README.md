@@ -2,6 +2,23 @@
 
 Flutter + Node/Prisma stack for the 한방 방문 진료 MVP.
 
+## What changed in ver1.3.9.3
+- **채팅 목록 자동 새로고침 최적화**: 채팅 목록 화면이 활성화되어 있을 때만 자동 새로고침 (10초 간격)
+  - 채팅 화면으로 이동 시 자동 새로고침 중지하여 입력 방해 최소화
+  - 화면 활성화 상태 추적을 위한 `ModalRoute.isCurrent` 사용
+- **읽지 않은 메시지 수 표시 기능 개선**: UI 모드(환자/한의사)에 따라 정확한 읽지 않은 메시지 수 표시
+  - 서버 API에 UI 모드 파라미터 추가 (`?uiMode=patient|practitioner`)
+  - 환자 모드: 한의사가 보낸 읽지 않은 메시지 수 표시
+  - 한의사 모드: 환자가 보낸 읽지 않은 메시지 수 표시
+- **서버 API 개선**: 
+  - `GET /api/chat/sessions?uiMode=patient|practitioner` - UI 모드에 따라 unreadCount 계산
+  - `GET /api/chat/sessions/:id/messages?uiMode=patient|practitioner` - UI 모드에 따라 읽음 처리
+- **클라이언트 서비스 개선**:
+  - `ChatService.fetchSessions(isPractitionerMode)` - UI 모드 전달
+  - `ChatService.fetchMessages(sessionId, isPractitionerMode)` - UI 모드 전달
+  - `chatSessionsProvider`에서 `uiModeProvider`를 읽어 서버에 전달
+- **채팅 목록 UI 개선**: 읽지 않은 메시지 수 배지 표시 (환자 모드: 초록색, 한의사 모드: 파란색)
+
 ## What changed in ver1.3.9.2
 - **한의사 인증 프로세스 구현**: 한의사 인증 신청 화면 구현 (자격증 번호, 클리닉 이름, 자격증 이미지 업로드)
 - **프로필 화면 인증 상태 표시**: 프로필 화면에 한의사 인증 상태 카드 추가 (대기 중/승인됨/거부됨)

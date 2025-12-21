@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 enum AppEnvironment { development, staging, production }
 
 class AppConfig {
@@ -19,6 +21,11 @@ class AppConfig {
   static String get apiBaseUrl {
     if (_customApiBaseUrl.isNotEmpty) {
       return _customApiBaseUrl;
+    }
+
+    // 개발 환경에서는 로컬 서버 사용
+    if (kDebugMode) {
+      return 'http://localhost:8080/api';
     }
 
     switch (environment) {

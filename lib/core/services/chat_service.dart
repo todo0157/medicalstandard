@@ -13,8 +13,9 @@ class ChatService {
 
   final ApiClient _apiClient;
 
-  Future<List<ChatSession>> fetchSessions() async {
-    final res = await _apiClient.get('/chat/sessions');
+  Future<List<ChatSession>> fetchSessions({bool isPractitionerMode = false}) async {
+    final uiMode = isPractitionerMode ? 'practitioner' : 'patient';
+    final res = await _apiClient.get('/chat/sessions?uiMode=$uiMode');
     final data = res['data'] as List<dynamic>? ?? [];
     return data
         .map((item) => ChatSession.fromJson(item as Map<String, dynamic>))
@@ -32,8 +33,9 @@ class ChatService {
     return ChatSession.fromJson(res['data'] as Map<String, dynamic>);
   }
 
-  Future<ChatMessagesResult> fetchMessages(String sessionId) async {
-    final res = await _apiClient.get('/chat/sessions/$sessionId/messages');
+  Future<ChatMessagesResult> fetchMessages(String sessionId, {bool isPractitionerMode = false}) async {
+    final uiMode = isPractitionerMode ? 'practitioner' : 'patient';
+    final res = await _apiClient.get('/chat/sessions/$sessionId/messages?uiMode=$uiMode');
     final data = res['data'] as Map<String, dynamic>? ?? {};
     final session = ChatSession.fromJson(
       data['session'] as Map<String, dynamic>,
@@ -47,11 +49,19 @@ class ChatService {
   Future<ChatMessage> sendMessage({
     required String sessionId,
     required String content,
+    bool? isPractitionerMode,
   }) async {
     final res = await _apiClient.post(
       '/chat/sessions/$sessionId/messages',
-      body: {'content': content},
+      body: {
+        'content': content,
+        if (isPractitionerMode != null) 'isPractitionerMode': isPractitionerMode,
+      },
     );
     return ChatMessage.fromJson(res['data'] as Map<String, dynamic>);
+  }
+
+  Future<void> deleteSession(String sessionId) async {
+    await _apiClient.delete('/chat/sessions/$sessionId');
   }
 }

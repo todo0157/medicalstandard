@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../chat/screens/chat_screen.dart';
+import '../../chat/screens/chat_list_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../doctor/providers/doctor_providers.dart';
 import '../../../core/models/address.dart';
+import '../../../core/models/doctor.dart';
+import '../../../core/providers/ui_mode_provider.dart';
+import '../../../core/providers/profile_provider.dart';
+import '../../../core/models/user_profile.dart';
 
 // 4쪽&7쪽_대표 화면 설명&초기 화면.html의 Primary Color (#ec4899) 반영
 const Color kPrimaryPink = Color(0xFFEC4899);
@@ -12,14 +18,14 @@ const Color kGrayText = Color(0xFF6B7280);
 const Color kDarkGray = Color(0xFF1F2937);
 
 // 메인 탭 구조 (하단 탭 바)
-class MainAppShellScreen extends StatefulWidget {
+class MainAppShellScreen extends ConsumerStatefulWidget {
   const MainAppShellScreen({super.key});
 
   @override
-  State<MainAppShellScreen> createState() => _MainAppShellScreenState();
+  ConsumerState<MainAppShellScreen> createState() => _MainAppShellScreenState();
 }
 
-class _MainAppShellScreenState extends State<MainAppShellScreen> {
+class _MainAppShellScreenState extends ConsumerState<MainAppShellScreen> {
   int _selectedIndex = 0; // 0: 홈, 1: 생활, 2: 채팅, 3: 프로필
 
   void _onItemTapped(int index) {
@@ -30,9 +36,11 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
 
   // Build the appropriate widget for the selected tab
   Widget _getBodyWidget(int index) {
+    final uiMode = ref.watch(uiModeProvider);
+    
     switch (index) {
       case 0:
-        return const HomeScreen(); // 홈 탭 (방문 진료 예약)
+        return const HomeScreen(); // 홈 탭 (방문 진료 예약 또는 한의사 전용)
       case 1:
         return const Center(
           child: Text(
@@ -41,7 +49,8 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
           ),
         );
       case 2:
-        return const ChatScreen(); // 채팅 탭
+        // 채팅 목록 화면 표시
+        return const ChatListScreen();
       case 3:
         return const ProfileScreen(); // 프로필 탭
       default:
@@ -51,16 +60,65 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final uiMode = ref.watch(uiModeProvider);
+    final profileState = ref.watch(profileStateNotifierProvider);
+    
+    // UI 모드에 따라 AppBar 제목 변경
+    String appBarTitle = "방문 진료";
+    if (_selectedIndex == 0) {
+      appBarTitle = uiMode == UIMode.practitioner ? "한의사 대시보드" : "방문 진료";
+    }
+    
+    // AppBar leading 버튼 결정
+    Widget? leadingButton;
+    if (_selectedIndex == 0 && uiMode == UIMode.patient) {
+      // 환자 모드: 한의사 전용 버튼
+      leadingButton = IconButton(
+        icon: const Icon(Icons.local_hospital, color: kPrimaryPink),
+        tooltip: '한의사 전용',
+        onPressed: () {
+          final profile = profileState.asData?.value;
+          if (profile != null &&
+              profile.certificationStatus == CertificationStatus.verified &&
+              profile.isPractitioner) {
+            // 한의사 인증 완료된 경우 한의사 모드로 전환
+            ref.read(uiModeProvider.notifier).switchToPractitioner();
+          } else {
+            // 한의사 인증 안 된 경우 메시지 표시
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('프로필에서 한의사 인증을 완료해주세요'),
+                duration: Duration(seconds: 3),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+        },
+      );
+    } else if (_selectedIndex == 0 && uiMode == UIMode.practitioner) {
+      // 한의사 모드: 환자 전용 버튼
+      leadingButton = IconButton(
+        icon: const Icon(Icons.person, color: kPrimaryPink),
+        tooltip: '환자 전용',
+        onPressed: () {
+          ref.read(uiModeProvider.notifier).switchToPatient();
+        },
+      );
+    } else {
+      // 다른 탭: 기본 메뉴 버튼
+      leadingButton = IconButton(
+        icon: const Icon(Icons.menu, color: kPrimaryPink),
+        onPressed: () {},
+      );
+    }
+    
     return Scaffold(
       // App Bar (HTML 헤더 반영)
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: kPrimaryPink),
-          onPressed: () {},
-        ),
-        title: const Text(
-          "방문 진료",
-          style: TextStyle(
+        leading: leadingButton,
+        title: Text(
+          appBarTitle,
+          style: const TextStyle(
             color: kDarkGray,
             fontWeight: FontWeight.w600,
             fontSize: 18,
@@ -114,20 +172,7 @@ class _MainAppShellScreenState extends State<MainAppShellScreen> {
         showUnselectedLabels: true,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton.extended(
-              backgroundColor: kPrimaryPink,
-              onPressed: () => context.push('/booking'),
-              icon: const Icon(Icons.calendar_month, color: Colors.white),
-              label: const Text(
-                '새 방문 예약',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            )
-          : null,
+      floatingActionButton: null,
     );
   }
 }
@@ -148,14 +193,14 @@ class Patient {
 }
 
 // HomeScreen
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final List<Patient> _patients = [
     Patient(
       id: "me",
@@ -171,6 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime? _selectedDate;
   String? _selectedSymptom;
   Address? _selectedAddress;
+  Doctor? _selectedDoctor;
 
   Widget _buildSelectionButton(String text, IconData icon) {
     bool isPlaceholder = text.contains("선택") || text.contains("입력");
@@ -661,6 +707,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final uiMode = ref.watch(uiModeProvider);
+    
+    // UI 모드에 따라 다른 화면 표시
+    if (uiMode == UIMode.practitioner) {
+      return const PractitionerHomeScreen();
+    }
+    
+    // 환자 모드 (기존 UI)
     return Container(
       color: kPrimaryPink.withValues(alpha: 0.05),
       child: SingleChildScrollView(
@@ -718,7 +772,26 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildSymptomSelection(),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => context.push('/find-doctor'),
+              onPressed: () async {
+                final doctor = await context.push<Doctor>('/find-doctor');
+                if (doctor != null && mounted) {
+                  setState(() {
+                    _selectedDoctor = doctor;
+                    // 선택된 한의사의 클리닉 주소를 자동으로 주소로 설정
+                    if (doctor.clinicLat != null && doctor.clinicLng != null) {
+                      // 주소는 나중에 geocoding으로 변환 가능하지만, 일단 클리닉 이름을 주소로 사용
+                      _selectedAddress = Address(
+                        roadAddress: doctor.clinicName,
+                        jibunAddress: doctor.clinicName,
+                        x: doctor.clinicLng ?? 0,
+                        y: doctor.clinicLat ?? 0,
+                        distance: doctor.distanceKm ?? 0,
+                        addressElements: [],
+                      );
+                    }
+                  });
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: kPrimaryPink,
                 foregroundColor: Colors.white,
@@ -728,12 +801,468 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 elevation: 0,
               ),
-              child: const Text(
-                "한의사 찾기",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              child: Text(
+                _selectedDoctor != null
+                    ? "${_selectedDoctor!.name} 한의사 선택됨"
+                    : "한의사 찾기",
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
             ),
+            if (_selectedDoctor != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: kPrimaryPink.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: kPrimaryPink.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.local_hospital, color: kPrimaryPink, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _selectedDoctor!.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                "${_selectedDoctor!.specialty} · ${_selectedDoctor!.clinicName}",
+                                style: TextStyle(
+                                  color: kGrayText,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () {
+                            setState(() {
+                              _selectedDoctor = null;
+                            });
+                          },
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // 예약 가능한 시간 표시
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final slotsAsync = ref.watch(slotsProvider(_selectedDoctor!.id));
+                        return slotsAsync.when(
+                          loading: () => const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          error: (error, stack) => Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Text(
+                              '예약 가능한 시간을 불러올 수 없습니다.',
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
+                          ),
+                          data: (slots) {
+                            if (slots.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                child: Text(
+                                  '예약 가능한 시간이 없습니다. 다른 한의사를 선택해 주세요.',
+                                  style: TextStyle(color: kGrayText, fontSize: 12),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Text(
+                                  '예약 가능한 시간',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: kDarkGray,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  constraints: const BoxConstraints(maxHeight: 200),
+                                  child: ListView.separated(
+                                    shrinkWrap: true,
+                                    itemCount: slots.length,
+                                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                    itemBuilder: (context, index) {
+                                      final slot = slots[index];
+                                      final startsAt = slot.startsAt.toLocal();
+                                      final endsAt = slot.endsAt.toLocal();
+                                      return InkWell(
+                                        onTap: () {
+                                          // 슬롯 선택 시 예약 화면으로 이동
+                                          context.push(
+                                            '/booking',
+                                            extra: {
+                                              'selectedDoctor': _selectedDoctor,
+                                              'selectedAddress': _selectedAddress,
+                                              'selectedDate': startsAt,
+                                              'selectedSymptom': _selectedSymptom,
+                                              'selectedSlot': slot,
+                                            },
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(
+                                              color: kPrimaryPink.withValues(alpha: 0.3),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.access_time,
+                                                color: kPrimaryPink,
+                                                size: 18,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  '${DateFormat('MM월 dd일 (E) HH:mm', 'ko_KR').format(startsAt)} - ${DateFormat('HH:mm').format(endsAt)}',
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                size: 14,
+                                                color: kGrayText,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 한의사 전용 홈 화면
+class PractitionerHomeScreen extends ConsumerWidget {
+  const PractitionerHomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(profileStateNotifierProvider);
+    
+    return Container(
+      color: kPrimaryBlue.withValues(alpha: 0.05),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 환영 메시지
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: kPrimaryBlue.withValues(alpha: 0.3),
+                  width: 2,
+                ),
+              ),
+              child: profileState.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Text('프로필을 불러올 수 없습니다.'),
+                data: (profile) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.local_hospital, color: kPrimaryBlue, size: 32),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${profile.name} 한의사님',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: kDarkGray,
+                                ),
+                              ),
+                              if (profile.clinicName != null && profile.clinicName!.isNotEmpty)
+                                Text(
+                                  profile.clinicName!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: kGrayText,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: kPrimaryBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.verified, color: kPrimaryBlue, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            '인증 완료',
+                            style: TextStyle(
+                              color: kPrimaryBlue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          if (profile.licenseNumber != null && profile.licenseNumber!.isNotEmpty) ...[
+                            const SizedBox(width: 12),
+                            Text(
+                              '자격증 번호: ${profile.licenseNumber}',
+                              style: TextStyle(
+                                color: kGrayText,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // 예약 관리 섹션
+            const Text(
+              "예약 관리",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: kDarkGray,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: kPrimaryBlue.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                children: [
+                  _buildStatCard(
+                    icon: Icons.calendar_today,
+                    label: '오늘 예약',
+                    value: '0',
+                    color: kPrimaryBlue,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildStatCard(
+                    icon: Icons.pending_actions,
+                    label: '대기 중',
+                    value: '0',
+                    color: Colors.orange,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildStatCard(
+                    icon: Icons.check_circle,
+                    label: '완료',
+                    value: '0',
+                    color: Colors.green,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            
+            // 빠른 액션
+            const Text(
+              "빠른 액션",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: kDarkGray,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.schedule,
+                    label: '일정 관리',
+                    color: kPrimaryBlue,
+                    onTap: () {
+                      context.push('/doctor-schedule');
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.people,
+                    label: '환자 관리',
+                    color: kPrimaryPink,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('환자 관리 기능은 준비 중입니다.')),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.medical_services,
+                    label: '진료 기록',
+                    color: Colors.green,
+                    onTap: () {
+                      context.push('/medical-records');
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.chat_bubble,
+                    label: '채팅',
+                    color: Colors.orange,
+                    onTap: () {
+                      // 채팅 탭으로 이동
+                      // MainAppShellScreen의 _selectedIndex를 변경해야 하지만,
+                      // 여기서는 간단히 메시지만 표시
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('채팅 탭을 이용해주세요.')),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: kDarkGray,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionCard({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: color.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: kDarkGray,
+              ),
+            ),
           ],
         ),
       ),

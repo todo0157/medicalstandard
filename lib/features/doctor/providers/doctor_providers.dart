@@ -69,12 +69,14 @@ class AppointmentNotifier extends StateNotifier<AsyncValue<List<Appointment>>> {
   Future<void> book({
     required String doctorId,
     required String slotId,
+    DateTime? appointmentTime, // 사용자가 선택한 정확한 시간대
     String? notes,
   }) async {
     try {
       await _service.createAppointment(
         doctorId: doctorId,
         slotId: slotId,
+        appointmentTime: appointmentTime,
         notes: notes,
       );
       await _loadAppointments();
@@ -101,6 +103,26 @@ class AppointmentNotifier extends StateNotifier<AsyncValue<List<Appointment>>> {
       }
     } catch (e, st) {
       state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> update({
+    required String appointmentId,
+    required String doctorId,
+    required String slotId,
+    DateTime? appointmentTime,
+    String? notes,
+  }) async {
+    try {
+      await _service.updateAppointment(
+        appointmentId: appointmentId,
+        slotId: slotId,
+        appointmentTime: appointmentTime,
+        notes: notes,
+      );
+      await _loadAppointments();
+    } catch (e) {
       rethrow;
     }
   }

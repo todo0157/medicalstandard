@@ -11,6 +11,7 @@ class AppointmentService {
   Future<Appointment> createAppointment({
     required String doctorId,
     required String slotId,
+    DateTime? appointmentTime, // 사용자가 선택한 정확한 시간대
     String? notes,
   }) async {
     final res = await _apiClient.post(
@@ -18,6 +19,7 @@ class AppointmentService {
       body: {
         'doctorId': doctorId,
         'slotId': slotId,
+        if (appointmentTime != null) 'appointmentTime': appointmentTime.toUtc().toIso8601String(),
         if (notes != null && notes.isNotEmpty) 'notes': notes,
       },
     );
@@ -39,12 +41,16 @@ class AppointmentService {
   Future<Appointment> updateAppointment({
     required String appointmentId,
     String? status,
+    String? slotId,
+    DateTime? appointmentTime,
     String? notes,
   }) async {
     final res = await _apiClient.patch(
       '/doctors/appointments/$appointmentId',
       body: {
         if (status != null) 'status': status,
+        if (slotId != null) 'slotId': slotId,
+        if (appointmentTime != null) 'appointmentTime': appointmentTime.toUtc().toIso8601String(),
         if (notes != null) 'notes': notes,
       },
     );

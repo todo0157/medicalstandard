@@ -21,6 +21,13 @@ import 'features/profile/screens/certification_request_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/support/customer_support_screen.dart';
 import 'features/address/screens/address_search_screen.dart';
+import 'features/chat/screens/chat_list_screen.dart';
+import 'features/chat/screens/chat_screen.dart';
+import 'features/chat/screens/practitioner_chat_screen.dart';
+import 'features/doctor/screens/doctor_schedule_screen.dart';
+import 'core/models/doctor.dart';
+import 'core/models/address.dart';
+import 'core/models/appointment.dart';
 
 GoRouter createAppRouter(bool isAuthenticated) {
   return GoRouter(
@@ -118,9 +125,27 @@ GoRouter createAppRouter(bool isAuthenticated) {
       GoRoute(
         path: '/booking',
         name: 'booking',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const AppointmentBookingScreen(),
-        ),
+        pageBuilder: (context, state) {
+          // Appointment 객체가 직접 전달된 경우 (수정 모드)
+          if (state.extra is Appointment) {
+            final appointment = state.extra as Appointment;
+            return MaterialPage(
+              child: AppointmentBookingScreen(
+                existingAppointment: appointment,
+              ),
+            );
+          }
+          // Map 형태로 전달된 경우 (새 예약 모드)
+          final extra = state.extra as Map<String, dynamic>?;
+          return MaterialPage(
+            child: AppointmentBookingScreen(
+              selectedDoctor: extra?['selectedDoctor'] as Doctor?,
+              selectedAddress: extra?['selectedAddress'] as Address?,
+              selectedDate: extra?['selectedDate'] as DateTime?,
+              selectedSymptom: extra?['selectedSymptom'] as String?,
+            ),
+          );
+        },
       ),
       // Find Doctor
       GoRoute(
@@ -128,6 +153,14 @@ GoRouter createAppRouter(bool isAuthenticated) {
         name: 'find-doctor',
         pageBuilder: (context, state) => MaterialPage(
           child: const FindDoctorScreen(),
+        ),
+      ),
+      // Doctor Schedule
+      GoRoute(
+        path: '/doctor-schedule',
+        name: 'doctor-schedule',
+        pageBuilder: (context, state) => MaterialPage(
+          child: const DoctorScheduleScreen(),
         ),
       ),
 
@@ -174,6 +207,38 @@ GoRouter createAppRouter(bool isAuthenticated) {
         pageBuilder: (context, state) => MaterialPage(
           child: const AddressSearchScreen(),
         ),
+      ),
+
+      // Chat Routes
+      GoRoute(
+        path: '/chat',
+        name: 'chat-list',
+        pageBuilder: (context, state) => MaterialPage(
+          child: const ChatListScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/chat/:sessionId',
+        name: 'chat-detail',
+        pageBuilder: (context, state) {
+          final sessionId = state.pathParameters['sessionId']!;
+          final isPractitioner = state.extra is Map && (state.extra as Map)['isPractitioner'] == true;
+          return MaterialPage(
+            child: isPractitioner
+                ? PractitionerChatScreen(sessionId: sessionId)
+                : ChatScreen(sessionId: sessionId),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/practitioner-chat/:sessionId',
+        name: 'practitioner-chat-detail',
+        pageBuilder: (context, state) {
+          final sessionId = state.pathParameters['sessionId']!;
+          return MaterialPage(
+            child: PractitionerChatScreen(sessionId: sessionId),
+          );
+        },
       ),
     ],
     redirect: (context, state) {

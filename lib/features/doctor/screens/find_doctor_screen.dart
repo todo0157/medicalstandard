@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/errors/app_exception.dart';
@@ -29,10 +30,23 @@ class _FindDoctorScreenState extends ConsumerState<FindDoctorScreen> {
   }
 
   Future<void> _showSlots(Doctor doctor) async {
+    // 한의사 선택 시 상담하기 버튼이 있는 바텀시트 표시
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => _SlotSheet(doctor: doctor),
+      backgroundColor: Colors.transparent,
+      builder: (context) => _ConsultationBottomSheet(
+        doctor: doctor,
+        onConsult: () {
+          Navigator.of(context).pop(); // 바텀시트 닫기
+          // Doctor 정보를 반환하여 채팅 세션 생성
+          if (context.canPop()) {
+            context.pop(doctor);
+          } else {
+            Navigator.of(context).pop(doctor);
+          }
+        },
+      ),
     );
   }
 
@@ -284,6 +298,131 @@ class _DoctorCard extends StatelessWidget {
             const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textHint),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ConsultationBottomSheet extends StatelessWidget {
+  const _ConsultationBottomSheet({
+    required this.doctor,
+    required this.onConsult,
+  });
+
+  final Doctor doctor;
+  final VoidCallback onConsult;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 드래그 핸들
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // 한의사 정보
+          Row(
+            children: [
+              _DoctorAvatar(imageUrl: doctor.imageUrl),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      doctor.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      doctor.specialty,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      doctor.clinicName,
+                      style: const TextStyle(
+                        color: AppColors.textHint,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          // 상담하기 버튼
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: onConsult,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                '상담하기',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // 취소 버튼
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                side: const BorderSide(color: AppColors.border),
+              ),
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+        ],
       ),
     );
   }

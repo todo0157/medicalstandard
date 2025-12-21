@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,25 +9,25 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/chat_realtime_service.dart';
 import '../providers/chat_providers.dart';
 
-// Modern color palette for patient chat UI
-const Color kChatPrimaryGreen = Color(0xFF10B981);
-const Color kChatPrimaryGreenLight = Color(0xFFD1FAE5);
-const Color kChatBubbleGray = Color(0xFFF9FAFB);
-const Color kChatDarkGray = Color(0xFF111827);
-const Color kChatMediumGray = Color(0xFF6B7280);
-const Color kChatLightGray = Color(0xFFE5E7EB);
-const Color kChatBackground = Color(0xFFF3F4F6);
+// Modern color palette for practitioner chat UI
+const Color kPractitionerChatPrimaryBlue = Color(0xFF3B82F6);
+const Color kPractitionerChatPrimaryBlueLight = Color(0xFFDBEAFE);
+const Color kPractitionerChatBubbleGray = Color(0xFFF9FAFB);
+const Color kPractitionerChatDarkGray = Color(0xFF111827);
+const Color kPractitionerChatMediumGray = Color(0xFF6B7280);
+const Color kPractitionerChatLightGray = Color(0xFFE5E7EB);
+const Color kPractitionerChatBackground = Color(0xFFF3F4F6);
 
-class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key, this.sessionId});
+class PractitionerChatScreen extends ConsumerStatefulWidget {
+  const PractitionerChatScreen({super.key, this.sessionId});
 
   final String? sessionId;
 
   @override
-  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+  ConsumerState<PractitionerChatScreen> createState() => _PractitionerChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _PractitionerChatScreenState extends ConsumerState<PractitionerChatScreen> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   ChatRealtimeService? _realtime;
@@ -62,7 +61,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (text.isEmpty) return;
     _chatController.clear();
     await ref
-        .read(chatMessagesNotifierProvider(session.id).notifier)
+        .read(practitionerChatMessagesNotifierProvider(session.id).notifier)
         .send(text, onSent: () {
       // 메시지 전송 후 채팅 목록 새로고침
       ref.refresh(chatSessionsProvider);
@@ -87,7 +86,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       onMessage: (message) {
         if (!mounted) return;
         ref
-            .read(chatMessagesNotifierProvider(session.id).notifier)
+            .read(practitionerChatMessagesNotifierProvider(session.id).notifier)
             .addRealtimeMessage(message);
         _scrollToBottom();
       },
@@ -102,13 +101,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return sessionAsync.when(
       loading: () => Scaffold(
-        backgroundColor: kChatBackground,
+        backgroundColor: kPractitionerChatBackground,
         body: const Center(
-          child: CircularProgressIndicator(color: kChatPrimaryGreen),
+          child: CircularProgressIndicator(color: kPractitionerChatPrimaryBlue),
         ),
       ),
       error: (error, _) => Scaffold(
-        backgroundColor: kChatBackground,
+        backgroundColor: kPractitionerChatBackground,
         body: _ErrorView(
           message: '채팅 세션을 불러오지 못했어요: $error',
           onRetry: () => ref.refresh(activeChatSessionProvider),
@@ -116,23 +115,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
       data: (session) {
         _ensureRealtime(session);
-        final messagesState = ref.watch(chatMessagesNotifierProvider(session.id));
+        final messagesState = ref.watch(practitionerChatMessagesNotifierProvider(session.id));
 
         return Scaffold(
-          backgroundColor: kChatBackground,
+          backgroundColor: kPractitionerChatBackground,
           body: SafeArea(
             child: Column(
               children: [
-                _ModernChatHeader(session: session),
+                _ModernPractitionerChatHeader(session: session),
                 Expanded(
                   child: messagesState.when(
                     loading: () => const Center(
-                      child: CircularProgressIndicator(color: kChatPrimaryGreen),
+                      child: CircularProgressIndicator(color: kPractitionerChatPrimaryBlue),
                     ),
                     error: (error, _) => _ErrorView(
                       message: '메시지를 불러오지 못했어요: $error',
                       onRetry: () => ref
-                          .read(chatMessagesNotifierProvider(session.id).notifier)
+                          .read(practitionerChatMessagesNotifierProvider(session.id).notifier)
                           .load(),
                     ),
                     data: (messages) {
@@ -148,7 +147,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: kChatPrimaryGreen.withValues(alpha: 0.1),
+                                      color: kPractitionerChatPrimaryBlue.withValues(alpha: 0.1),
                                       blurRadius: 20,
                                       spreadRadius: 5,
                                     ),
@@ -157,15 +156,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 child: Icon(
                                   Icons.chat_bubble_outline,
                                   size: 48,
-                                  color: kChatPrimaryGreen.withValues(alpha: 0.6),
+                                  color: kPractitionerChatPrimaryBlue.withValues(alpha: 0.6),
                                 ),
                               ),
                               const SizedBox(height: 24),
                               Text(
-                                '메시지를 입력하여\n상담을 시작해보세요',
+                                '환자와의 상담을\n시작해보세요',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: kChatMediumGray,
+                                  color: kPractitionerChatMediumGray,
                                   fontSize: 16,
                                   height: 1.5,
                                 ),
@@ -182,7 +181,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.white,
-                              kChatBackground,
+                              kPractitionerChatBackground,
                             ],
                             stops: const [0.0, 0.3],
                           ),
@@ -197,7 +196,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           itemBuilder: (context, index) {
                             final showAvatar = index == 0 ||
                                 messages[index].sender != messages[index - 1].sender;
-                            return _ModernMessageBubble(
+                            return _ModernPractitionerMessageBubble(
                               message: messages[index],
                               showAvatar: showAvatar,
                             );
@@ -207,7 +206,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     },
                   ),
                 ),
-                _ModernChatInputBar(
+                _ModernPractitionerChatInputBar(
                   controller: _chatController,
                   onSend: () => _sendMessage(session),
                 ),
@@ -220,8 +219,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
-class _ModernChatHeader extends ConsumerWidget {
-  const _ModernChatHeader({required this.session});
+class _ModernPractitionerChatHeader extends ConsumerWidget {
+  const _ModernPractitionerChatHeader({required this.session});
 
   final ChatSession session;
 
@@ -281,7 +280,6 @@ class _ModernChatHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final doctor = session.doctor;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -301,7 +299,7 @@ class _ModernChatHeader extends ConsumerWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-                color: kChatDarkGray,
+                color: kPractitionerChatDarkGray,
                 onPressed: () => Navigator.of(context).pop(),
               ),
               const SizedBox(width: 8),
@@ -312,20 +310,20 @@ class _ModernChatHeader extends ConsumerWidget {
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
                     colors: [
-                      kChatPrimaryGreen,
-                      kChatPrimaryGreen.withValues(alpha: 0.8),
+                      kPractitionerChatPrimaryBlue,
+                      kPractitionerChatPrimaryBlue.withValues(alpha: 0.8),
                     ],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: kChatPrimaryGreen.withValues(alpha: 0.3),
+                      color: kPractitionerChatPrimaryBlue.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: const Icon(
-                  Icons.health_and_safety_rounded,
+                  Icons.person_rounded,
                   color: Colors.white,
                   size: 24,
                 ),
@@ -335,22 +333,20 @@ class _ModernChatHeader extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      session.subject ?? '방문 진료 상담',
-                      style: const TextStyle(
+                    const Text(
+                      '환자 상담',
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
-                        color: kChatDarkGray,
+                        color: kPractitionerChatDarkGray,
                         letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      doctor != null
-                          ? '${doctor.name} · ${doctor.specialty}'
-                          : '의료진이 배정되었습니다',
+                      session.subject ?? '방문 진료 상담',
                       style: TextStyle(
-                        color: kChatMediumGray,
+                        color: kPractitionerChatMediumGray,
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                       ),
@@ -362,7 +358,7 @@ class _ModernChatHeader extends ConsumerWidget {
               PopupMenuButton<String>(
                 icon: Icon(
                   Icons.more_vert,
-                  color: kChatDarkGray,
+                  color: kPractitionerChatDarkGray,
                   size: 20,
                 ),
                 onSelected: (value) {
@@ -386,7 +382,7 @@ class _ModernChatHeader extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: kChatPrimaryGreenLight,
+                  color: kPractitionerChatPrimaryBlueLight,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -396,15 +392,15 @@ class _ModernChatHeader extends ConsumerWidget {
                       width: 8,
                       height: 8,
                       decoration: const BoxDecoration(
-                        color: kChatPrimaryGreen,
+                        color: kPractitionerChatPrimaryBlue,
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 6),
                     const Text(
-                      '온라인',
+                      '상담중',
                       style: TextStyle(
-                        color: kChatPrimaryGreen,
+                        color: kPractitionerChatPrimaryBlue,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
@@ -420,8 +416,8 @@ class _ModernChatHeader extends ConsumerWidget {
   }
 }
 
-class _ModernMessageBubble extends StatelessWidget {
-  const _ModernMessageBubble({
+class _ModernPractitionerMessageBubble extends StatelessWidget {
+  const _ModernPractitionerMessageBubble({
     required this.message,
     required this.showAvatar,
   });
@@ -431,18 +427,14 @@ class _ModernMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 환자 전용 채팅: sender가 'user'면 오른쪽(자신), 'doctor'면 왼쪽(의사)
-    final bool isUser = message.sender == 'user';
-    final alignment = isUser ? MainAxisAlignment.end : MainAxisAlignment.start;
-    final bubbleColor = isUser ? kChatPrimaryGreen : Colors.white;
-    final textColor = isUser ? Colors.white : kChatDarkGray;
+    // 한의사 관점에서 메시지 표시
+    // sender가 'user'이면 환자가 보낸 메시지, 'doctor'이면 한의사가 보낸 메시지
+    final bool isFromPatient = message.sender == 'user';
+    final alignment = isFromPatient ? MainAxisAlignment.start : MainAxisAlignment.end;
+    final bubbleColor = isFromPatient ? Colors.white : kPractitionerChatPrimaryBlue;
+    final textColor = isFromPatient ? kPractitionerChatDarkGray : Colors.white;
     final timeFormat = DateFormat('HH:mm');
     final messageTime = message.createdAt.toLocal();
-    
-    // 디버깅: sender 값 확인
-    if (kDebugMode) {
-      print('[ChatScreen] Message sender: ${message.sender}, isUser: $isUser, alignment: $alignment');
-    }
 
     return Padding(
       padding: EdgeInsets.only(
@@ -453,7 +445,7 @@ class _ModernMessageBubble extends StatelessWidget {
         mainAxisAlignment: alignment,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isUser && showAvatar)
+          if (isFromPatient && showAvatar)
             Container(
               margin: const EdgeInsets.only(right: 8),
               child: Container(
@@ -461,30 +453,25 @@ class _ModernMessageBubble extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      kChatPrimaryGreen,
-                      kChatPrimaryGreen.withValues(alpha: 0.8),
-                    ],
-                  ),
+                  color: kPractitionerChatBubbleGray,
                   boxShadow: [
                     BoxShadow(
-                      color: kChatPrimaryGreen.withValues(alpha: 0.2),
+                      color: Colors.black.withValues(alpha: 0.08),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.health_and_safety_rounded,
-                  color: Colors.white,
+                child: Icon(
+                  Icons.person_rounded,
+                  color: kPractitionerChatMediumGray,
                   size: 18,
                 ),
               ),
-          ),
+            ),
           Flexible(
             child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isFromPatient ? CrossAxisAlignment.start : CrossAxisAlignment.end,
               children: [
                 Container(
                   constraints: BoxConstraints(
@@ -496,14 +483,14 @@ class _ModernMessageBubble extends StatelessWidget {
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(20),
                       topRight: const Radius.circular(20),
-                      bottomLeft: isUser ? const Radius.circular(20) : const Radius.circular(4),
-                      bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(20),
+                      bottomLeft: isFromPatient ? const Radius.circular(4) : const Radius.circular(20),
+                      bottomRight: isFromPatient ? const Radius.circular(20) : const Radius.circular(4),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: isUser
-                            ? kChatPrimaryGreen.withValues(alpha: 0.25)
-                            : Colors.black.withValues(alpha: 0.08),
+                        color: isFromPatient
+                            ? Colors.black.withValues(alpha: 0.08)
+                            : kPractitionerChatPrimaryBlue.withValues(alpha: 0.25),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                         spreadRadius: 0,
@@ -531,20 +518,20 @@ class _ModernMessageBubble extends StatelessWidget {
                       child: Text(
                         timeFormat.format(messageTime),
                         style: TextStyle(
-                          color: kChatMediumGray,
+                          color: kPractitionerChatMediumGray,
                           fontSize: 11,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),
                     // 읽음/안 읽음 표시 (카카오톡 스타일)
-                    if (isUser)
+                    if (!isFromPatient)
                       Padding(
                         padding: const EdgeInsets.only(left: 4),
                         child: Text(
                           message.readAt != null ? '0' : '1',
                           style: TextStyle(
-                            color: kChatMediumGray,
+                            color: kPractitionerChatMediumGray,
                             fontSize: 10,
                             fontWeight: FontWeight.w400,
                           ),
@@ -555,7 +542,7 @@ class _ModernMessageBubble extends StatelessWidget {
               ],
             ),
           ),
-          if (isUser && showAvatar)
+          if (!isFromPatient && showAvatar)
             Container(
               margin: const EdgeInsets.only(left: 8),
               child: Container(
@@ -563,17 +550,22 @@ class _ModernMessageBubble extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: kChatPrimaryGreen,
+                  gradient: LinearGradient(
+                    colors: [
+                      kPractitionerChatPrimaryBlue,
+                      kPractitionerChatPrimaryBlue.withValues(alpha: 0.8),
+                    ],
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: kChatPrimaryGreen.withValues(alpha: 0.2),
+                      color: kPractitionerChatPrimaryBlue.withValues(alpha: 0.2),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
                 child: const Icon(
-                  Icons.person_rounded,
+                  Icons.local_hospital_rounded,
                   color: Colors.white,
                   size: 18,
                 ),
@@ -585,8 +577,8 @@ class _ModernMessageBubble extends StatelessWidget {
   }
 }
 
-class _ModernChatInputBar extends StatefulWidget {
-  const _ModernChatInputBar({
+class _ModernPractitionerChatInputBar extends StatefulWidget {
+  const _ModernPractitionerChatInputBar({
     required this.controller,
     required this.onSend,
   });
@@ -595,10 +587,10 @@ class _ModernChatInputBar extends StatefulWidget {
   final VoidCallback onSend;
 
   @override
-  State<_ModernChatInputBar> createState() => _ModernChatInputBarState();
+  State<_ModernPractitionerChatInputBar> createState() => _ModernPractitionerChatInputBarState();
 }
 
-class _ModernChatInputBarState extends State<_ModernChatInputBar> {
+class _ModernPractitionerChatInputBarState extends State<_ModernPractitionerChatInputBar> {
   bool _hasText = false;
 
   @override
@@ -646,13 +638,13 @@ class _ModernChatInputBarState extends State<_ModernChatInputBar> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: kChatBubbleGray,
+                  color: kPractitionerChatBubbleGray,
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
                   icon: Icon(
                     Icons.add_rounded,
-                    color: kChatMediumGray,
+                    color: kPractitionerChatMediumGray,
                     size: 24,
                   ),
                   padding: EdgeInsets.zero,
@@ -664,8 +656,8 @@ class _ModernChatInputBarState extends State<_ModernChatInputBar> {
                 child: Theme(
                   data: Theme.of(context).copyWith(
                     textSelectionTheme: TextSelectionThemeData(
-                      selectionColor: kChatPrimaryGreen.withValues(alpha: 0.3),
-                      cursorColor: kChatPrimaryGreen,
+                      selectionColor: kPractitionerChatPrimaryBlue.withValues(alpha: 0.3),
+                      cursorColor: kPractitionerChatPrimaryBlue,
                     ),
                   ),
                   child: TextField(
@@ -673,21 +665,21 @@ class _ModernChatInputBarState extends State<_ModernChatInputBar> {
                     maxLines: null,
                     textInputAction: TextInputAction.newline,
                     style: const TextStyle(
-                      color: kChatDarkGray,
+                      color: kPractitionerChatDarkGray,
                       fontSize: 15,
                       height: 1.4,
                       fontWeight: FontWeight.w400,
                     ),
-                    cursorColor: kChatPrimaryGreen,
+                    cursorColor: kPractitionerChatPrimaryBlue,
                     decoration: InputDecoration(
-                      hintText: "메시지를 입력하세요",
+                      hintText: "환자에게 메시지를 입력하세요",
                       hintStyle: TextStyle(
-                        color: kChatMediumGray.withValues(alpha: 0.6),
+                        color: kPractitionerChatMediumGray.withValues(alpha: 0.6),
                         fontSize: 15,
                         fontWeight: FontWeight.w400,
                       ),
                       filled: true,
-                      fillColor: kChatBubbleGray,
+                      fillColor: kPractitionerChatBubbleGray,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
@@ -715,17 +707,17 @@ class _ModernChatInputBarState extends State<_ModernChatInputBar> {
                   gradient: _hasText
                       ? LinearGradient(
                           colors: [
-                            kChatPrimaryGreen,
-                            kChatPrimaryGreen.withValues(alpha: 0.9),
+                            kPractitionerChatPrimaryBlue,
+                            kPractitionerChatPrimaryBlue.withValues(alpha: 0.9),
                           ],
                         )
                       : null,
-                  color: _hasText ? null : kChatBubbleGray,
+                  color: _hasText ? null : kPractitionerChatBubbleGray,
                   shape: BoxShape.circle,
                   boxShadow: _hasText
                       ? [
                           BoxShadow(
-                            color: kChatPrimaryGreen.withValues(alpha: 0.4),
+                            color: kPractitionerChatPrimaryBlue.withValues(alpha: 0.4),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -740,7 +732,7 @@ class _ModernChatInputBarState extends State<_ModernChatInputBar> {
                     child: Center(
                       child: Icon(
                         _hasText ? Icons.send_rounded : Icons.mic_rounded,
-                        color: _hasText ? Colors.white : kChatMediumGray,
+                        color: _hasText ? Colors.white : kPractitionerChatMediumGray,
                         size: 20,
                       ),
                     ),
@@ -780,7 +772,7 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message,
-              style: const TextStyle(color: kChatDarkGray, fontSize: 15),
+              style: const TextStyle(color: kPractitionerChatDarkGray, fontSize: 15),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -789,7 +781,7 @@ class _ErrorView extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('다시 시도'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: kChatPrimaryGreen,
+                backgroundColor: kPractitionerChatPrimaryBlue,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
