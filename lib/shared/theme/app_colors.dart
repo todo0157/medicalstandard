@@ -19,6 +19,10 @@ class AppColors {
   static const Color error = Color(0xFFEF4444); // Red-500
   static const Color errorLight = Color(0xFFFEE2E2); // Red-100
 
+  // Warning/Orange
+  static const Color warning = Color(0xFFF59E0B); // Amber-500
+  static const Color warningLight = Color(0xFFFEF3C7); // Amber-100
+
   // Neutral/Gray
   static const Color background = Color(0xFFF9FAFB); // Gray-50
   static const Color surface = Color(0xFFFFFFFF); // White

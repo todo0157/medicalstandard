@@ -43,6 +43,9 @@ const envSchema = z.object({
   // 네이버 지도 API
   NAVER_MAP_CLIENT_ID: z.string().optional(),
   NAVER_MAP_CLIENT_SECRET: z.string().optional(),
+
+  // 관리자 설정
+  ADMIN_EMAILS: z.string().optional(), // 쉼표로 구분된 관리자 이메일 목록
 });
 
 // Safe parsing

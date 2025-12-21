@@ -17,6 +17,7 @@ import 'features/auth/screens/kakao_callback_screen.dart';
 import 'features/medical_records/medical_records_screen.dart';
 import 'features/profile/screens/profile_edit_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'features/profile/screens/certification_request_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/support/customer_support_screen.dart';
 import 'features/address/screens/address_search_screen.dart';
@@ -95,6 +96,13 @@ GoRouter createAppRouter(bool isAuthenticated) {
         name: 'profile-edit',
         pageBuilder: (context, state) => MaterialPage(
           child: const ProfileEditScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/profile/certification-request',
+        name: 'certification-request',
+        pageBuilder: (context, state) => MaterialPage(
+          child: const CertificationRequestScreen(),
         ),
       ),
 

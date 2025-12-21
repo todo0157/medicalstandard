@@ -70,11 +70,20 @@ class ProfileStateNotifier extends StateNotifier<AsyncValue<UserProfile>> {
     );
   }
 
-  Future<void> updateCertificationStatus(CertificationStatus status) async {
+  Future<void> updateCertificationStatus(
+    CertificationStatus status, {
+    String? licenseNumber,
+    String? clinicName,
+  }) async {
     final profile = state.asData?.value;
     if (profile == null) return;
     await _withRefresh(
-      () => _profileService.updateCertificationStatus(profile.id, status),
+      () => _profileService.updateCertificationStatus(
+        profile.id,
+        status,
+        licenseNumber: licenseNumber,
+        clinicName: clinicName,
+      ),
     );
   }
 

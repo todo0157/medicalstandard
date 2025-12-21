@@ -10,6 +10,8 @@ export interface UserProfile {
   treatmentCount: number;
   isPractitioner: boolean;
   certificationStatus: 'none' | 'pending' | 'verified';
+  licenseNumber?: string;
+  clinicName?: string;
   createdAt: string;
   updatedAt: string;
 }

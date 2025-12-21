@@ -13,8 +13,10 @@ abstract class ProfileService {
   Future<void> uploadProfileImage(String userId, String imagePath);
   Future<void> updateCertificationStatus(
     String userId,
-    CertificationStatus status,
-  );
+    CertificationStatus status, {
+    String? licenseNumber,
+    String? clinicName,
+  });
 }
 
 class ApiProfileService implements ProfileService {
@@ -81,11 +83,20 @@ class ApiProfileService implements ProfileService {
   @override
   Future<void> updateCertificationStatus(
     String userId,
-    CertificationStatus status,
-  ) async {
+    CertificationStatus status, {
+    String? licenseNumber,
+    String? clinicName,
+  }) async {
+    final body = <String, dynamic>{
+      'status': status.name,
+      if (licenseNumber != null && licenseNumber.isNotEmpty)
+        'licenseNumber': licenseNumber,
+      if (clinicName != null && clinicName.isNotEmpty)
+        'clinicName': clinicName,
+    };
     await _apiClient.post(
       '/profiles/$userId/certification',
-      body: {'status': status.name},
+      body: body,
     );
   }
 
@@ -143,8 +154,10 @@ class MockProfileService implements ProfileService {
   @override
   Future<void> updateCertificationStatus(
     String userId,
-    CertificationStatus status,
-  ) async {
+    CertificationStatus status, {
+    String? licenseNumber,
+    String? clinicName,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 300));
   }
 }
@@ -182,9 +195,16 @@ class ResilientProfileService implements ProfileService {
   @override
   Future<void> updateCertificationStatus(
     String userId,
-    CertificationStatus status,
-  ) {
-    return _primary.updateCertificationStatus(userId, status);
+    CertificationStatus status, {
+    String? licenseNumber,
+    String? clinicName,
+  }) {
+    return _primary.updateCertificationStatus(
+      userId,
+      status,
+      licenseNumber: licenseNumber,
+      clinicName: clinicName,
+    );
   }
 
   Future<T> _withFallback<T>(

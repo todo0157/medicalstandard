@@ -21,6 +21,8 @@ model UserProfile {
   treatmentCount      Int      @default(0)
   isPractitioner      Boolean  @default(false)
   certificationStatus String   @default("none")
+  licenseNumber       String?
+  clinicName          String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

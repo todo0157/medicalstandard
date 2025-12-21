@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - 인증 신청 목록</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>관리자 대시보드</h1>
+            <div class="header-actions">
+                <span id="userEmail" class="user-info"></span>
+                <button class="btn btn-secondary" id="logoutBtn">로그아웃</button>
+            </div>
+        </header>
+        
+        <main class="dashboard-main">
+            <div class="filters">
+                <select id="statusFilter">
+                    <option value="pending">대기 중</option>
+                    <option value="verified">승인됨</option>
+                    <option value="all">전체</option>
+                </select>
+                <button class="btn btn-primary" onclick="loadCertifications()">새로고침</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">대기 중</div>
+                    <div class="stat-value" id="pendingCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">승인됨</div>
+                    <div class="stat-value" id="verifiedCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">전체</div>
+                    <div class="stat-value" id="totalCount">0</div>
+                </div>
+            </div>
+            
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>로딩 중...</p>
+            </div>
+            
+            <div id="certificationsList" class="certifications-list"></div>
+            
+            <div id="pagination" class="pagination"></div>
+        </main>
+    </div>
+    
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
+
+

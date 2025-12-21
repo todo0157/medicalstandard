@@ -35,6 +35,8 @@ const envSchema = zod_1.z.object({
     // 네이버 지도 API
     NAVER_MAP_CLIENT_ID: zod_1.z.string().optional(),
     NAVER_MAP_CLIENT_SECRET: zod_1.z.string().optional(),
+    // 관리자 설정
+    ADMIN_EMAILS: zod_1.z.string().optional(), // 쉼표로 구분된 관리자 이메일 목록
 });
 // Safe parsing
 const parsed = envSchema.safeParse(process.env);

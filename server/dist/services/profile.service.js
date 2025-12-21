@@ -16,37 +16,50 @@ class ProfileService {
         return this.map(profile);
     }
     async updateProfile(id, data) {
-        const updateData = {};
-        if (typeof data.name !== 'undefined')
-            updateData.name = data.name;
-        if (typeof data.age !== 'undefined')
-            updateData.age = data.age;
-        if (typeof data.gender !== 'undefined')
-            updateData.gender = data.gender;
-        if (typeof data.address !== 'undefined')
-            updateData.address = data.address;
-        if (typeof data.profileImageUrl !== 'undefined') {
-            updateData.profileImageUrl = data.profileImageUrl;
+        try {
+            const updateData = {};
+            if (typeof data.name !== 'undefined')
+                updateData.name = data.name;
+            if (typeof data.age !== 'undefined')
+                updateData.age = data.age;
+            if (typeof data.gender !== 'undefined')
+                updateData.gender = data.gender;
+            if (typeof data.address !== 'undefined')
+                updateData.address = data.address;
+            if (typeof data.profileImageUrl !== 'undefined') {
+                updateData.profileImageUrl = data.profileImageUrl;
+            }
+            if (typeof data.phoneNumber !== 'undefined')
+                updateData.phoneNumber = data.phoneNumber;
+            if (typeof data.appointmentCount !== 'undefined') {
+                updateData.appointmentCount = data.appointmentCount;
+            }
+            if (typeof data.treatmentCount !== 'undefined') {
+                updateData.treatmentCount = data.treatmentCount;
+            }
+            if (typeof data.isPractitioner !== 'undefined') {
+                updateData.isPractitioner = data.isPractitioner;
+            }
+            if (typeof data.certificationStatus !== 'undefined') {
+                updateData.certificationStatus = data.certificationStatus;
+            }
+            if (typeof data.licenseNumber !== 'undefined') {
+                updateData.licenseNumber = data.licenseNumber;
+            }
+            if (typeof data.clinicName !== 'undefined') {
+                updateData.clinicName = data.clinicName;
+            }
+            console.log('[ProfileService] Updating profile:', { id, updateData });
+            const updated = await prisma_1.prisma.userProfile.update({
+                where: { id },
+                data: updateData,
+            });
+            return this.map(updated);
         }
-        if (typeof data.phoneNumber !== 'undefined')
-            updateData.phoneNumber = data.phoneNumber;
-        if (typeof data.appointmentCount !== 'undefined') {
-            updateData.appointmentCount = data.appointmentCount;
+        catch (error) {
+            console.error('[ProfileService] Update error:', error);
+            throw error;
         }
-        if (typeof data.treatmentCount !== 'undefined') {
-            updateData.treatmentCount = data.treatmentCount;
-        }
-        if (typeof data.isPractitioner !== 'undefined') {
-            updateData.isPractitioner = data.isPractitioner;
-        }
-        if (typeof data.certificationStatus !== 'undefined') {
-            updateData.certificationStatus = data.certificationStatus;
-        }
-        const updated = await prisma_1.prisma.userProfile.update({
-            where: { id },
-            data: updateData,
-        });
-        return this.map(updated);
     }
     map(record) {
         return {
@@ -61,6 +74,8 @@ class ProfileService {
             treatmentCount: record.treatmentCount,
             isPractitioner: record.isPractitioner,
             certificationStatus: record.certificationStatus,
+            licenseNumber: record.licenseNumber ?? undefined,
+            clinicName: record.clinicName ?? undefined,
             createdAt: record.createdAt.toISOString(),
             updatedAt: record.updatedAt.toISOString()
         };

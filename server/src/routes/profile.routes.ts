@@ -29,7 +29,9 @@ const profileUpdateSchema = z.object({
   appointmentCount: z.coerce.number().int().min(0).optional(),
   treatmentCount: z.coerce.number().int().min(0).optional(),
   isPractitioner: z.coerce.boolean().optional(),
-  certificationStatus: z.enum(['none', 'pending', 'verified']).optional()
+  certificationStatus: z.enum(['none', 'pending', 'verified']).optional(),
+  licenseNumber: z.string().max(50).optional(),
+  clinicName: z.string().max(100).optional()
 });
 
 router.use(authenticate);
@@ -103,6 +105,14 @@ router.post('/:id/photo', async (req: AuthenticatedRequest, res, next) => {
     }
     const payload = photoSchema.parse(req.body);
     const imageData = payload.imageData.replace(/\s/g, '');
+    
+    // 이미지 크기 체크 (약 10MB 제한)
+    if (imageData.length > 10 * 1024 * 1024) {
+      return res.status(400).json({
+        message: '이미지 크기가 너무 큽니다. 10MB 이하의 이미지를 선택해주세요.',
+      });
+    }
+    
     const extension =
       payload.fileName?.split('.').pop()?.toLowerCase() ?? 'png';
     const allowed = new Set(['png', 'jpg', 'jpeg', 'webp']);
@@ -115,6 +125,7 @@ router.post('/:id/photo', async (req: AuthenticatedRequest, res, next) => {
     });
     return res.json({ data: updated });
   } catch (error) {
+    console.error('[Profile Photo Upload] Error:', error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         message: '입력값이 올바르지 않습니다.',
@@ -128,6 +139,8 @@ router.post('/:id/photo', async (req: AuthenticatedRequest, res, next) => {
 const certificationSchema = z.object({
   status: z.enum(['none', 'pending', 'verified']),
   isPractitioner: z.boolean().optional(),
+  licenseNumber: z.string().max(50).optional(),
+  clinicName: z.string().max(100).optional(),
 });
 
 router.post('/:id/certification', async (req: AuthenticatedRequest, res, next) => {
@@ -137,12 +150,23 @@ router.post('/:id/certification', async (req: AuthenticatedRequest, res, next) =
       return res.status(403).json({ message: '자신의 프로필만 인증 상태를 변경할 수 있습니다.' });
     }
     const payload = certificationSchema.parse(req.body);
+    
+    console.log('[Certification Update] Request:', {
+      profileId,
+      status: payload.status,
+      licenseNumber: payload.licenseNumber,
+      clinicName: payload.clinicName,
+    });
+    
     const updated = await profileService.updateProfile(profileId, {
       certificationStatus: payload.status,
       isPractitioner: payload.isPractitioner ?? payload.status === 'verified',
+      licenseNumber: payload.licenseNumber,
+      clinicName: payload.clinicName,
     });
     return res.json({ data: updated });
   } catch (error) {
+    console.error('[Certification Update] Error:', error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         message: '입력값이 올바르지 않습니다.',

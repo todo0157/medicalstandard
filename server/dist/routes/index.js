@@ -10,6 +10,7 @@ const doctor_routes_1 = __importDefault(require("./doctor.routes"));
 const chat_routes_1 = __importDefault(require("./chat.routes"));
 const records_routes_1 = __importDefault(require("./records.routes"));
 const address_routes_1 = __importDefault(require("./address.routes"));
+const admin_routes_1 = __importDefault(require("./admin.routes"));
 const router = (0, express_1.Router)();
 router.use('/auth', auth_routes_1.default);
 router.use('/profiles', profile_routes_1.default);
@@ -17,4 +18,6 @@ router.use('/doctors', doctor_routes_1.default);
 router.use('/chat', chat_routes_1.default);
 router.use('/records', records_routes_1.default);
 router.use('/addresses', address_routes_1.default);
+// /admin API 라우트는 /api/admin으로만 접근 가능하도록 설정
+router.use('/admin', admin_routes_1.default);
 exports.default = router;

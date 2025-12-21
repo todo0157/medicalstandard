@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - 인증 상세</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>인증 상세 정보</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="backToListBtn">목록으로</button>
+            </div>
+        </header>
+        
+        <main class="dashboard-main">
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>로딩 중...</p>
+            </div>
+            
+            <div id="detailContent" style="display: none;">
+                <div class="detail-section">
+                    <h2>기본 정보</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>이름</label>
+                            <div id="detailName">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>이메일</label>
+                            <div id="detailEmail">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>자격증 번호</label>
+                            <div id="detailLicenseNumber">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>클리닉 이름</label>
+                            <div id="detailClinicName">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>상태</label>
+                            <div id="detailStatus" class="status-badge">-</div>
+                        </div>
+                        <div class="info-item">
+                            <label>신청 일시</label>
+                            <div id="detailCreatedAt">-</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h2>자격증 이미지</h2>
+                    <div id="licenseImageContainer" class="image-container">
+                        <p class="no-image">이미지 없음</p>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h2>신분증 이미지</h2>
+                    <div id="idCardImageContainer" class="image-container">
+                        <p class="no-image">이미지 없음</p>
+                    </div>
+                </div>
+                
+                <div class="detail-section" id="actionSection" style="display: none;">
+                    <h2>처리</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-success" id="approveBtn">승인</button>
+                        <button class="btn btn-danger" id="rejectBtn">거부</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 승인 모달 -->
+    <div id="approveModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>인증 승인</h3>
+            <p>이 인증 신청을 승인하시겠습니까?</p>
+            <div class="form-group">
+                <label for="approveNotes">메모 (선택)</label>
+                <textarea id="approveNotes" rows="3" placeholder="승인 메모를 입력하세요 (선택사항)"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-success" id="confirmApproveBtn">승인</button>
+                <button class="btn btn-secondary" id="cancelApproveBtn">취소</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 거부 모달 -->
+    <div id="rejectModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>인증 거부</h3>
+            <p>이 인증 신청을 거부하시겠습니까?</p>
+            <div class="form-group">
+                <label for="rejectReason">거부 사유 <span class="required">*</span></label>
+                <textarea id="rejectReason" rows="3" placeholder="거부 사유를 입력하세요 (필수)" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="rejectNotes">메모 (선택)</label>
+                <textarea id="rejectNotes" rows="3" placeholder="추가 메모를 입력하세요 (선택사항)"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="confirmRejectBtn">거부</button>
+                <button class="btn btn-secondary" id="cancelRejectBtn">취소</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/detail.js"></script>
+</body>
+</html>
+
+

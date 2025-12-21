@@ -119,6 +119,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 _ProfileCard(profile: profile, onEdit: _handleEditProfile),
                 const SizedBox(height: 12),
+                _CertificationStatusCard(profile: profile),
+                const SizedBox(height: 12),
                 _ProfileStats(profile: profile),
                 const SizedBox(height: 16),
                 _AppointmentSection(
@@ -405,6 +407,120 @@ class _ProfileCard extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CertificationStatusCard extends ConsumerWidget {
+  const _CertificationStatusCard({required this.profile});
+
+  final UserProfile profile;
+
+  String _getStatusText(CertificationStatus status) {
+    switch (status) {
+      case CertificationStatus.none:
+        return '인증 없음';
+      case CertificationStatus.pending:
+        return '인증 대기 중';
+      case CertificationStatus.verified:
+        return '인증 완료';
+    }
+  }
+
+  Color _getStatusColor(CertificationStatus status) {
+    switch (status) {
+      case CertificationStatus.none:
+        return AppColors.textSecondary;
+      case CertificationStatus.pending:
+        return AppColors.warning;
+      case CertificationStatus.verified:
+        return AppColors.success;
+    }
+  }
+
+  IconData _getStatusIcon(CertificationStatus status) {
+    switch (status) {
+      case CertificationStatus.none:
+        return Icons.info_outline;
+      case CertificationStatus.pending:
+        return Icons.pending_outlined;
+      case CertificationStatus.verified:
+        return Icons.verified;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statusColor = _getStatusColor(profile.certificationStatus);
+    final statusText = _getStatusText(profile.certificationStatus);
+    final statusIcon = _getStatusIcon(profile.certificationStatus);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: statusColor.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(statusIcon, color: statusColor, size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '한의사 인증 상태',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  statusText,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          if (profile.certificationStatus == CertificationStatus.none)
+            TextButton(
+              onPressed: () {
+                context.push('/profile/certification-request');
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+              ),
+              child: const Text('인증 신청'),
+            )
+          else if (profile.certificationStatus == CertificationStatus.pending)
+            Text(
+              '검토 중',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
         ],
       ),
     );
