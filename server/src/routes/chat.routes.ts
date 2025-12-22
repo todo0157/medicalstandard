@@ -131,15 +131,7 @@ router.post("/sessions", async (req: AuthenticatedRequest, res, next) => {
       include: { doctor: { include: { clinic: true } } },
     });
 
-    // 기본 안내 메시지
-    const initialMessage = await prisma.chatMessage.create({
-      data: {
-        sessionId: session.id,
-        sender: "doctor",
-        content: "상담 요청이 접수되었습니다. 곧 답변드리겠습니다.",
-      },
-    });
-    chatGateway.broadcastMessage(session.id, initialMessage);
+    // 기본 안내 메시지는 제거됨 (사용자의 요청에 따라 예약 정보 등으로 대체되거나 수동 전송됨)
 
     return res.status(201).json({ data: session });
   } catch (error) {

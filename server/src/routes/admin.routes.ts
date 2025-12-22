@@ -202,6 +202,7 @@ router.post("/certifications/:profileId/approve", async (req: AuthenticatedReque
             bio: `자격증 번호: ${profile.licenseNumber || "없음"}`,
             imageUrl: profile.profileImageUrl || null,
             clinicId: clinic.id,
+            isVerified: true,
           },
           include: {
             clinic: true,
@@ -230,6 +231,7 @@ router.post("/certifications/:profileId/approve", async (req: AuthenticatedReque
         // 기존 Doctor가 있으면 정보 업데이트
         const updateData: any = {
           clinicId: clinic.id,
+          isVerified: true,
         };
         
         // 이미지가 있으면 업데이트
@@ -326,6 +328,17 @@ router.post("/certifications/:profileId/reject", async (req: AuthenticatedReques
       certificationStatus: "none",
       isPractitioner: false,
     });
+
+    // Doctor 정보 비활성화
+    try {
+      await prisma.doctor.updateMany({
+        where: { name: profile.name },
+        data: { isVerified: false },
+      });
+      console.log(`[Admin] Doctor records for "${profile.name}" deactivated (isVerified: false)`);
+    } catch (doctorError) {
+      console.error(`[Admin] Failed to deactivate doctor records for "${profile.name}":`, doctorError);
+    }
 
     console.log(`[Admin] Certification rejected for profile ${profileId} by admin ${req.user?.email}. Reason: ${payload.reason}`);
 

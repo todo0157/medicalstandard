@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { authenticate, AuthenticatedRequest } from "../middleware/auth.middleware";
+import { chatGateway } from "../services/chat.gateway";
 
 const router = Router();
 
@@ -34,15 +35,18 @@ router.get("/", async (req, res, next) => {
     const { query, limit, offset, lat, lng, radiusKm } = querySchema.parse(req.query);
     const hasCoords = typeof lat === "number" && typeof lng === "number";
 
-    const where = query
+    const where: any = query
       ? {
+          isVerified: true,
           OR: [
             { name: { contains: query } },
             { specialty: { contains: query } },
             { clinic: { name: { contains: query } } },
           ],
         }
-      : {};
+      : {
+          isVerified: true,
+        };
 
     // 모든 Doctor 조회 (디버깅용 로그 추가)
     const doctors = await prisma.doctor.findMany({
@@ -318,6 +322,57 @@ router.post(
         data: { isBooked: true },
       });
 
+      // --- 자동 채팅방 생성 및 메시지 전송 로직 추가 ---
+      try {
+        // 1. 기존 채팅방이 있는지 확인 (사용자 ID와 한의사 ID 기준)
+        let chatSession = await prisma.chatSession.findFirst({
+          where: {
+            userAccountId: req.user!.sub,
+            doctorId: payload.doctorId,
+          },
+        });
+
+        // 2. 채팅방이 없으면 생성
+        if (!chatSession) {
+          chatSession = await prisma.chatSession.create({
+            data: {
+              userAccountId: req.user!.sub,
+              doctorId: payload.doctorId,
+              subject: `${appointment.doctor.name} 한의사님과의 상담`,
+            },
+          });
+        }
+
+        // 3. 증상 및 요청사항 메시지 전송 (환자가 보낸 것으로 설정)
+        const chatContent = payload.notes 
+          ? `[신규 진료 예약]\n${payload.notes}`
+          : "[신규 진료 예약] 증상 및 요청사항 없이 예약되었습니다.";
+
+        const chatMessage = await prisma.chatMessage.create({
+          data: {
+            sessionId: chatSession.id,
+            sender: "user",
+            content: chatContent,
+          },
+        });
+        
+        // 실시간 알림 전송
+        chatGateway.broadcastMessage(chatSession.id, chatMessage);
+        
+        // 세션 업데이트 시간 갱신
+        await prisma.chatSession.update({
+          where: { id: chatSession.id },
+          data: { 
+            updatedAt: new Date(),
+            lastMessageAt: new Date()
+          },
+        });
+      } catch (chatError) {
+        console.error("[Doctor API] Failed to create chat session/message:", chatError);
+        // 예약 자체는 성공했으므로 오류를 던지지는 않음
+      }
+      // ---------------------------------------------
+
       return res.status(201).json({ data: appointment });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -388,6 +443,114 @@ router.patch(
           doctor: { include: { clinic: true } },
         },
       });
+
+      // --- 예약 수정 시 채팅방 처리 로직 추가 ---
+      try {
+        // 한의사가 변경되었는지 확인
+        if (payload.slotId && payload.slotId !== appointment.slotId) {
+          // 실제 한의사가 변경되었는지 체크 (슬롯의 doctorId 비교)
+          const newSlot = await prisma.slot.findUnique({ where: { id: payload.slotId } });
+          if (newSlot && newSlot.doctorId !== appointment.doctorId) {
+            // 한의사가 변경됨 -> 이전 한의사와의 채팅방 삭제
+            const oldChatSession = await prisma.chatSession.findFirst({
+              where: {
+                userAccountId: req.user!.sub,
+                doctorId: appointment.doctorId,
+              },
+            });
+
+            if (oldChatSession) {
+              await prisma.chatMessage.deleteMany({ where: { sessionId: oldChatSession.id } });
+              await prisma.chatSession.delete({ where: { id: oldChatSession.id } });
+              console.log(`[Doctor API] Deleted old chat session ${oldChatSession.id} due to doctor change`);
+            }
+
+            // 새 한의사와의 채팅방 생성 및 메시지 전송
+            let newChatSession = await prisma.chatSession.findFirst({
+              where: {
+                userAccountId: req.user!.sub,
+                doctorId: newSlot.doctorId,
+              },
+            });
+
+            if (!newChatSession) {
+              newChatSession = await prisma.chatSession.create({
+                data: {
+                  userAccountId: req.user!.sub,
+                  doctorId: newSlot.doctorId,
+                  subject: `${updated.doctor.name} 한의사님과의 상담`,
+                },
+              });
+            }
+
+            const chatContent = payload.notes 
+              ? `[신규 진료 예약]\n${payload.notes}`
+              : "[신규 진료 예약] 증상 및 요청사항 없이 예약되었습니다.";
+
+            const chatMessage = await prisma.chatMessage.create({
+              data: {
+                sessionId: newChatSession.id,
+                sender: "user",
+                content: chatContent,
+              },
+            });
+            chatGateway.broadcastMessage(newChatSession.id, chatMessage);
+          } else {
+            // 한의사는 그대로이고 시간/내용만 변경된 경우
+            const chatSession = await prisma.chatSession.findFirst({
+              where: {
+                userAccountId: req.user!.sub,
+                doctorId: appointment.doctorId,
+              },
+            });
+
+            if (chatSession) {
+              const chatContent = payload.notes 
+                ? `[진료 예약 수정]\n${payload.notes}`
+                : "[진료 예약 수정] 시간 또는 내용이 변경되었습니다.";
+
+              const chatMessage = await prisma.chatMessage.create({
+                data: {
+                  sessionId: chatSession.id,
+                  sender: "user",
+                  content: chatContent,
+                },
+              });
+              chatGateway.broadcastMessage(chatSession.id, chatMessage);
+              
+              await prisma.chatSession.update({
+                where: { id: chatSession.id },
+                data: { 
+                  updatedAt: new Date(),
+                  lastMessageAt: new Date()
+                },
+              });
+            }
+          }
+        } else if (payload.notes !== undefined && payload.notes !== appointment.notes) {
+          // 한의사/슬롯은 그대로인데 요청사항(notes)만 변경된 경우
+          const chatSession = await prisma.chatSession.findFirst({
+            where: {
+              userAccountId: req.user!.sub,
+              doctorId: appointment.doctorId,
+            },
+          });
+
+          if (chatSession) {
+            const chatMessage = await prisma.chatMessage.create({
+              data: {
+                sessionId: chatSession.id,
+                sender: "user",
+                content: `[진료 예약 수정]\n${payload.notes}`,
+              },
+            });
+            chatGateway.broadcastMessage(chatSession.id, chatMessage);
+          }
+        }
+      } catch (chatError) {
+        console.error("[Doctor API] Failed to handle chat session on update:", chatError);
+      }
+      // ------------------------------------------
 
       // 취소 시 슬롯을 다시 개방
       if (payload.status === "cancelled") {

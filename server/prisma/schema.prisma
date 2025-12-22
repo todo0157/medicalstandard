@@ -106,6 +106,7 @@ model Doctor {
   bio          String?
   imageUrl     String?
   clinicId     String
+  isVerified   Boolean  @default(true)
   clinic       Clinic   @relation(fields: [clinicId], references: [id])
   slots        Slot[]
   appointments Appointment[]
