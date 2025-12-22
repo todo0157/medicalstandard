@@ -48,7 +48,7 @@ Flutter + Node/Prisma stack for the 한방 방문 진료 MVP.
 - **로그인/로그아웃 기능 개선**: 이벤트 리스너 기반 처리로 안정성 향상
 - **로그인 화면 개선**: 이미 로그인된 경우 자동으로 대시보드로 리다이렉트
 
-## What changed in ver1.3.9.1
+## What changed in ver1.3.9.4 (analysis)
 - **배포 환경 우편번호 검색 지원**: Docker 및 배포 환경에서 우편번호 검색 기능이 정상 작동하도록 개선
 - **Dockerfile 최적화**: 프로젝트 루트를 build context로 설정하여 Git LFS 파일 자동 다운로드
 - **PostalCodeService 경로 개선**: Docker 환경(`/app/search_number`) 경로 추가 및 경로 탐색 로직 개선
@@ -138,7 +138,8 @@ flutter run -d chrome --web-port 5173 \
 4. **프로필 저장 버그 수정**: `/profiles/me` 엔드포인트 사용 및 서버 스키마에 맞는 데이터 전송으로 프로필 업데이트가 정상 작동하도록 수정.
 
 ## 📊 코드베이스 분석 및 개선 계획
-상세한 분석과 개선 계획은 [ver1.3.9.1_analysis_and_improvements.md](docs/ver1.3.9.1_analysis_and_improvements.md)를 참고하세요.
+
+상세한 분석과 개선 계획은 [docs/ver1.3.9.4_analysis_and_improvements.md](docs/ver1.3.9.4_analysis_and_improvements.md)를 참고하세요.
 
 ## 📱 Android & iOS 환경 배포 계획
 상세한 배포 계획과 업데이트 전략은 [android_ios_deployment_plan.md](docs/android_ios_deployment_plan.md)를 참고하세요.
