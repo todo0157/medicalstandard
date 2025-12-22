@@ -139,7 +139,7 @@ flutter run -d chrome --web-port 5173 \
 
 ## 📊 코드베이스 분석 및 개선 계획
 
-상세한 분석과 개선 계획은 [docs/ver1.3.9.4_analysis_and_improvements.md](docs/ver1.3.9.4_analysis_and_improvements.md)를 참고하세요.
+상세한 분석과 개선 계획은 [ver1.3.9.4_analysis_and_improvements.md](docs/ver1.3.9.4_analysis_and_improvements.md)를 참고하세요.
 
 ## 📱 Android & iOS 환경 배포 계획
 상세한 배포 계획과 업데이트 전략은 [android_ios_deployment_plan.md](docs/android_ios_deployment_plan.md)를 참고하세요.
