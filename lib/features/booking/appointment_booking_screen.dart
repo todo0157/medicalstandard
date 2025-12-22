@@ -273,12 +273,46 @@ class _AppointmentBookingScreenState
   }
 
   void _onDoctorSelected(Doctor doctor) {
+    // 한의사 변경 시 경고 문구 표시
+    if (_existingAppointmentId != null && _selectedDoctor != null && _selectedDoctor!.id != doctor.id) {
+      _showDoctorChangeWarning(doctor);
+      return;
+    }
+    
     setState(() {
       _selectedDoctor = doctor;
       _selectedSlot = null;
       _selectedTimeSlot = null;
     });
     _loadSlots(doctor.id);
+  }
+
+  void _showDoctorChangeWarning(Doctor newDoctor) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('한의사 변경 안내'),
+        content: const Text('한의사 선생님을 변경하시면 이전에 예약한 선생님과의 채팅 내역은 삭제됩니다. 계속하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              setState(() {
+                _selectedDoctor = newDoctor;
+                _selectedSlot = null;
+                _selectedTimeSlot = null;
+              });
+              _loadSlots(newDoctor.id);
+            },
+            child: const Text('변경하기', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _onSlotSelected(Slot slot) {
