@@ -47,6 +47,21 @@ model UserAccount {
   medicalRecords MedicalRecord[]
   passwordResetTokens PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
+  
+  // 알림 토큰 (1:N 관계 - 한 사용자가 여러 기기를 가질 수 있음)
+  deviceTokens  UserDeviceToken[]
+}
+
+model UserDeviceToken {
+  id            String      @id @default(cuid())
+  userAccountId String
+  token         String      @unique // FCM 토큰
+  platform      String?     // android, ios, web
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  lastUsedAt    DateTime    @default(now())
+
+  userAccount   UserAccount @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
 }
 
 model Session {

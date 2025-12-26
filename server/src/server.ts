@@ -7,8 +7,12 @@ import path from 'path';
 import { env } from './config';
 import router from './routes';
 import { setupChatGateway } from './services/chat.gateway';
+import { initFirebase } from './lib/fcm';
 
 const app = express();
+
+// FCM 초기화
+initFirebase();
 
 const allowedOrigins = (env.ALLOW_ORIGIN ?? '')
   .split(',')

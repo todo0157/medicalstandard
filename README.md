@@ -2,6 +2,15 @@
 
 Flutter + Node/Prisma stack for the 한방 방문 진료 MVP.
 
+## What changed in ver1.3.9.6
+- **알림 시스템 (FCM) 구현**:
+  - **Firebase Cloud Messaging 연동**: 백엔드(`firebase-admin`)와 프론트엔드(`firebase_messaging`) 연동 완료
+  - **DB 스키마 확장**: 사용자별 기기 토큰 관리를 위한 `UserDeviceToken` 모델 추가
+  - **알림 서비스 모듈**: 앱 실행 시 권한 요청 및 토큰 자동 등록 (`NotificationService`)
+  - **이벤트 기반 알림 발송**:
+    - **채팅**: 메시지 수신 시 상대방에게 실시간 푸시 알림 전송 (`ChatGateway` 연동)
+    - **예약**: 예약 접수(한의사 수신) 및 상태 변경(환자 수신) 시 알림 전송
+
 ## What changed in ver1.3.9.5
 - **프로필 이미지 스토리지 최적화 (S3 연동)**:
   - AWS S3 버킷(`ap-southeast-2`)을 연동하여 이미지 저장소를 DB에서 외부 스토리지로 이전
@@ -147,7 +156,7 @@ flutter run -d chrome --web-port 5173 \
 
 ## 📊 코드베이스 분석 및 개선 계획
 
-상세한 분석과 개선 계획은 [ver1.3.9.5_analysis_and_improvements.md](docs/ver1.3.9.5_analysis_and_improvements.md)를 참고하세요.
+상세한 분석과 개선 계획은 [ver1.3.9.6_analysis_and_improvements.md](docs/ver1.3.9.6_analysis_and_improvements.md)를 참고하세요.
 
 ## 📱 Android & iOS 환경 배포 계획
 상세한 배포 계획과 업데이트 전략은 [android_ios_deployment_plan.md](docs/android_ios_deployment_plan.md)를 참고하세요.

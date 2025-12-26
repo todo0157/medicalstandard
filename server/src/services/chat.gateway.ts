@@ -4,6 +4,7 @@ import { WebSocketServer } from 'ws';
 
 import { prisma } from '../lib/prisma';
 import { AuthService } from './auth.service';
+import { sendMulticastNotification } from '../lib/fcm';
 
 interface ClientMeta {
   sessionId: string;
@@ -33,19 +34,80 @@ export class ChatGateway {
     });
   }
 
-  broadcastMessage(sessionId: string, payload: ChatMessageLike) {
+  // 메시지 브로드캐스트 + 푸시 알림
+  async broadcastMessage(sessionId: string, payload: ChatMessageLike) {
+    // 1. WebSocket 전송
     const room = this.rooms.get(sessionId);
-    if (!room) return;
-    const message = JSON.stringify({
-      type: 'message',
-      data: this.serializeMessage(payload),
-    });
-    for (const client of room) {
-      try {
-        client.send(message);
-      } catch (_) {
-        // ignore send failures
+    if (room) {
+      const message = JSON.stringify({
+        type: 'message',
+        data: this.serializeMessage(payload),
+      });
+      for (const client of room) {
+        try {
+          client.send(message);
+        } catch (_) {
+          // ignore send failures
+        }
       }
+    }
+
+    // 2. 푸시 알림 전송 (상대방에게)
+    try {
+      // 현재 메시지를 보낸 사람이 아닌, 채팅방의 다른 참여자 찾기
+      const session = await prisma.chatSession.findUnique({
+        where: { id: sessionId },
+        include: { 
+          doctor: { select: { id: true, name: true } } 
+        },
+      });
+
+      if (!session) return;
+
+      let recipientUserId: string | null = null;
+      let notificationTitle = '';
+
+      if (payload.sender === 'user') {
+        // 보낸이: 환자 -> 수신자: 한의사
+        if (session.doctor?.name) {
+          // 한의사 이름으로 계정 찾기 (임시 로직: 이름 매칭)
+          const doctorAccount = await prisma.userAccount.findFirst({
+            where: {
+              profile: {
+                name: session.doctor.name,
+                isPractitioner: true,
+              }
+            }
+          });
+          recipientUserId = doctorAccount?.id || null;
+          notificationTitle = '새로운 환자 메시지';
+        }
+      } else {
+        // 보낸이: 한의사 -> 수신자: 환자
+        recipientUserId = session.userAccountId;
+        notificationTitle = session.doctor?.name ? `${session.doctor.name} 한의사` : '새로운 메시지';
+      }
+
+      if (recipientUserId) {
+        const tokens = await prisma.userDeviceToken.findMany({
+          where: { userAccountId: recipientUserId },
+          select: { token: true },
+        });
+
+        if (tokens.length > 0) {
+          const tokenList = tokens.map(t => t.token);
+          await sendMulticastNotification(tokenList, {
+            title: notificationTitle,
+            body: payload.content.length > 50 ? payload.content.substring(0, 50) + '...' : payload.content,
+            data: {
+              type: 'chat',
+              sessionId: sessionId,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error('[ChatGateway] Failed to send push notification:', error);
     }
   }
 
@@ -86,7 +148,7 @@ export class ChatGateway {
         return;
       }
       
-      // 세션 소유자(환자)인지 확인
+      // 세션 접근 권한 확인 로직 (기존과 동일)
       if (session.userAccountId === accountId) {
         // 환자는 접근 가능
       } else if (session.doctorId) {
@@ -102,7 +164,6 @@ export class ChatGateway {
             select: { name: true, isPractitioner: true },
           });
           
-          // 한의사이고, 세션의 한의사 이름과 일치하는지 확인
           if (profile?.isPractitioner && session.doctor && session.doctor.name === profile.name) {
             // 한의사는 접근 가능
           } else {
@@ -165,29 +226,20 @@ export class ChatGateway {
       const content = payload.content?.trim();
       if (!content) return;
 
-      // sender 결정 로직:
-      // 1. 세션 소유자(환자)인 경우 → sender: 'user' (우선순위 1)
-      // 2. 세션 소유자가 아니지만 한의사인 경우 → sender: 'doctor' (우선순위 2)
+      // sender 결정 로직 (기존과 동일)
       const session = await prisma.chatSession.findUnique({
         where: { id: meta.sessionId },
         include: { doctor: true },
       });
       
-      if (!session) {
-        return; // 세션을 찾을 수 없으면 무시
-      }
+      if (!session) return;
       
       const isSessionOwner = session.userAccountId === meta.accountId;
-      
-      let sender: string = 'user'; // 기본값은 'user'
-      let userProfileName: string | null = null;
-      let userIsPractitioner: boolean = false;
+      let sender: string = 'user';
       
       if (isSessionOwner) {
-        // 세션 소유자(환자)인 경우, 무조건 'user'
         sender = 'user';
       } else {
-        // 세션 소유자가 아닌 경우, 한의사인지 확인
         const account = await prisma.userAccount.findUnique({
           where: { id: meta.accountId },
           select: { profileId: true },
@@ -199,29 +251,11 @@ export class ChatGateway {
             select: { name: true, isPractitioner: true },
           });
           
-          userProfileName = profile?.name || null;
-          userIsPractitioner = profile?.isPractitioner || false;
-          
-          // 한의사이고, 세션의 doctorId가 있고, 세션의 한의사 이름과 일치하는지 확인
           if (profile?.isPractitioner && session.doctorId && session.doctor && session.doctor.name === profile.name) {
             sender = 'doctor';
-          } else {
-            // 한의사가 아니거나 세션의 한의사와 일치하지 않으면 환자
-            sender = 'user';
           }
         }
       }
-
-      console.log(`[Chat Gateway] WebSocket message`);
-      console.log(`  - Current user ID: ${meta.accountId}`);
-      console.log(`  - Session owner ID: ${session.userAccountId}`);
-      console.log(`  - Session doctor ID: ${session.doctorId || 'none'}`);
-      console.log(`  - Session doctor name: ${session.doctor?.name || 'none'}`);
-      console.log(`  - Is session owner: ${isSessionOwner}`);
-      console.log(`  - User profile name: ${userProfileName || 'none'}`);
-      console.log(`  - User is practitioner: ${userIsPractitioner}`);
-      console.log(`  - Determined sender: ${sender}`);
-      console.log(`  - Message content: ${content.substring(0, 50)}...`);
 
       const message = await prisma.chatMessage.create({
         data: {
@@ -236,7 +270,7 @@ export class ChatGateway {
         data: { updatedAt: new Date() },
       });
 
-      this.broadcastMessage(meta.sessionId, message);
+      await this.broadcastMessage(meta.sessionId, message);
     } catch (_) {
       // ignore malformed events
     }
@@ -248,6 +282,3 @@ export const chatGateway = new ChatGateway();
 export function setupChatGateway(server: HttpServer) {
   chatGateway.attach(server);
 }
-
-
-

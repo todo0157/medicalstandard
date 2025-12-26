@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { authenticate, AuthenticatedRequest } from "../middleware/auth.middleware";
 import { chatGateway } from "../services/chat.gateway";
+import { sendPushNotification } from "../lib/fcm";
 
 const router = Router();
 
@@ -373,7 +374,57 @@ router.post(
       }
       // ---------------------------------------------
 
-      return res.status(201).json({ data: appointment });
+          // 예약 생성 완료 후 알림 로직 (채팅방 생성 이후)
+          // 한의사에게 알림 전송 (예약 접수)
+          try {
+            // 한의사 계정 찾기 (이름으로 매칭)
+            const doctorAccount = await prisma.userAccount.findFirst({
+              where: {
+                profile: {
+                  name: appointment.doctor.name,
+                  isPractitioner: true,
+                }
+              }
+            });
+
+            if (doctorAccount) {
+              const tokens = await prisma.userDeviceToken.findMany({
+                where: { userAccountId: doctorAccount.id },
+                select: { token: true },
+              });
+
+              if (tokens.length > 0) {
+                const userName = req.user?.sub ? '환자' : '예약자'; // 사용자 이름 조회 필요하지만 일단 '환자'로 표시
+                // 실제 사용자 이름 조회
+                const userProfile = await prisma.userProfile.findFirst({
+                    where: { account: { id: req.user!.sub } }
+                });
+                
+                const senderName = userProfile?.name || '환자';
+
+                // 한의사에게 알림
+                const tokenList = tokens.map(t => t.token);
+                // FCM 다중 전송 함수 필요하지만 일단 단일 전송 루프 (또는 sendMulticastNotification import 필요)
+                // 상단에 sendMulticastNotification import 추가 필요 (현재 sendPushNotification만 있음)
+                // 간단하게 반복문으로 처리
+                for (const t of tokenList) {
+                  await sendPushNotification(t, {
+                    title: '새로운 진료 예약',
+                    body: `${senderName}님이 진료를 예약했습니다.`,
+                    data: {
+                      type: 'appointment',
+                      appointmentId: appointment.id,
+                    },
+                  });
+                }
+              }
+            }
+          } catch (notiError) {
+            console.error('[Doctor API] Failed to send appointment notification:', notiError);
+          }
+
+          return res.status(201).json({ data: appointment });
+
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
@@ -560,7 +611,50 @@ router.patch(
         });
       }
 
+      // 예약 상태 변경 알림 (확인/취소 등)
+      try {
+        if (payload.status) {
+          // 환자에게 알림 전송
+          const tokens = await prisma.userDeviceToken.findMany({
+            where: { userAccountId: appointment.userAccountId },
+            select: { token: true },
+          });
+
+          if (tokens.length > 0) {
+            let title = '진료 예약 알림';
+            let body = '';
+
+            if (payload.status === 'confirmed') {
+              title = '진료 예약 확정';
+              body = `${updated.doctor.name} 한의사님이 예약을 확정했습니다.`;
+            } else if (payload.status === 'cancelled') {
+              title = '진료 예약 취소';
+              body = '진료 예약이 취소되었습니다.';
+            } else if (payload.status === 'completed') {
+              title = '진료 완료';
+              body = '진료가 완료되었습니다.';
+            }
+
+            if (body) {
+              for (const t of tokens) {
+                await sendPushNotification(t.token, {
+                  title,
+                  body,
+                  data: {
+                    type: 'appointment',
+                    appointmentId: updated.id,
+                  },
+                });
+              }
+            }
+          }
+        }
+      } catch (notiError) {
+        console.error('[Doctor API] Failed to send status change notification:', notiError);
+      }
+
       return res.json({ data: updated });
+
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
