@@ -4,6 +4,7 @@ const express_1 = require("express");
 const zod_1 = require("zod");
 const profile_service_1 = require("../services/profile.service");
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const s3_1 = require("../lib/s3");
 const router = (0, express_1.Router)();
 const profileService = new profile_service_1.ProfileService();
 const profileUpdateSchema = zod_1.z.object({
@@ -113,8 +114,12 @@ router.post('/:id/photo', async (req, res, next) => {
         const normalized = allowed.has(extension) ? extension : 'png';
         const mime = normalized === 'jpg' ? 'jpeg' : normalized;
         const dataUrl = `data:image/${mime};base64,${imageData}`;
+        // S3에 이미지 업로드
+        console.log('[Profile Photo Upload] Uploading to S3...');
+        const s3Url = await (0, s3_1.uploadImageToS3)(dataUrl, 'profiles');
+        console.log('[Profile Photo Upload] S3 Upload Success:', s3Url);
         const updated = await profileService.updateProfile(profileId, {
-            profileImageUrl: dataUrl,
+            profileImageUrl: s3Url,
         });
         return res.json({ data: updated });
     }

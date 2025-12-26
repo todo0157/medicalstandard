@@ -25,6 +25,7 @@ import 'features/chat/screens/chat_list_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
 import 'features/chat/screens/practitioner_chat_screen.dart';
 import 'features/doctor/screens/doctor_schedule_screen.dart';
+import 'features/life/screens/health_tip_detail_screen.dart'; // 추가
 import 'core/models/doctor.dart';
 import 'core/models/address.dart';
 import 'core/models/appointment.dart';
@@ -237,6 +238,18 @@ GoRouter createAppRouter(bool isAuthenticated) {
           final sessionId = state.pathParameters['sessionId']!;
           return MaterialPage(
             child: PractitionerChatScreen(sessionId: sessionId),
+          );
+        },
+      ),
+
+      // Health Tips Detail
+      GoRoute(
+        path: '/health-tip/:id',
+        name: 'health-tip-detail',
+        pageBuilder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return MaterialPage(
+            child: HealthTipDetailScreen(tipId: id),
           );
         },
       ),

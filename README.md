@@ -2,6 +2,17 @@
 
 Flutter + Node/Prisma stack for the 한방 방문 진료 MVP.
 
+## What changed in ver1.3.9.7
+- **"생활" 탭 콘텐츠 구현** (✅ 구현 완료):
+  - **건강 팁 시스템**: 관리자가 작성하는 한의학 건강 정보 제공 기능 (`HealthTip` 모델) - 작성/조회 완료
+  - **건강 일기**: 사용자가 매일 기분(😊/😐/😢)과 메모를 기록하는 기능 (`HealthLog` 모델) - 작성/조회 완료
+  - **관리자 건강 팁 관리**: 관리자 대시보드에 건강 팁 작성/수정/삭제 기능 추가 (Markdown 미리보기 지원) - 테스트 완료
+  - **앱 생활 화면 개편** (구현 완료): 
+    - 상단: 오늘의 한방 팁 카드 (클릭 시 상세 페이지 이동) ✅
+    - 중단: 나의 건강 일기 섹션 (오늘 기록 추가/조회) ✅
+    - 하단: 건강 정보 피드 (스크롤 가능한 리스트) ✅
+  - **API 추가**: `/api/contents/tips`, `/api/health-logs` 엔드포인트 구현 및 배포 완료
+
 ## What changed in ver1.3.9.6
 - **알림 시스템 (FCM) 구현**:
   - **Firebase Cloud Messaging 연동**: 백엔드(`firebase-admin`)와 프론트엔드(`firebase_messaging`) 연동 완료
@@ -100,6 +111,119 @@ Flutter + Node/Prisma stack for the 한방 방문 진료 MVP.
 - Hooked Flutter routes for `/verify-pre`, `/verify-email`, `/reset-password`.
 - SendGrid wiring documented; server env keys aligned for local Flutter web.
 
+## 🚀 How to Start (Cursor Terminal)
+
+이 섹션은 Cursor IDE의 터미널에서 바로 복사하여 사용할 수 있는 실행 명령어를 제공합니다.
+
+### 📋 사전 준비 (필수)
+
+1. **환경변수 파일 생성**: `server/.env` 파일을 만들고 아래 내용을 설정하세요.
+
+```env
+DATABASE_URL="file:./prisma/dev.db"
+ADMIN_EMAILS="your-admin@email.com"
+
+# AWS S3 (이미지 저장소)
+AWS_ACCESS_KEY_ID="your-access-key"
+AWS_SECRET_ACCESS_KEY="your-secret-key"
+AWS_REGION="ap-southeast-2"
+AWS_BUCKET_NAME="your-bucket-name"
+
+# SendGrid (이메일 발송, 선택)
+SENDGRID_API_KEY="your-api-key"
+MAIL_FROM="your-email@example.com"
+MAIL_FROM_NAME="한방 앱"
+
+# Naver Map API (선택)
+NAVER_MAP_CLIENT_ID="your-client-id"
+NAVER_MAP_CLIENT_SECRET="your-client-secret"
+```
+
+2. **Firebase 설정 파일 배치**:
+   - `android/app/google-services.json`
+   - `ios/Runner/GoogleService-Info.plist`
+   - `server/firebase-service-account.json`
+
+### 🖥️ 터미널 1: 백엔드 서버 실행 (Windows PowerShell)
+
+서버 터미널을 열고 아래 명령어를 순서대로 입력하세요.
+
+```powershell
+# 서버 폴더로 이동
+cd server
+
+# 의존성 설치 (최초 1회)
+npm install
+
+# DB 스키마 적용 (최초 1회 또는 스키마 변경 시)
+npx prisma db push
+
+# 서버 빌드 (코드 변경 시마다 필수)
+npm run build
+
+# 환경변수 설정 (PowerShell)
+$env:DATABASE_URL="file:./prisma/dev.db"
+$env:ADMIN_EMAILS="thf5662@gmail.com"
+$env:AWS_ACCESS_KEY_ID="your-key"
+$env:AWS_SECRET_ACCESS_KEY="your-secret"
+$env:AWS_REGION="ap-southeast-2"
+$env:AWS_BUCKET_NAME="your-bucket"
+
+# 서버 실행
+npm start
+```
+
+**참고**: 환경변수는 매번 터미널을 새로 열 때마다 설정해야 합니다. `server/.env` 파일을 만들면 자동으로 로드됩니다.
+
+### 📱 터미널 2: Flutter 앱 실행
+
+앱 터미널을 열고 **프로젝트 루트 디렉토리**에서 실행하세요.
+
+```powershell
+# 의존성 설치 (최초 1회)
+flutter pub get
+
+# 코드 생성 (모델 변경 시)
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# 크롬 브라우저에서 앱 실행
+flutter run -d chrome --web-port 5175 --dart-define API_BASE_URL=http://localhost:8080/api --dart-define APP_ENV=development
+```
+
+### 👨‍💼 관리자 페이지 접속
+
+1. **URL**: [http://localhost:8080/admin/index.html](http://localhost:8080/admin/index.html)
+2. **기본 계정 생성** (최초 1회):
+   ```powershell
+   cd server
+   npx ts-node scripts/create-admin.ts
+   ```
+   스크립트 내부의 이메일/비밀번호를 수정한 후 실행하면 관리자 계정이 생성됩니다.
+
+### ⚠️ 문제 해결
+
+**포트 충돌 에러**
+```powershell
+# 8080 포트 점유 프로세스 종료
+netstat -ano | findstr :8080
+taskkill /F /PID <PID>
+
+# 또는 모든 Node 프로세스 종료
+taskkill /F /IM node.exe
+```
+
+**빌드 에러 (EPERM: operation not permitted)**
+```powershell
+# 서버 종료 후
+taskkill /F /IM node.exe
+
+# Prisma 폴더 삭제
+Remove-Item -Recurse -Force node_modules/.prisma
+
+# 다시 빌드
+npm run build
+```
+
 ## Quick start
 
 ### Server (Node/Prisma)
@@ -139,9 +263,9 @@ flutter run -d chrome --web-port 5173 \
 ```
 
 ## Email flows (local)
-- **Pre-signup verify:** Login screen “인증” button → `/auth/verify-email/precheck` sends email → click link (opens `/verify-pre?...`) → signup allowed only for that verified email.
+- **Pre-signup verify:** Login screen "인증" button → `/auth/verify-email/precheck` sends email → click link (opens `/verify-pre?...`) → signup allowed only for that verified email.
 - **Post-signup verify resend:** `/auth/verify-email` always sends (even if already verified).
-- **Password reset:** Login screen “비밀번호 재설정하기” → `/auth/forgot` email → link opens `/reset-password?...` → submit new password → `/auth/reset`.
+- **Password reset:** Login screen "비밀번호 재설정하기" → `/auth/forgot` email → link opens `/reset-password?...` → submit new password → `/auth/reset`.
 
 ## Notes
 - Prisma DB stored at `server/prisma/dev.db` by default (SQLite). Update `DATABASE_URL` for Postgres when ready.
@@ -156,7 +280,7 @@ flutter run -d chrome --web-port 5173 \
 
 ## 📊 코드베이스 분석 및 개선 계획
 
-상세한 분석과 개선 계획은 [ver1.3.9.6_analysis_and_improvements.md](docs/ver1.3.9.6_analysis_and_improvements.md)를 참고하세요.
+상세한 분석과 개선 계획은 [ver1.3.9.7_analysis_and_improvements.md](docs/ver1.3.9.7_analysis_and_improvements.md)를 참고하세요.
 
 ## 📱 Android & iOS 환경 배포 계획
 상세한 배포 계획과 업데이트 전략은 [android_ios_deployment_plan.md](docs/android_ios_deployment_plan.md)를 참고하세요.

@@ -6,12 +6,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hanbang_app/core/network/api_client.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants/api_constants.dart';
-import '../providers/auth_provider.dart';
+import '../config/app_config.dart';
+import 'auth_session.dart';
+import 'auth_state.dart';
 
 // Top-level function for background message handling
 @pragma('vm:entry-point')
@@ -108,7 +108,7 @@ class NotificationService {
     final notification = message.notification;
     final android = message.notification?.android;
 
-    if (notification != null && android != null) {
+    if (notification != null) {
       await _localNotificationsPlugin.show(
         notification.hashCode,
         notification.title,
@@ -135,8 +135,8 @@ class NotificationService {
   }
 
   Future<void> _registerTokenToServer(String token) async {
-    final authState = _ref.read(authProvider);
-    if (authState.value == null) {
+    // AuthState나 AuthSession을 통해 로그인 여부 확인
+    if (!AuthState.instance.isAuthenticated || AuthSession.instance.token == null) {
       debugPrint('User not logged in, skipping token registration');
       return;
     }
@@ -148,12 +148,10 @@ class NotificationService {
               ? 'android'
               : 'ios';
 
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('access_token');
-      
+      final accessToken = AuthSession.instance.token;
       if (accessToken == null) return;
 
-      final url = Uri.parse('${ApiConstants.baseUrl}/notifications/register');
+      final url = Uri.parse('${AppConfig.apiBaseUrl}/notifications/register');
       
       final response = await http.post(
         url,
@@ -184,12 +182,10 @@ class NotificationService {
       String? token = await _firebaseMessaging.getToken();
       if (token == null) return;
       
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('access_token');
-      
+      final accessToken = AuthSession.instance.token;
       if (accessToken == null) return;
 
-      final url = Uri.parse('${ApiConstants.baseUrl}/notifications/unregister');
+      final url = Uri.parse('${AppConfig.apiBaseUrl}/notifications/unregister');
       
       await http.post(
         url,
@@ -206,4 +202,3 @@ class NotificationService {
     }
   }
 }
-

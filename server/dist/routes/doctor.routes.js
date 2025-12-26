@@ -5,6 +5,7 @@ const zod_1 = require("zod");
 const prisma_1 = require("../lib/prisma");
 const auth_middleware_1 = require("../middleware/auth.middleware");
 const chat_gateway_1 = require("../services/chat.gateway");
+const fcm_1 = require("../lib/fcm");
 const router = (0, express_1.Router)();
 const querySchema = zod_1.z.object({
     query: zod_1.z.string().optional(),
@@ -324,6 +325,51 @@ router.post("/appointments", auth_middleware_1.authenticate, async (req, res, ne
             // 예약 자체는 성공했으므로 오류를 던지지는 않음
         }
         // ---------------------------------------------
+        // 예약 생성 완료 후 알림 로직 (채팅방 생성 이후)
+        // 한의사에게 알림 전송 (예약 접수)
+        try {
+            // 한의사 계정 찾기 (이름으로 매칭)
+            const doctorAccount = await prisma_1.prisma.userAccount.findFirst({
+                where: {
+                    profile: {
+                        name: appointment.doctor.name,
+                        isPractitioner: true,
+                    }
+                }
+            });
+            if (doctorAccount) {
+                const tokens = await prisma_1.prisma.userDeviceToken.findMany({
+                    where: { userAccountId: doctorAccount.id },
+                    select: { token: true },
+                });
+                if (tokens.length > 0) {
+                    const userName = req.user?.sub ? '환자' : '예약자'; // 사용자 이름 조회 필요하지만 일단 '환자'로 표시
+                    // 실제 사용자 이름 조회
+                    const userProfile = await prisma_1.prisma.userProfile.findFirst({
+                        where: { account: { id: req.user.sub } }
+                    });
+                    const senderName = userProfile?.name || '환자';
+                    // 한의사에게 알림
+                    const tokenList = tokens.map(t => t.token);
+                    // FCM 다중 전송 함수 필요하지만 일단 단일 전송 루프 (또는 sendMulticastNotification import 필요)
+                    // 상단에 sendMulticastNotification import 추가 필요 (현재 sendPushNotification만 있음)
+                    // 간단하게 반복문으로 처리
+                    for (const t of tokenList) {
+                        await (0, fcm_1.sendPushNotification)(t, {
+                            title: '새로운 진료 예약',
+                            body: `${senderName}님이 진료를 예약했습니다.`,
+                            data: {
+                                type: 'appointment',
+                                appointmentId: appointment.id,
+                            },
+                        });
+                    }
+                }
+            }
+        }
+        catch (notiError) {
+            console.error('[Doctor API] Failed to send appointment notification:', notiError);
+        }
         return res.status(201).json({ data: appointment });
     }
     catch (error) {
@@ -491,6 +537,47 @@ router.patch("/appointments/:id", auth_middleware_1.authenticate, async (req, re
                 where: { id: updated.slotId },
                 data: { isBooked: false },
             });
+        }
+        // 예약 상태 변경 알림 (확인/취소 등)
+        try {
+            if (payload.status) {
+                // 환자에게 알림 전송
+                const tokens = await prisma_1.prisma.userDeviceToken.findMany({
+                    where: { userAccountId: appointment.userAccountId },
+                    select: { token: true },
+                });
+                if (tokens.length > 0) {
+                    let title = '진료 예약 알림';
+                    let body = '';
+                    if (payload.status === 'confirmed') {
+                        title = '진료 예약 확정';
+                        body = `${updated.doctor.name} 한의사님이 예약을 확정했습니다.`;
+                    }
+                    else if (payload.status === 'cancelled') {
+                        title = '진료 예약 취소';
+                        body = '진료 예약이 취소되었습니다.';
+                    }
+                    else if (payload.status === 'completed') {
+                        title = '진료 완료';
+                        body = '진료가 완료되었습니다.';
+                    }
+                    if (body) {
+                        for (const t of tokens) {
+                            await (0, fcm_1.sendPushNotification)(t.token, {
+                                title,
+                                body,
+                                data: {
+                                    type: 'appointment',
+                                    appointmentId: updated.id,
+                                },
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        catch (notiError) {
+            console.error('[Doctor API] Failed to send status change notification:', notiError);
         }
         return res.json({ data: updated });
     }

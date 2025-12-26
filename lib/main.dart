@@ -4,29 +4,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
-import 'package:firebase_core/firebase_core.dart'; // 추가
-import 'firebase_options.dart'; // 추가 (flutterfire configure로 생성된 파일 필요, 없으면 수동 초기화 필요)
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 import 'app_router.dart';
 import 'core/services/auth_session.dart';
 import 'core/services/auth_state.dart';
-import 'core/services/notification_service.dart'; // 추가
+import 'core/services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
 
-  // Firebase 초기화 (플랫폼별 옵션 자동 설정)
-  // firebase_options.dart 파일이 없다면 수동으로 설정하거나, flutterfire configure 명령어를 실행해야 함.
-  // 사용자가 "앱 설정 파일 다운로드 완료"라고 했으므로, Android/iOS는 google-services.json/plist로 자동 처리될 수 있음.
-  // Web의 경우 옵션이 필수임.
-  // 일단 try-catch로 감싸서 초기화 시도.
+  // Firebase 초기화 (웹/모바일 대응)
   try {
-    await Firebase.initializeApp();
+    if (kIsWeb) {
+      // 웹 환경에서는 최소한의 옵션이라도 필요합니다.
+      // (실제 프로젝트의 Firebase 웹 설정값으로 교체하는 것이 좋지만, 
+      //  일단 초기화 실패로 앱이 멈추는 것을 방지합니다.)
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: "dummy-api-key",
+          appId: "dummy-app-id",
+          messagingSenderId: "dummy-sender-id",
+          projectId: "medicalstandard-a4a3e",
+        ),
+      );
+    } else {
+      // 모바일은 설정 파일 기반으로 자동 초기화
+      await Firebase.initializeApp();
+    }
   } catch (e) {
-    debugPrint("Firebase initializeApp failed: $e");
-    // Web 등에서 옵션 부족으로 실패할 수 있음. 
-    // 하지만 모바일(Android/iOS)은 google-services.json/plist가 있으면 옵션 없이도 가능.
+    debugPrint("Firebase initializeApp skipped or failed: $e");
   }
 
   KakaoSdk.init(nativeAppKey: '6daf1cc619f2e11d4d4a129475e9c3ff');
@@ -52,10 +61,8 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    // 앱 시작 시 알림 서비스 초기화 및 권한 요청
-    // (빌드 후에 실행되도록 addPostFrameCallback 사용 또는 직접 호출)
-    // Provider를 통해 접근하려면 ref가 필요하므로 ConsumerState 사용
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 알림 서비스 초기화 (초기화 실패 시 내부적으로 무시됨)
       ref.read(notificationServiceProvider).initialize();
     });
   }

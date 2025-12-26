@@ -9,7 +9,13 @@
 <body>
     <div class="dashboard-container">
         <header class="dashboard-header">
-            <h1>관리자 대시보드</h1>
+            <div class="header-left">
+                <h1>한방 관리자 대시보드</h1>
+                <nav class="header-nav">
+                    <a href="dashboard.html" class="nav-link active">인증 관리</a>
+                    <a href="tips.html" class="nav-link">건강 팁 관리</a>
+                </nav>
+            </div>
             <div class="header-actions">
                 <span id="userEmail" class="user-info"></span>
                 <button class="btn btn-secondary" id="logoutBtn">로그아웃</button>
@@ -57,5 +63,3 @@
     <script src="js/dashboard.js"></script>
 </body>
 </html>
-
-

@@ -13,6 +13,7 @@
 migrate_working_dir/
 **/node_modules/
 server/prisma/dev.db
+server/dev.db
 
 # Postal code database files are managed by Git LFS (see .gitattributes)
 
@@ -47,3 +48,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Security & Environment files (Do NOT commit these!)
+server/.env
+server/.env.*
+!server/.env.example
+server/firebase-service-account.json
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Build outputs
+server/dist/

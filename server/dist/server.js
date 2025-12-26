@@ -12,7 +12,10 @@ const path_1 = __importDefault(require("path"));
 const config_1 = require("./config");
 const routes_1 = __importDefault(require("./routes"));
 const chat_gateway_1 = require("./services/chat.gateway");
+const fcm_1 = require("./lib/fcm");
 const app = (0, express_1.default)();
+// FCM 초기화
+(0, fcm_1.initFirebase)();
 const allowedOrigins = (config_1.env.ALLOW_ORIGIN ?? '')
     .split(',')
     .map((origin) => origin.trim())

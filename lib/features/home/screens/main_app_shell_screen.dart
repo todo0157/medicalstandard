@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../chat/screens/chat_list_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../doctor/providers/doctor_providers.dart';
+import '../../life/screens/life_screen.dart'; // 추가
 import '../../../core/models/address.dart';
 import '../../../core/models/doctor.dart';
 import '../../../core/providers/ui_mode_provider.dart';
@@ -42,12 +43,7 @@ class _MainAppShellScreenState extends ConsumerState<MainAppShellScreen> {
       case 0:
         return const HomeScreen(); // 홈 탭 (방문 진료 예약 또는 한의사 전용)
       case 1:
-        return const Center(
-          child: Text(
-            "생활 탭",
-            style: TextStyle(fontSize: 20, color: kPrimaryPink),
-          ),
-        );
+        return const LifeScreen(); // 생활 탭 (교체됨)
       case 2:
         // 채팅 목록 화면 표시
         return const ChatListScreen();
@@ -67,6 +63,12 @@ class _MainAppShellScreenState extends ConsumerState<MainAppShellScreen> {
     String appBarTitle = "방문 진료";
     if (_selectedIndex == 0) {
       appBarTitle = uiMode == UIMode.practitioner ? "한의사 대시보드" : "방문 진료";
+    } else if (_selectedIndex == 1) {
+      appBarTitle = "건강 생활";
+    } else if (_selectedIndex == 2) {
+      appBarTitle = "채팅";
+    } else if (_selectedIndex == 3) {
+      appBarTitle = "프로필";
     }
     
     // AppBar leading 버튼 결정

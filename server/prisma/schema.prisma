@@ -48,20 +48,49 @@ model UserAccount {
   passwordResetTokens PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   
-  // 알림 토큰 (1:N 관계 - 한 사용자가 여러 기기를 가질 수 있음)
+  // 알림 토큰
   deviceTokens  UserDeviceToken[]
+
+  // 건강 기록
+  healthLogs    HealthLog[]
 }
 
 model UserDeviceToken {
   id            String      @id @default(cuid())
   userAccountId String
-  token         String      @unique // FCM 토큰
+  token         String      @unique
   platform      String?     // android, ios, web
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   lastUsedAt    DateTime    @default(now())
 
   userAccount   UserAccount @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
+}
+
+model HealthTip {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  category    String   @default("general") // general, season, food, habit 등
+  imageUrl    String?
+  viewCount   Int      @default(0)
+  isVisible   Boolean  @default(true) // 공개 여부
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HealthLog {
+  id            String      @id @default(cuid())
+  userAccountId String
+  date          DateTime    @default(now())
+  mood          String      // GOOD, SOSO, BAD
+  note          String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  userAccount   UserAccount @relation(fields: [userAccountId], references: [id], onDelete: Cascade)
+
+  @@index([userAccountId, date])
 }
 
 model Session {
@@ -149,7 +178,7 @@ model Appointment {
   userAccountId String
   doctorId      String
   slotId        String   @unique
-  appointmentTime DateTime? // 사용자가 선택한 정확한 시간대
+  appointmentTime DateTime?
   status        String   @default("confirmed")
   notes         String?
   createdAt     DateTime @default(now())
@@ -175,9 +204,7 @@ model ChatSession {
   doctor        Doctor?      @relation(fields: [doctorId], references: [id])
   messages      ChatMessage[]
   
-  // 읽지 않은 메시지 수 (환자 기준)
   userUnreadCount Int @default(0)
-  // 읽지 않은 메시지 수 (한의사 기준)
   doctorUnreadCount Int @default(0)
 }
 
