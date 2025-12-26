@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { ProfileService } from '../services/profile.service';
 import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
+import { uploadImageToS3 } from '../lib/s3';
 
 const router = Router();
 const profileService = new ProfileService();
@@ -120,8 +121,13 @@ router.post('/:id/photo', async (req: AuthenticatedRequest, res, next) => {
     const mime = normalized === 'jpg' ? 'jpeg' : normalized;
     const dataUrl = `data:image/${mime};base64,${imageData}`;
 
+    // S3에 이미지 업로드
+    console.log('[Profile Photo Upload] Uploading to S3...');
+    const s3Url = await uploadImageToS3(dataUrl, 'profiles');
+    console.log('[Profile Photo Upload] S3 Upload Success:', s3Url);
+
     const updated = await profileService.updateProfile(profileId, {
-      profileImageUrl: dataUrl,
+      profileImageUrl: s3Url,
     });
     return res.json({ data: updated });
   } catch (error) {
