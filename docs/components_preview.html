@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하니비 앱 - 공통 컴포넌트 라이브러리</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background: #F9FAFB;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6B7280;
+  margin-bottom: 40px;
+}
+
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.component-demo {
+  background: #F9FAFB;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.demo-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.code-label {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: #6B7280;
+  margin-top: 8px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.new-badge {
+  background: #10B981;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* 버튼 스타일 */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+  background: #3B82F6;
+  color: white;
+}
+
+.btn-secondary {
+  background: #10B981;
+  color: white;
+}
+
+.btn-brand {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: white;
+  box-shadow: 0 10px 20px rgba(255, 215, 0, 0.25);
+}
+
+.btn-outlined {
+  background: white;
+  color: #3B82F6;
+  border: 1.5px solid #3B82F6;
+}
+
+.btn-text {
+  background: transparent;
+  color: #3B82F6;
+  padding: 8px 16px;
+}
+
+.btn-small {
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+/* 카드 스타일 */
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+.card-gradient {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: white;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+}
+
+/* 배지 스타일 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge-success {
+  background: #E7F7EF;
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-warning {
+  background: #FEF3C7;
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-error {
+  background: #FEE2E2;
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-info {
+  background: #DCFCE7;
+  color: #3B82F6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.count-badge {
+  background: #EF4444;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🧩 하니비(Honeybee) 앱 - 공통 컴포넌트</h1>
+  <p class="subtitle">ver 1.4.0 - UI/UX 개선 Phase 1</p>
+
+  <!-- Buttons -->
+  <div class="section">
+    <div class="section-title">🔘 버튼 컴포넌트</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      디자인 시스템을 활용한 일관된 버튼 스타일입니다. 각 버튼은 용도에 맞게 사용하세요.
+    </p>
+
+    <div class="component-demo">
+      <div class="demo-label">Primary Button (주요 액션)</div>
+      <button class="btn btn-primary">
+        <span>📅</span>
+        <span>예약하기</span>
+      </button>
+      <div class="code-label">AppPrimaryButton(text: '예약하기', icon: Icons.calendar_today)</div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">Secondary Button (보조 액션)</div>
+      <button class="btn btn-secondary">
+        <span>✓</span>
+        <span>완료</span>
+      </button>
+      <div class="code-label">AppSecondaryButton(text: '완료', icon: Icons.check)</div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">Brand Button (하니비 브랜딩) <span class="new-badge">NEW</span></div>
+      <button class="btn btn-brand">
+        <span>🍯</span>
+        <span>방문 진료 예약하기</span>
+      </button>
+      <div class="code-label">AppBrandButton(text: '방문 진료 예약하기', icon: Icons.favorite)</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="component-demo">
+        <div class="demo-label">Outlined Button</div>
+        <button class="btn btn-outlined btn-small">
+          <span>✎</span>
+          <span>수정</span>
+        </button>
+        <div class="code-label">AppOutlinedButton(text: '수정', size: ButtonSize.medium)</div>
+      </div>
+
+      <div class="component-demo">
+        <div class="demo-label">Text Button</div>
+        <button class="btn btn-text btn-small">자세히 보기</button>
+        <div class="code-label">AppTextButton(text: '자세히 보기')</div>
+      </div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">버튼 크기 비교</div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="btn btn-primary">Large Button</button>
+        <button class="btn btn-primary btn-small">Medium Button</button>
+      </div>
+      <div class="code-label">size: ButtonSize.large / ButtonSize.medium</div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">로딩 상태</div>
+      <button class="btn btn-primary" disabled style="opacity: 0.6;">
+        <div style="width: 20px; height: 20px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      </button>
+      <div class="code-label">AppPrimaryButton(isLoading: true)</div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="section">
+    <div class="section-title">🃏 카드 컴포넌트</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      정보를 담는 카드 컴포넌트입니다. 자동으로 그림자, Radius, Padding이 적용됩니다.
+    </p>
+
+    <div class="component-demo">
+      <div class="demo-label">Base Card (기본 카드)</div>
+      <div class="card">
+        <div style="font-size: 16px; font-weight: bold; color: #111827; margin-bottom: 8px;">
+          카드 제목
+        </div>
+        <div style="font-size: 14px; color: #6B7280;">
+          카드 내용이 들어갑니다. 자동으로 패딩, 그림자, 둥근 모서리가 적용됩니다.
+        </div>
+      </div>
+      <div class="code-label">AppBaseCard(child: ...)</div>
+    </div>
+
+    <div class="grid-3">
+      <div class="component-demo">
+        <div class="demo-label">Stat Card (통계)</div>
+        <div class="card" style="text-align: center;">
+          <div style="width: 40px; height: 40px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <span style="font-size: 24px; color: #3B82F6;">📅</span>
+          </div>
+          <div style="font-size: 24px; font-weight: bold; color: #3B82F6; margin-bottom: 4px;">
+            12
+            <span style="background: rgba(16, 185, 129, 0.1); color: #10B981; font-size: 10px; padding: 2px 4px; border-radius: 4px; margin-left: 4px;">+2</span>
+          </div>
+          <div style="font-size: 12px; color: #6B7280;">예약</div>
+        </div>
+        <div class="code-label">AppStatCard(value: '12', trend: '+2')</div>
+      </div>
+
+      <div class="component-demo">
+        <div class="demo-label">Stat Card (성공)</div>
+        <div class="card" style="text-align: center;">
+          <div style="width: 40px; height: 40px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <span style="font-size: 24px; color: #10B981;">✓</span>
+          </div>
+          <div style="font-size: 24px; font-weight: bold; color: #10B981; margin-bottom: 4px;">5</div>
+          <div style="font-size: 12px; color: #6B7280;">완료</div>
+        </div>
+        <div class="code-label">AppStatCard(value: '5', color: success)</div>
+      </div>
+
+      <div class="component-demo">
+        <div class="demo-label">Stat Card (경고)</div>
+        <div class="card" style="text-align: center;">
+          <div style="width: 40px; height: 40px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+            <span style="font-size: 24px; color: #F59E0B;">⏳</span>
+          </div>
+          <div style="font-size: 24px; font-weight: bold; color: #F59E0B; margin-bottom: 4px;">3</div>
+          <div style="font-size: 12px; color: #6B7280;">대기중</div>
+        </div>
+        <div class="code-label">AppStatCard(value: '3', color: warning)</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="component-demo">
+        <div class="demo-label">List Card</div>
+        <div class="card">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 48px; height: 48px; background: #EFF6FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+              👨‍⚕️
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 4px;">
+                김한의 한의사
+              </div>
+              <div style="font-size: 13px; color: #6B7280;">내과 전문의 · 서울 한의원</div>
+            </div>
+            <span style="font-size: 20px; color: #9CA3AF;">›</span>
+          </div>
+        </div>
+        <div class="code-label">AppListCard(title: '김한의 한의사', subtitle: '내과 전문의')</div>
+      </div>
+
+      <div class="component-demo">
+        <div class="demo-label">Gradient Card <span class="new-badge">NEW</span></div>
+        <div class="card card-gradient">
+          <div style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">
+            겨울철 건강 관리
+          </div>
+          <div style="font-size: 14px; opacity: 0.9;">
+            추운 겨울철에는 체온 유지가 중요합니다.
+          </div>
+        </div>
+        <div class="code-label">AppGradientCard(gradient: blueGradient)</div>
+      </div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">Info Card (정보 박스)</div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <div style="background: #DCFCE7; padding: 16px; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.3);">
+          <div style="display: flex; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: rgba(59, 130, 246, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <span style="font-size: 16px; color: #3B82F6;">ℹ</span>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: rgba(59, 130, 246, 0.8); margin-bottom: 4px;">알림</div>
+              <div style="font-size: 13px; color: rgba(59, 130, 246, 0.8);">새로운 건강 팁이 추가되었습니다.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #E7F7EF; padding: 16px; border-radius: 16px; border: 1px solid rgba(16, 185, 129, 0.3);">
+          <div style="display: flex; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: rgba(16, 185, 129, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <span style="font-size: 16px; color: #10B981;">✓</span>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 600; color: rgba(16, 185, 129, 0.8); margin-bottom: 4px;">성공</div>
+              <div style="font-size: 13px; color: rgba(16, 185, 129, 0.8);">예약이 완료되었습니다.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="code-label">AppInfoCard(type: InfoCardType.info / success)</div>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  <div class="section">
+    <div class="section-title">🏷️ 배지 컴포넌트</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      상태, 카테고리, 숫자 등을 표시하는 배지입니다.
+    </p>
+
+    <div class="component-demo">
+      <div class="demo-label">Status Badge (상태 배지)</div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="badge badge-success">
+          <span>✓</span>
+          <span>완료</span>
+        </span>
+        <span class="badge badge-warning">
+          <span>⏳</span>
+          <span>대기중</span>
+        </span>
+        <span class="badge badge-error">
+          <span>✕</span>
+          <span>취소</span>
+        </span>
+        <span class="badge badge-info">
+          <span>ℹ</span>
+          <span>정보</span>
+        </span>
+      </div>
+      <div class="code-label">AppStatusBadge(type: BadgeType.success / warning / error / info)</div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">Category Badge (카테고리 배지)</div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span style="background: rgba(59, 130, 246, 0.1); color: #3B82F6; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: bold;">
+          건강 팁
+        </span>
+        <span style="background: rgba(16, 185, 129, 0.1); color: #10B981; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: bold;">
+          내과
+        </span>
+        <span style="background: rgba(236, 72, 153, 0.1); color: #EC4899; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: bold;">
+          한의사
+        </span>
+        <span style="background: rgba(245, 158, 11, 0.1); color: #F59E0B; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: bold;">
+          추천 제품
+        </span>
+      </div>
+      <div class="code-label">AppCategoryBadge(label: '건강 팁', color: AppColors.primary)</div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">Count Badge (숫자 배지) - 읽지 않은 메시지 등</div>
+      <div style="display: flex; gap: 16px; align-items: center;">
+        <div style="position: relative; display: inline-block;">
+          <span style="font-size: 24px;">💬</span>
+          <span class="count-badge" style="position: absolute; top: -4px; right: -8px;">3</span>
+        </div>
+        <div style="position: relative; display: inline-block;">
+          <span style="font-size: 24px;">🔔</span>
+          <span class="count-badge" style="position: absolute; top: -4px; right: -8px;">99+</span>
+        </div>
+        <div style="position: relative; display: inline-block;">
+          <span style="font-size: 24px;">🛒</span>
+          <span class="count-badge" style="position: absolute; top: -4px; right: -8px;">5</span>
+        </div>
+      </div>
+      <div class="code-label">AppCountBadge(count: 3 / 99+ / 5)</div>
+    </div>
+
+    <div class="component-demo">
+      <div class="demo-label">Notification Dot (알림 점)</div>
+      <div style="display: flex; gap: 24px; align-items: center;">
+        <div style="position: relative; display: inline-block;">
+          <div style="width: 48px; height: 48px; background: #EFF6FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+            👤
+          </div>
+          <div style="position: absolute; top: 0; right: 0; width: 12px; height: 12px; background: #EF4444; border-radius: 50%; border: 2px solid white;"></div>
+        </div>
+        <span style="font-size: 14px; color: #6B7280;">새로운 활동 있음</span>
+      </div>
+      <div class="code-label">AppNotificationDot()</div>
+    </div>
+  </div>
+
+  <!-- 실제 조합 예시 -->
+  <div class="section">
+    <div class="section-title">🎨 실제 화면 조합 예시</div>
+    
+    <div class="grid-2">
+      <!-- 예약 카드 -->
+      <div class="card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 20px; color: #3B82F6;">👨‍⚕️</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 16px; font-weight: bold; color: #111827; margin-bottom: 4px;">김한의 한의사</div>
+            <div style="font-size: 13px; color: #6B7280;">내과 전문의</div>
+          </div>
+          <span class="badge badge-success">
+            <span>✓</span>
+            <span>완료</span>
+          </span>
+        </div>
+        <div style="border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 12px;">
+          <div style="font-size: 14px; color: #111827; margin-bottom: 8px;">
+            📅 2024년 1월 15일 오후 2:30
+          </div>
+          <div style="font-size: 13px; color: #6B7280;">
+            📍 서울시 강남구 테헤란로 123
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <button class="btn btn-outlined btn-small" style="flex: 1;">수정</button>
+          <button class="btn btn-outlined btn-small" style="flex: 1; color: #EF4444; border-color: #EF4444;">취소</button>
+        </div>
+      </div>
+
+      <!-- 하니비 메인 카드 -->
+      <div style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 24px; border-radius: 20px; box-shadow: 0 10px 20px rgba(255, 215, 0, 0.25); color: white;">
+        <div style="background: rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 8px; display: inline-block; margin-bottom: 16px; font-size: 12px; font-weight: bold;">
+          방문 진료
+        </div>
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 8px;">
+          방문 진료<br>한의사
+        </div>
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 16px;">
+          한의사 방문진료 예약하기
+        </div>
+        <button class="btn" style="background: white; color: #FFA500; box-shadow: none;">
+          예약하기
+        </button>
+      </div>
+
+      <!-- 프로필 카드 -->
+      <div class="card card-gradient">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; font-size: 24px; color: #3B82F6;">
+            홍
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">홍길동</div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">45세 · 남성</div>
+            <div style="font-size: 12px; opacity: 0.8;">📍 서울시 강남구</div>
+          </div>
+          <button style="background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px;">
+            ✎
+          </button>
+        </div>
+      </div>
+
+      <!-- 상품 카드 -->
+      <div class="card" style="padding: 0; overflow: hidden;">
+        <img src="https://via.placeholder.com/300x140/10B981/FFFFFF?text=Product" style="width: 100%; display: block;">
+        <div style="padding: 12px;">
+          <div style="font-size: 11px; color: #9CA3AF; margin-bottom: 4px;">브랜드명</div>
+          <div style="font-size: 14px; font-weight: bold; color: #111827; margin-bottom: 8px;">혈당측정기 스타터 키트</div>
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+            <span style="font-size: 14px;">⭐</span>
+            <span style="font-size: 12px; font-weight: 600;">4.8</span>
+            <span style="font-size: 11px; color: #9CA3AF;">(1,247)</span>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <span style="background: #FEE2E2; color: #EF4444; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">15%</span>
+              <span style="font-size: 16px; font-weight: bold;">89,000원</span>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-small" style="width: 100%;">장바구니 담기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 코드 사용 예시 -->
+  <div class="section" style="background: #F3F4F6;">
+    <div class="section-title">💻 Flutter 코드 사용 예시</div>
+    
+    <div style="background: #1F2937; color: #E5E7EB; padding: 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 13px; overflow-x: auto;">
+<pre style="margin: 0; color: #E5E7EB;">
+<span style="color: #9CA3AF;">// 1. import 추가</span>
+<span style="color: #F59E0B;">import</span> <span style="color: #10B981;">'package:your_app/shared/widgets/common_button.dart'</span>;
+<span style="color: #F59E0B;">import</span> <span style="color: #10B981;">'package:your_app/shared/widgets/common_card.dart'</span>;
+<span style="color: #F59E0B;">import</span> <span style="color: #10B981;">'package:your_app/shared/widgets/common_badge.dart'</span>;
+
+<span style="color: #9CA3AF;">// 2. 버튼 사용</span>
+
+<span style="color: #9CA3AF;">// Primary 버튼</span>
+<span style="color: #3B82F6;">AppPrimaryButton</span>(
+  text: <span style="color: #10B981;">'예약하기'</span>,
+  icon: Icons.calendar_today,
+  onPressed: () => _handleBooking(),
+),
+
+<span style="color: #9CA3AF;">// 하니비 브랜드 버튼</span>
+<span style="color: #3B82F6;">AppBrandButton</span>(
+  text: <span style="color: #10B981;">'방문 진료 예약하기'</span>,
+  icon: Icons.favorite,
+  onPressed: () => _showBookingFlow(),
+),
+
+<span style="color: #9CA3AF;">// Outlined 버튼 (작은 크기)</span>
+<span style="color: #3B82F6;">AppOutlinedButton</span>(
+  text: <span style="color: #10B981;">'수정'</span>,
+  icon: Icons.edit,
+  size: ButtonSize.medium,
+  isFullWidth: <span style="color: #F59E0B;">false</span>,
+  onPressed: () => _handleEdit(),
+),
+
+<span style="color: #9CA3AF;">// 로딩 상태 버튼</span>
+<span style="color: #3B82F6;">AppPrimaryButton</span>(
+  text: <span style="color: #10B981;">'저장 중...'</span>,
+  isLoading: <span style="color: #F59E0B;">true</span>,
+  onPressed: <span style="color: #F59E0B;">null</span>,
+),
+
+<span style="color: #9CA3AF;">// 3. 카드 사용</span>
+
+<span style="color: #9CA3AF;">// 기본 카드</span>
+<span style="color: #3B82F6;">AppBaseCard</span>(
+  child: Column(
+    children: [
+      Text(<span style="color: #10B981;">'카드 제목'</span>),
+      Text(<span style="color: #10B981;">'카드 내용'</span>),
+    ],
+  ),
+),
+
+<span style="color: #9CA3AF;">// 통계 카드</span>
+<span style="color: #3B82F6;">AppStatCard</span>(
+  icon: Icons.calendar_today,
+  value: <span style="color: #10B981;">'12'</span>,
+  label: <span style="color: #10B981;">'예약'</span>,
+  color: AppColors.primary,
+  trend: <span style="color: #10B981;">'+2'</span>, <span style="color: #9CA3AF;">// 이번 달 증가</span>
+),
+
+<span style="color: #9CA3AF;">// 리스트 카드</span>
+<span style="color: #3B82F6;">AppListCard</span>(
+  title: <span style="color: #10B981;">'김한의 한의사'</span>,
+  subtitle: <span style="color: #10B981;">'내과 전문의 · 서울 한의원'</span>,
+  leading: CircleAvatar(child: Icon(Icons.person)),
+  trailing: Icon(Icons.chevron_right),
+  onTap: () => _showDoctorDetail(),
+),
+
+<span style="color: #9CA3AF;">// 그라디언트 카드</span>
+<span style="color: #3B82F6;">AppGradientCard</span>(
+  gradient: AppColors.brandGradient,
+  child: Column(
+    children: [
+      Text(<span style="color: #10B981;">'하니비 메인 카드'</span>),
+    ],
+  ),
+),
+
+<span style="color: #9CA3AF;">// 정보 카드</span>
+<span style="color: #3B82F6;">AppInfoCard</span>(
+  type: InfoCardType.success,
+  icon: Icons.check_circle,
+  title: <span style="color: #10B981;">'성공'</span>,
+  content: <span style="color: #10B981;">'예약이 완료되었습니다.'</span>,
+),
+
+<span style="color: #9CA3AF;">// 4. 배지 사용</span>
+
+<span style="color: #9CA3AF;">// 상태 배지</span>
+<span style="color: #3B82F6;">AppStatusBadge</span>(
+  type: BadgeType.success,
+  label: <span style="color: #10B981;">'완료'</span>,
+  icon: Icons.check,
+),
+
+<span style="color: #9CA3AF;">// 카테고리 배지</span>
+<span style="color: #3B82F6;">AppCategoryBadge</span>(
+  label: <span style="color: #10B981;">'건강 팁'</span>,
+  color: AppColors.primary,
+  icon: Icons.lightbulb,
+),
+
+<span style="color: #9CA3AF;">// 숫자 배지</span>
+Stack(
+  children: [
+    Icon(Icons.chat_bubble),
+    Positioned(
+      right: <span style="color: #F59E0B;">0</span>,
+      top: <span style="color: #F59E0B;">0</span>,
+      child: <span style="color: #3B82F6;">AppCountBadge</span>(count: <span style="color: #F59E0B;">3</span>),
+    ),
+  ],
+),
+</pre>
+    </div>
+  </div>
+
+  <!-- 변경 사항 요약 -->
+  <div class="section" style="background: #DCFCE7; border-left: 4px solid #10B981;">
+    <div class="section-title" style="border-color: #10B981;">✅ Phase 1 - Day 5 완료!</div>
+    
+    <div style="color: #065F46;">
+      <h4 style="margin-top: 0; color: #065F46;">📋 생성된 컴포넌트</h4>
+      
+      <p style="font-weight: 600; margin-top: 16px;">📦 Buttons (common_button.dart)</p>
+      <ul style="line-height: 1.8;">
+        <li><strong>AppPrimaryButton</strong>: 주요 액션 버튼 (파란색)</li>
+        <li><strong>AppSecondaryButton</strong>: 보조 액션 버튼 (초록색)</li>
+        <li><strong>AppBrandButton</strong>: 하니비 브랜딩 버튼 (그라디언트) 🍯</li>
+        <li><strong>AppOutlinedButton</strong>: 외곽선 버튼</li>
+        <li><strong>AppTextButton</strong>: 텍스트만 있는 버튼</li>
+        <li><strong>AppIconButton</strong>: 아이콘만 있는 버튼</li>
+      </ul>
+
+      <p style="font-weight: 600; margin-top: 16px;">🃏 Cards (common_card.dart)</p>
+      <ul style="line-height: 1.8;">
+        <li><strong>AppBaseCard</strong>: 기본 카드 (자동 패딩/그림자/Radius)</li>
+        <li><strong>AppStatCard</strong>: 통계 카드 (숫자 강조, 트렌드 표시)</li>
+        <li><strong>AppListCard</strong>: 리스트 아이템 카드</li>
+        <li><strong>AppGradientCard</strong>: 그라디언트 배경 카드</li>
+        <li><strong>AppInfoCard</strong>: 정보 박스 (Success/Warning/Error/Info)</li>
+      </ul>
+
+      <p style="font-weight: 600; margin-top: 16px;">🏷️ Badges (common_badge.dart)</p>
+      <ul style="line-height: 1.8;">
+        <li><strong>AppStatusBadge</strong>: 상태 배지 (6가지 타입)</li>
+        <li><strong>AppCategoryBadge</strong>: 카테고리 배지 (색상 커스터마이징)</li>
+        <li><strong>AppCountBadge</strong>: 숫자 배지 (읽지 않은 메시지 등)</li>
+        <li><strong>AppNotificationDot</strong>: 알림 점 (온라인 상태 등)</li>
+      </ul>
+
+      <h4 style="color: #065F46; margin-top: 24px;">✨ 주요 특징</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>디자인 시스템 완전 통합</strong>: 색상, 타이포그래피, 간격, Radius, Shadow 자동 적용</li>
+        <li><strong>재사용성 극대화</strong>: 한 번 만들면 어디서나 일관되게 사용</li>
+        <li><strong>커스터마이징 가능</strong>: 필요에 따라 색상, 크기 등 조정 가능</li>
+        <li><strong>로딩 상태 지원</strong>: 버튼에 로딩 스피너 자동 표시</li>
+        <li><strong>반응형 크기</strong>: Large/Medium/Small 크기 옵션</li>
+      </ul>
+
+      <h4 style="color: #065F46; margin-top: 24px;">🎯 디자인 시스템 Week 1 완료!</h4>
+      <p style="line-height: 1.8; margin-bottom: 0;">
+        디자인 시스템 구축이 완료되었습니다:
+      </p>
+      <ul style="line-height: 1.8;">
+        <li>✅ <strong>Day 1-2</strong>: 색상 시스템 (Color + Gradient)</li>
+        <li>✅ <strong>Day 3</strong>: 타이포그래피 시스템 (16개 스타일)</li>
+        <li>✅ <strong>Day 4</strong>: 간격/Radius/Shadow 시스템</li>
+        <li>✅ <strong>Day 5</strong>: 공통 컴포넌트 라이브러리 (15개 컴포넌트)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 다음 단계 -->
+  <div class="section" style="background: #FEF3C7; border-left: 4px solid #FFD700;">
+    <div class="section-title" style="border-color: #FFD700;">🚀 다음 단계: 실제 화면 적용!</div>
+    <div style="color: #78350F;">
+      <p style="margin-top: 0; font-size: 16px;">
+        <strong>이제 실제 앱 화면에 적용할 준비가 완료되었습니다!</strong>
+      </p>
+      <p style="line-height: 1.8;">
+        Week 2부터는 만든 디자인 시스템을 실제 화면에 적용합니다:
+      </p>
+      <ul style="line-height: 1.8;">
+        <li><strong>Day 6-7</strong>: 홈 화면 개선 (하니비 브랜딩 적용)</li>
+        <li style="margin-left: 20px;">- 브랜딩 섹션 추가 (하니비 로고 + 환영 메시지)</li>
+        <li style="margin-left: 20px;">- 메인 서비스 카드 (방문진료) - BrandButton 사용</li>
+        <li style="margin-left: 20px;">- 추가 서비스 그리드</li>
+        <li><strong>Day 8</strong>: 채팅 탭 개선</li>
+        <li style="margin-left: 20px;">- 채팅 목록 카드 UI 개선</li>
+        <li style="margin-left: 20px;">- 빈 상태 개선</li>
+        <li><strong>Day 9-10</strong>: 프로필 탭 개선</li>
+        <li style="margin-left: 20px;">- 프로필 헤더 그라디언트</li>
+        <li style="margin-left: 20px;">- 통계 카드 개선</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+</body>
+</html>
+
