@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하니비 앱 - Spacing/Radius/Shadow 시스템</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background: #F9FAFB;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6B7280;
+  margin-bottom: 40px;
+}
+
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.spacing-demo {
+  background: #F3F4F6;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.spacing-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  margin-bottom: 8px;
+}
+
+.spacing-value {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #111827;
+  font-weight: bold;
+}
+
+.spacing-visual {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.spacing-box {
+  background: #3B82F6;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.radius-demo {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.radius-label {
+  font-size: 12px;
+  color: #6B7280;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+}
+
+.shadow-demo {
+  background: white;
+  padding: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #111827;
+}
+
+.new-badge {
+  background: #10B981;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.example-card {
+  background: white;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #E5E7EB;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📐 하니비(Honeybee) 앱 - Spacing/Radius/Shadow</h1>
+  <p class="subtitle">ver 1.4.0 - UI/UX 개선 Phase 1</p>
+
+  <!-- Spacing 시스템 -->
+  <div class="section">
+    <div class="section-title">📏 Spacing 시스템 (8px 기준)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      모든 간격을 8의 배수로 통일하여 시각적 리듬을 만듭니다. 일관된 간격은 전문적이고 깔끔한 UI를 만드는 핵심입니다.
+    </p>
+
+    <div class="grid-4">
+      <div class="spacing-demo">
+        <div class="spacing-label">XXS (2배수)</div>
+        <div class="spacing-value">4px</div>
+        <div class="spacing-visual">
+          <div class="spacing-box" style="width: 4px;"></div>
+        </div>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">XS (1배수)</div>
+        <div class="spacing-value">8px</div>
+        <div class="spacing-visual">
+          <div class="spacing-box" style="width: 8px;"></div>
+        </div>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">SM (1.5배수)</div>
+        <div class="spacing-value">12px</div>
+        <div class="spacing-visual">
+          <div class="spacing-box" style="width: 12px;"></div>
+        </div>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">MD (2배수) ⭐</div>
+        <div class="spacing-value">16px</div>
+        <div class="spacing-visual">
+          <div class="spacing-box" style="width: 16px;"></div>
+        </div>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">LG (3배수)</div>
+        <div class="spacing-value">24px</div>
+        <div class="spacing-visual">
+          <div class="spacing-box" style="width: 24px;"></div>
+        </div>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">XL (4배수)</div>
+        <div class="spacing-value">32px</div>
+        <div class="spacing-visual">
+          <div class="spacing-box" style="width: 32px;"></div>
+        </div>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">XXL (6배수)</div>
+        <div class="spacing-value">48px</div>
+        <div class="spacing-visual">
+          <div class="spacing-box" style="width: 48px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 32px; margin-bottom: 16px; color: #111827;">특수 용도 간격</h3>
+    <div class="grid-3">
+      <div class="spacing-demo">
+        <div class="spacing-label">List Item</div>
+        <div class="spacing-value">12px</div>
+        <p style="font-size: 11px; color: #9CA3AF; margin: 8px 0 0 0;">리스트 아이템 사이</p>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">Section</div>
+        <div class="spacing-value">24px</div>
+        <p style="font-size: 11px; color: #9CA3AF; margin: 8px 0 0 0;">섹션 간 간격</p>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">Screen Padding</div>
+        <div class="spacing-value">16px</div>
+        <p style="font-size: 11px; color: #9CA3AF; margin: 8px 0 0 0;">화면 좌우 여백</p>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">Card Padding</div>
+        <div class="spacing-value">16px</div>
+        <p style="font-size: 11px; color: #9CA3AF; margin: 8px 0 0 0;">카드 내부 패딩</p>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">Modal Padding</div>
+        <div class="spacing-value">24px</div>
+        <p style="font-size: 11px; color: #9CA3AF; margin: 8px 0 0 0;">모달 내부 패딩</p>
+      </div>
+
+      <div class="spacing-demo">
+        <div class="spacing-label">Icon-Text Gap</div>
+        <div class="spacing-value">8px</div>
+        <p style="font-size: 11px; color: #9CA3AF; margin: 8px 0 0 0;">아이콘-텍스트 간격</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 32px; margin-bottom: 16px; color: #111827;">실제 적용 예시</h3>
+    <div style="background: #F9FAFB; padding: 24px; border-radius: 12px;">
+      <div style="background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+        <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">카드 제목 (margin-bottom: 12px = SM)</div>
+        <div style="font-size: 14px; color: #6B7280; margin-bottom: 16px;">카드 설명 (margin-bottom: 16px = MD)</div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">📅</span>
+          <span style="font-size: 14px;">아이콘-텍스트 간격: 8px (XS)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Border Radius 시스템 -->
+  <div class="section">
+    <div class="section-title">🔄 Border Radius 시스템</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      컴포넌트별로 최적화된 모서리 둥글기를 제공합니다. 작은 요소는 작은 radius, 큰 요소는 큰 radius를 사용합니다.
+    </p>
+
+    <h3 style="margin-bottom: 16px; color: #111827;">기본 Radius 값</h3>
+    <div class="grid-4">
+      <div>
+        <div class="radius-demo" style="border-radius: 0px;">0px</div>
+        <div class="radius-label">none (0px)</div>
+      </div>
+
+      <div>
+        <div class="radius-demo" style="border-radius: 4px;">4px</div>
+        <div class="radius-label">xs (4px)</div>
+      </div>
+
+      <div>
+        <div class="radius-demo" style="border-radius: 8px;">8px</div>
+        <div class="radius-label">sm (8px)</div>
+      </div>
+
+      <div>
+        <div class="radius-demo" style="border-radius: 12px;">12px</div>
+        <div class="radius-label">md (12px)</div>
+      </div>
+
+      <div>
+        <div class="radius-demo" style="border-radius: 16px;">16px ⭐</div>
+        <div class="radius-label">lg (16px) - 가장 많이 사용</div>
+      </div>
+
+      <div>
+        <div class="radius-demo" style="border-radius: 20px;">20px</div>
+        <div class="radius-label">xl (20px)</div>
+      </div>
+
+      <div>
+        <div class="radius-demo" style="border-radius: 24px;">24px</div>
+        <div class="radius-label">xxl (24px)</div>
+      </div>
+
+      <div>
+        <div class="radius-demo" style="border-radius: 9999px;">Full</div>
+        <div class="radius-label">full (9999px)</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 32px; margin-bottom: 16px; color: #111827;">컴포넌트별 Radius</h3>
+    <div class="grid-3">
+      <div style="text-align: center;">
+        <div style="background: #3B82F6; color: white; padding: 12px 24px; border-radius: 8px; display: inline-block; margin-bottom: 8px; font-weight: 600;">
+          버튼
+        </div>
+        <div style="font-size: 12px; color: #6B7280;">button: 8px</div>
+      </div>
+
+      <div style="text-align: center;">
+        <div style="background: white; border: 1px solid #E5E7EB; padding: 16px; border-radius: 16px; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+          카드
+        </div>
+        <div style="font-size: 12px; color: #6B7280;">card: 16px</div>
+      </div>
+
+      <div style="text-align: center;">
+        <div style="background: white; border: 1px solid #E5E7EB; padding: 16px; border-radius: 24px 24px 0 0; margin-bottom: 8px; box-shadow: 0 -4px 20px rgba(0,0,0,0.1);">
+          모달
+        </div>
+        <div style="font-size: 12px; color: #6B7280;">modal: 24px (상단만)</div>
+      </div>
+
+      <div style="text-align: center;">
+        <span style="background: #10B981; color: white; padding: 6px 12px; border-radius: 12px; display: inline-block; margin-bottom: 8px; font-size: 12px; font-weight: 600;">
+          배지
+        </span>
+        <div style="font-size: 12px; color: #6B7280;">badge: 12px</div>
+      </div>
+
+      <div style="text-align: center;">
+        <input type="text" placeholder="입력 필드" style="padding: 12px 16px; border: 1px solid #E5E7EB; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 8px;">
+        <div style="font-size: 12px; color: #6B7280;">input: 8px</div>
+      </div>
+
+      <div style="text-align: center;">
+        <img src="https://via.placeholder.com/80x80/3B82F6/FFFFFF?text=IMG" style="border-radius: 12px; margin-bottom: 8px;">
+        <div style="font-size: 12px; color: #6B7280;">image: 12px</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shadow 시스템 -->
+  <div class="section">
+    <div class="section-title">☁️ Shadow 시스템 (Elevation)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      Material Design의 elevation 개념을 따르되, 더 부드럽고 자연스러운 그림자를 사용합니다. 
+      높은 elevation일수록 더 강한 그림자로 고도감을 표현합니다.
+    </p>
+
+    <h3 style="margin-bottom: 16px; color: #111827;">기본 그림자 (용도별)</h3>
+    <div class="grid-3">
+      <div class="shadow-demo" style="box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+        카드 기본 그림자
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          blur: 10px, offset: 4px, opacity: 0.05
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);">
+        카드 호버 그림자
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          blur: 15px, offset: 6px, opacity: 0.08
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);">
+        카드 강조 그림자
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          blur: 20px, offset: 8px, opacity: 0.1
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        버튼 기본 그림자
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          blur: 8px, offset: 4px, opacity: 0.1
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);">
+        모달 그림자
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          blur: 30px, offset: 10px, opacity: 0.15
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);">
+        FAB 그림자
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          blur: 15px, offset: 6px, opacity: 0.15
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 32px; margin-bottom: 16px; color: #111827;">Elevation 기반 그림자</h3>
+    <div class="grid-3">
+      <div class="shadow-demo" style="box-shadow: none;">
+        Elevation 0
+        <div style="font-size: 11px; color: #9CA3AF; font-weight: normal; margin-top: 4px;">
+          그림자 없음
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);">
+        Elevation 1
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          매우 약함
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);">
+        Elevation 2
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          약함
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);">
+        Elevation 3
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          중간
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);">
+        Elevation 4
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          강함
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);">
+        Elevation 5
+        <div style="font-size: 11px; color: #6B7280; font-weight: normal; margin-top: 4px;">
+          매우 강함
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 32px; margin-bottom: 16px; color: #111827;">색상별 그림자 <span class="new-badge">NEW</span></h3>
+    <div class="grid-2">
+      <div class="shadow-demo" style="box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2); border: 2px solid #3B82F6;">
+        Primary 그림자
+        <div style="font-size: 11px; color: #3B82F6; font-weight: normal; margin-top: 4px;">
+          Primary 버튼, 강조 카드
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 8px 15px rgba(16, 185, 129, 0.2); border: 2px solid #10B981;">
+        Success 그림자
+        <div style="font-size: 11px; color: #10B981; font-weight: normal; margin-top: 4px;">
+          Success 버튼, 완료 카드
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 8px 15px rgba(236, 72, 153, 0.2); border: 2px solid #EC4899;">
+        Accent 그림자
+        <div style="font-size: 11px; color: #EC4899; font-weight: normal; margin-top: 4px;">
+          Accent 버튼, 한의사 카드
+        </div>
+      </div>
+
+      <div class="shadow-demo" style="box-shadow: 0 10px 20px rgba(255, 215, 0, 0.25); border: 2px solid #FFD700;">
+        Brand 그림자
+        <div style="font-size: 11px; color: #D97706; font-weight: normal; margin-top: 4px;">
+          하니비 브랜딩 카드
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실제 UI 조합 예시 -->
+  <div class="section">
+    <div class="section-title">🎨 Spacing + Radius + Shadow 조합 예시</div>
+    
+    <div class="grid-2">
+      <!-- 예약 카드 -->
+      <div style="background: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); border: 1px solid #E5E7EB;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="width: 48px; height: 48px; background: #EFF6FF; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 24px;">👨‍⚕️</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 16px; font-weight: bold; color: #111827; margin-bottom: 4px;">김한의 한의사</div>
+            <div style="font-size: 13px; color: #6B7280;">내과 전문의</div>
+          </div>
+          <span style="background: #E7F7EF; color: #10B981; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">완료</span>
+        </div>
+        <div style="border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; color: #6B7280; font-size: 14px;">
+            <span>📅</span>
+            <span>2024년 1월 15일 오후 2:30</span>
+          </div>
+        </div>
+        <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px; text-align: right;">
+          간격: 12-16px | Radius: 16px | Shadow: card
+        </div>
+      </div>
+
+      <!-- 하니비 브랜딩 카드 -->
+      <div style="background: linear-gradient(135deg, #FFD700, #FFA500); border-radius: 20px; padding: 24px; box-shadow: 0 10px 20px rgba(255, 215, 0, 0.25); color: white;">
+        <div style="background: rgba(255,255,255,0.3); padding: 6px 12px; border-radius: 8px; display: inline-block; margin-bottom: 16px; font-size: 12px; font-weight: 600;">
+          방문 진료
+        </div>
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 8px;">방문 진료<br>한의사</div>
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 16px;">한의사 방문진료 예약하기</div>
+        <button style="background: white; color: #FFA500; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+          예약하기
+        </button>
+        <div style="font-size: 11px; opacity: 0.8; margin-top: 12px; text-align: right;">
+          간격: 8-24px | Radius: 20px | Shadow: brand
+        </div>
+      </div>
+
+      <!-- 프로필 헤더 카드 -->
+      <div style="background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 24px; padding: 20px; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2); color: white;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; font-size: 24px;">
+            홍
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">홍길동</div>
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">45세 · 남성</div>
+            <div style="font-size: 12px; opacity: 0.8;">📍 서울시 강남구</div>
+          </div>
+        </div>
+        <div style="font-size: 11px; opacity: 0.8; margin-top: 12px; text-align: right;">
+          간격: 4-20px | Radius: 24px | Shadow: primary
+        </div>
+      </div>
+
+      <!-- 상품 카드 -->
+      <div style="background: white; border-radius: 16px; border: 1px solid #E5E7EB; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+        <img src="https://via.placeholder.com/300x140/10B981/FFFFFF?text=Product" style="width: 100%; display: block;">
+        <div style="padding: 12px;">
+          <div style="font-size: 11px; color: #9CA3AF; margin-bottom: 4px;">브랜드명</div>
+          <div style="font-size: 14px; font-weight: bold; color: #111827; margin-bottom: 8px;">혈당측정기 스타터 키트</div>
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 8px;">
+            <span style="font-size: 14px;">⭐</span>
+            <span style="font-size: 12px; font-weight: 600;">4.8</span>
+            <span style="font-size: 11px; color: #9CA3AF;">(1,247)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 12px;">
+            <span style="background: #FEE2E2; color: #EF4444; padding: 2px 4px; border-radius: 4px; font-size: 11px; font-weight: 600;">15%</span>
+            <span style="font-size: 16px; font-weight: bold;">89,000원</span>
+          </div>
+          <button style="width: 100%; background: #3B82F6; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            장바구니 담기
+          </button>
+        </div>
+        <div style="font-size: 11px; color: #9CA3AF; padding: 0 12px 12px; text-align: right;">
+          간격: 4-12px | Radius: 16px | Shadow: card
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 코드 사용 예시 -->
+  <div class="section" style="background: #F3F4F6;">
+    <div class="section-title">💻 Flutter 코드 사용 예시</div>
+    
+    <div style="background: #1F2937; color: #E5E7EB; padding: 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 13px; overflow-x: auto;">
+<pre style="margin: 0; color: #E5E7EB;">
+<span style="color: #9CA3AF;">// 1. import 추가</span>
+<span style="color: #F59E0B;">import</span> <span style="color: #10B981;">'package:your_app/shared/theme/app_spacing.dart'</span>;
+<span style="color: #F59E0B;">import</span> <span style="color: #10B981;">'package:your_app/shared/theme/app_radius.dart'</span>;
+<span style="color: #F59E0B;">import</span> <span style="color: #10B981;">'package:your_app/shared/theme/app_shadows.dart'</span>;
+
+<span style="color: #9CA3AF;">// 2. Spacing 사용</span>
+Container(
+  padding: <span style="color: #3B82F6;">AppSpacing.allMD</span>, <span style="color: #9CA3AF;">// EdgeInsets.all(16)</span>
+  margin: EdgeInsets.symmetric(
+    horizontal: <span style="color: #3B82F6;">AppSpacing.md</span>, <span style="color: #9CA3AF;">// 16px</span>
+    vertical: <span style="color: #3B82F6;">AppSpacing.sm</span>, <span style="color: #9CA3AF;">// 12px</span>
+  ),
+  child: Column(
+    children: [
+      Text(<span style="color: #10B981;">'제목'</span>),
+      SizedBox(height: <span style="color: #3B82F6;">AppSpacing.sm</span>), <span style="color: #9CA3AF;">// 12px</span>
+      Text(<span style="color: #10B981;">'내용'</span>),
+    ],
+  ),
+)
+
+<span style="color: #9CA3AF;">// 3. Radius 사용</span>
+Container(
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: <span style="color: #3B82F6;">AppRadius.cardRadius</span>, <span style="color: #9CA3AF;">// 16px 둥근 모서리</span>
+  ),
+)
+
+<span style="color: #9CA3AF;">// 4. Shadow 사용</span>
+Container(
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: <span style="color: #3B82F6;">AppRadius.cardRadius</span>,
+    boxShadow: <span style="color: #3B82F6;">AppShadows.card</span>, <span style="color: #9CA3AF;">// 카드 그림자</span>
+  ),
+)
+
+<span style="color: #9CA3AF;">// 5. 모두 조합</span>
+Container(
+  padding: <span style="color: #3B82F6;">AppSpacing.cardPaddingAll</span>, <span style="color: #9CA3AF;">// 16px 패딩</span>
+  margin: EdgeInsets.only(bottom: <span style="color: #3B82F6;">AppSpacing.listItemSpacing</span>), <span style="color: #9CA3AF;">// 12px</span>
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: <span style="color: #3B82F6;">AppRadius.cardRadius</span>, <span style="color: #9CA3AF;">// 16px</span>
+    border: Border.all(color: AppColors.border),
+    boxShadow: <span style="color: #3B82F6;">AppShadows.card</span>, <span style="color: #9CA3AF;">// 부드러운 그림자</span>
+  ),
+  child: <span style="color: #9CA3AF;">// 카드 콘텐츠</span>
+)
+
+<span style="color: #9CA3AF;">// 6. 버튼 스타일</span>
+ElevatedButton(
+  onPressed: () {},
+  style: ElevatedButton.styleFrom(
+    padding: <span style="color: #3B82F6;">AppSpacing.buttonPaddingLarge</span>, <span style="color: #9CA3AF;">// 수평 24px, 수직 16px</span>
+    shape: RoundedRectangleBorder(
+      borderRadius: <span style="color: #3B82F6;">AppRadius.buttonRadius</span>, <span style="color: #9CA3AF;">// 8px</span>
+    ),
+    shadowColor: Colors.black,
+    elevation: 2, <span style="color: #9CA3AF;">// 또는 boxShadow 직접 사용</span>
+  ),
+  child: Text(<span style="color: #10B981;">'예약하기'</span>),
+)
+
+<span style="color: #9CA3AF;">// 7. 바텀시트</span>
+showModalBottomSheet(
+  context: context,
+  backgroundColor: Colors.transparent,
+  builder: (ctx) => Container(
+    padding: <span style="color: #3B82F6;">AppSpacing.modalPaddingAll</span>, <span style="color: #9CA3AF;">// 24px</span>
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: <span style="color: #3B82F6;">AppRadius.modalTopRadius</span>, <span style="color: #9CA3AF;">// 상단만 24px</span>
+      boxShadow: <span style="color: #3B82F6;">AppShadows.modal</span>, <span style="color: #9CA3AF;">// 강한 그림자</span>
+    ),
+  ),
+)
+</pre>
+    </div>
+  </div>
+
+  <!-- 변경 사항 요약 -->
+  <div class="section" style="background: #DCFCE7; border-left: 4px solid #10B981;">
+    <div class="section-title" style="border-color: #10B981;">✅ Phase 1 - Day 4 완료!</div>
+    
+    <div style="color: #065F46;">
+      <h4 style="margin-top: 0; color: #065F46;">📋 생성된 파일</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>app_spacing.dart</strong>: 간격 시스템 (7개 기본 + 특수 용도 + EdgeInsets 헬퍼)</li>
+        <li><strong>app_radius.dart</strong>: Border Radius 시스템 (9개 기본 + 컴포넌트별 + BorderRadius 객체)</li>
+        <li><strong>app_shadows.dart</strong>: 그림자 시스템 (용도별 + Elevation + 색상별 그림자)</li>
+      </ul>
+
+      <h4 style="color: #065F46;">✨ 주요 특징</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>8px 기준 간격 시스템</strong>: 모든 간격을 8의 배수로 통일</li>
+        <li><strong>컴포넌트별 최적화</strong>: 버튼, 카드, 모달 등 각 요소에 맞는 값 제공</li>
+        <li><strong>EdgeInsets/BorderRadius 헬퍼</strong>: 자주 사용하는 값 미리 정의</li>
+        <li><strong>색상별 그림자</strong>: Primary, Success, Accent, Brand 그림자로 강조 효과</li>
+        <li><strong>상세한 주석</strong>: 각 값의 사용 예시 포함</li>
+      </ul>
+
+      <h4 style="color: #065F46;">🎯 시스템 통합 완료!</h4>
+      <p style="line-height: 1.8; margin-bottom: 0;">
+        이제 디자인 시스템의 기본 3요소가 모두 완성되었습니다:
+      </p>
+      <ul style="line-height: 1.8;">
+        <li>✅ <strong>Color</strong>: 색상 시스템 (Day 1-2)</li>
+        <li>✅ <strong>Typography</strong>: 타이포그래피 시스템 (Day 3)</li>
+        <li>✅ <strong>Spacing/Radius/Shadow</strong>: 간격/모서리/그림자 시스템 (Day 4)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 다음 단계 -->
+  <div class="section" style="background: #EFF6FF; border-left: 4px solid #3B82F6;">
+    <div class="section-title" style="border-color: #3B82F6;">🚀 다음 단계</div>
+    <div style="color: #1E40AF;">
+      <p style="margin-top: 0; font-size: 16px;">
+        <strong>디자인 시스템 기본 구축 완료!</strong>
+      </p>
+      <p style="line-height: 1.8;">
+        이제 이 디자인 시스템을 활용한 공통 컴포넌트를 만들 차례입니다:
+      </p>
+      <ul style="line-height: 1.8;">
+        <li><strong>Day 5</strong>: 공통 컴포넌트 라이브러리 생성</li>
+        <li style="margin-left: 20px;">- common_button.dart (버튼 컴포넌트)</li>
+        <li style="margin-left: 20px;">- common_card.dart (카드 컴포넌트)</li>
+        <li style="margin-left: 20px;">- common_badge.dart (배지 컴포넌트)</li>
+        <li><strong>Day 6-7</strong>: 홈 화면 개선 (브랜딩 적용)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+
