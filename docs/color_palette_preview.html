@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하니비 앱 색상 시스템 - 미리보기</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background: #F9FAFB;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6B7280;
+  margin-bottom: 40px;
+}
+
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.color-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #E5E7EB;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.color-swatch {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.color-info {
+  padding: 12px;
+  background: white;
+}
+
+.color-name {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.color-hex {
+  font-size: 12px;
+  color: #6B7280;
+  font-family: 'Courier New', monospace;
+}
+
+.color-usage {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.gradient-card {
+  height: 150px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.gradient-name {
+  font-size: 20px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.gradient-desc {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-top: 8px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.example-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: #F9FAFB;
+  border-radius: 12px;
+}
+
+.example-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.button-example {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 12px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.button-example:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.badge-example {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.new-badge {
+  background: #10B981;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🍯 하니비(Honeybee) 앱 색상 시스템</h1>
+  <p class="subtitle">ver 1.4.0 - UI/UX 개선 Phase 1</p>
+
+  <!-- 브랜딩 그라디언트 -->
+  <div class="section">
+    <div class="section-title">🎨 브랜딩 색상 (Honeybee Branding) <span class="new-badge">NEW</span></div>
+    <p style="color: #6B7280; margin-bottom: 16px;">
+      하니비의 핵심 브랜드 아이덴티티를 나타내는 색상입니다. 메인 카드, 히어로 섹션, 로고 등에 사용됩니다.
+    </p>
+    
+    <div class="gradient-card" style="background: linear-gradient(135deg, #FFD700, #FFA500);">
+      <div class="gradient-name">하니비 브랜딩 그라디언트</div>
+      <div class="gradient-desc">Yellow (#FFD700) → Orange (#FFA500)</div>
+    </div>
+
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FFD700;">Yellow</div>
+        <div class="color-info">
+          <div class="color-name">brandYellow <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#FFD700</div>
+          <div class="color-usage">따뜻함, 친근함을 나타내는 메인 브랜드 색상</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FFA500;">Orange</div>
+        <div class="color-info">
+          <div class="color-name">brandOrange <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#FFA500</div>
+          <div class="color-usage">활력, 건강을 나타내는 메인 브랜드 색상</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary Colors -->
+  <div class="section">
+    <div class="section-title">💙 Primary Colors (신뢰감 - Blue)</div>
+    <p style="color: #6B7280; margin-bottom: 16px;">
+      주요 버튼, 링크, 강조 요소에 사용되는 신뢰감을 주는 파란색 계열입니다.
+    </p>
+    
+    <div class="gradient-card" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
+      <div class="gradient-name">Blue 그라디언트</div>
+      <div class="gradient-desc">Blue-600 (#3B82F6) → Blue-700 (#2563EB)</div>
+    </div>
+
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #EFF6FF;">Light</div>
+        <div class="color-info">
+          <div class="color-name">primaryLight <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#EFF6FF (Blue-50)</div>
+          <div class="color-usage">밝은 배경, 호버 상태</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #DBEAFE;">Medium</div>
+        <div class="color-info">
+          <div class="color-name">primaryMedium <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#DBEAFE (Blue-100)</div>
+          <div class="color-usage">중간 배경, 카드 배경</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #3B82F6;">Primary</div>
+        <div class="color-info">
+          <div class="color-name">primary</div>
+          <div class="color-hex">#3B82F6 (Blue-600)</div>
+          <div class="color-usage">주요 버튼, 링크, 강조</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #1E40AF;">Dark</div>
+        <div class="color-info">
+          <div class="color-name">primaryDark</div>
+          <div class="color-hex">#1E40AF (Blue-800)</div>
+          <div class="color-usage">버튼 호버, 강조 텍스트</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary Colors -->
+  <div class="section">
+    <div class="section-title">💚 Secondary Colors (건강/성공 - Green)</div>
+    <p style="color: #6B7280; margin-bottom: 16px;">
+      성공, 완료, 건강 상태를 나타내는 초록색 계열입니다.
+    </p>
+    
+    <div class="gradient-card" style="background: linear-gradient(135deg, #10B981, #059669);">
+      <div class="gradient-name">Green 그라디언트</div>
+      <div class="gradient-desc">Green-500 (#10B981) → Green-600 (#059669)</div>
+    </div>
+
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #D1FAE5;">Light</div>
+        <div class="color-info">
+          <div class="color-name">secondaryLight</div>
+          <div class="color-hex">#D1FAE5 (Green-100)</div>
+          <div class="color-usage">성공 배경, 완료 카드</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #10B981;">Secondary</div>
+        <div class="color-info">
+          <div class="color-name">secondary / success</div>
+          <div class="color-hex">#10B981 (Green-500)</div>
+          <div class="color-usage">성공 버튼, 완료 상태</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #047857;">Dark</div>
+        <div class="color-info">
+          <div class="color-name">secondaryDark</div>
+          <div class="color-hex">#047857 (Green-700)</div>
+          <div class="color-usage">성공 버튼 호버</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accent Colors -->
+  <div class="section">
+    <div class="section-title">💗 Accent Colors (강조 - Pink)</div>
+    <p style="color: #6B7280; margin-bottom: 16px;">
+      특별한 강조, 한의사 모드, 중요 알림에 사용되는 핑크색 계열입니다.
+    </p>
+
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FCE7F3;">Light</div>
+        <div class="color-info">
+          <div class="color-name">accentLight</div>
+          <div class="color-hex">#FCE7F3 (Pink-100)</div>
+          <div class="color-usage">강조 배경, 한의사 카드</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #EC4899;">Accent</div>
+        <div class="color-info">
+          <div class="color-name">accent</div>
+          <div class="color-hex">#EC4899 (Pink-500)</div>
+          <div class="color-usage">한의사 모드, 특별 강조</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #DB2777;">Dark</div>
+        <div class="color-info">
+          <div class="color-name">accentDark <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#DB2777 (Pink-600)</div>
+          <div class="color-usage">강조 버튼 호버</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Semantic Colors -->
+  <div class="section">
+    <div class="section-title">🎯 Semantic Colors (상태 색상)</div>
+    <p style="color: #6B7280; margin-bottom: 16px;">
+      상태를 나타내는 색상입니다. 각 상태에 맞는 색상을 사용하여 사용자 경험을 개선합니다.
+    </p>
+
+    <div class="color-grid">
+      <!-- Success -->
+      <div class="color-card">
+        <div class="color-swatch" style="background: #10B981;">✓ Success</div>
+        <div class="color-info">
+          <div class="color-name">success</div>
+          <div class="color-hex">#10B981</div>
+          <div class="color-usage">예약 완료, 진료 완료</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #E7F7EF; color: #10B981;">✓ Light</div>
+        <div class="color-info">
+          <div class="color-name">successLight <span class="new-badge">UPDATED</span></div>
+          <div class="color-hex">#E7F7EF</div>
+          <div class="color-usage">성공 배경</div>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="color-card">
+        <div class="color-swatch" style="background: #F59E0B;">⚠ Warning</div>
+        <div class="color-info">
+          <div class="color-name">warning</div>
+          <div class="color-hex">#F59E0B</div>
+          <div class="color-usage">대기, 주의 필요</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FEF3C7; color: #F59E0B;">⚠ Light</div>
+        <div class="color-info">
+          <div class="color-name">warningLight</div>
+          <div class="color-hex">#FEF3C7</div>
+          <div class="color-usage">경고 배경</div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div class="color-card">
+        <div class="color-swatch" style="background: #EF4444;">✕ Error</div>
+        <div class="color-info">
+          <div class="color-name">error</div>
+          <div class="color-hex">#EF4444</div>
+          <div class="color-usage">취소, 실패, 오류</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FEE2E2; color: #EF4444;">✕ Light</div>
+        <div class="color-info">
+          <div class="color-name">errorLight</div>
+          <div class="color-hex">#FEE2E2</div>
+          <div class="color-usage">오류 배경</div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="color-card">
+        <div class="color-swatch" style="background: #3B82F6;">ℹ Info</div>
+        <div class="color-info">
+          <div class="color-name">info <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#3B82F6</div>
+          <div class="color-usage">정보, 알림, 안내</div>
+        </div>
+      </div>
+      
+      <div class="color-card">
+        <div class="color-swatch" style="background: #DCFCE7; color: #3B82F6;">ℹ Light</div>
+        <div class="color-info">
+          <div class="color-name">infoLight <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#DCFCE7</div>
+          <div class="color-usage">정보 배경</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Neutral Colors -->
+  <div class="section">
+    <div class="section-title">🌫️ Neutral/Gray Scale</div>
+    <p style="color: #6B7280; margin-bottom: 16px;">
+      배경, 텍스트, 구분선 등에 사용되는 중립 색상입니다.
+    </p>
+
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #F9FAFB; color: #111827; border: 1px solid #E5E7EB;">Background</div>
+        <div class="color-info">
+          <div class="color-name">background</div>
+          <div class="color-hex">#F9FAFB (Gray-50)</div>
+          <div class="color-usage">앱 전체 배경</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #FFFFFF; color: #111827; border: 1px solid #E5E7EB;">Surface</div>
+        <div class="color-info">
+          <div class="color-name">surface</div>
+          <div class="color-hex">#FFFFFF (White)</div>
+          <div class="color-usage">카드, 모달 배경</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #F3F4F6; color: #111827;">Variant</div>
+        <div class="color-info">
+          <div class="color-name">surfaceVariant</div>
+          <div class="color-hex">#F3F4F6 (Gray-100)</div>
+          <div class="color-usage">대체 배경</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 24px; margin-bottom: 12px; color: #111827; font-size: 16px;">텍스트 색상 계층</h3>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background: #111827;">Primary</div>
+        <div class="color-info">
+          <div class="color-name">textPrimary</div>
+          <div class="color-hex">#111827 (Gray-900)</div>
+          <div class="color-usage">메인 제목, 본문</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #6B7280;">Secondary</div>
+        <div class="color-info">
+          <div class="color-name">textSecondary <span class="new-badge">UPDATED</span></div>
+          <div class="color-hex">#6B7280 (Gray-500)</div>
+          <div class="color-usage">보조 텍스트, 설명</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #9CA3AF;">Hint</div>
+        <div class="color-info">
+          <div class="color-name">textHint</div>
+          <div class="color-hex">#9CA3AF (Gray-400)</div>
+          <div class="color-usage">힌트, placeholder</div>
+        </div>
+      </div>
+
+      <div class="color-card">
+        <div class="color-swatch" style="background: #D1D5DB; color: #6B7280;">Disabled</div>
+        <div class="color-info">
+          <div class="color-name">textDisabled <span class="new-badge">NEW</span></div>
+          <div class="color-hex">#D1D5DB (Gray-300)</div>
+          <div class="color-usage">비활성화된 텍스트</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI 컴포넌트 예시 -->
+  <div class="section">
+    <div class="section-title">🎨 UI 컴포넌트 예시</div>
+    
+    <div class="example-section">
+      <div class="example-title">버튼 스타일</div>
+      <button class="button-example" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: white;">
+        하니비 브랜드 버튼
+      </button>
+      <button class="button-example" style="background: #3B82F6; color: white;">
+        Primary 버튼
+      </button>
+      <button class="button-example" style="background: #10B981; color: white;">
+        Success 버튼
+      </button>
+      <button class="button-example" style="background: #EC4899; color: white;">
+        Accent 버튼
+      </button>
+      <button class="button-example" style="background: #EF4444; color: white;">
+        Error 버튼
+      </button>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">상태 배지</div>
+      <span class="badge-example" style="background: #E7F7EF; color: #10B981;">✓ 완료</span>
+      <span class="badge-example" style="background: #FEF3C7; color: #F59E0B;">⏳ 대기중</span>
+      <span class="badge-example" style="background: #FEE2E2; color: #EF4444;">✕ 취소</span>
+      <span class="badge-example" style="background: #EFF6FF; color: #3B82F6;">ℹ 정보</span>
+      <span class="badge-example" style="background: #DCFCE7; color: #16A34A;">✓ 인증완료</span>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">카드 예시 (하니비 메인 카드)</div>
+      <div style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 32px; border-radius: 20px; color: white; max-width: 400px;">
+        <div style="background: rgba(255, 255, 255, 0.3); display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-bottom: 12px;">
+          방문 진료
+        </div>
+        <h2 style="font-size: 28px; font-weight: bold; margin: 0 0 8px 0;">방문 진료<br>한의사</h2>
+        <p style="opacity: 0.9; margin: 0 0 16px 0;">한의사 방문진료 예약하기</p>
+        <button style="background: white; color: #FFA500; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+          예약하기
+        </button>
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">프로필 헤더 예시 (Blue 그라디언트)</div>
+      <div style="background: linear-gradient(135deg, #3B82F6, #2563EB); padding: 24px; border-radius: 20px; color: white; max-width: 400px;">
+        <div style="display: flex; align-items: center;">
+          <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white;">
+            <span style="font-size: 24px; color: #3B82F6;">👤</span>
+          </div>
+          <div style="margin-left: 16px; flex: 1;">
+            <h3 style="font-size: 20px; font-weight: bold; margin: 0 0 4px 0;">홍길동</h3>
+            <p style="opacity: 0.9; margin: 0; font-size: 14px;">45세 · 남성</p>
+            <p style="opacity: 0.8; margin: 4px 0 0 0; font-size: 12px;">📍 서울시 강남구</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">채팅 메시지 예시</div>
+      <div style="max-width: 400px;">
+        <div style="background: #E5E7EB; padding: 12px 16px; border-radius: 16px; margin-bottom: 8px; display: inline-block; max-width: 70%;">
+          <p style="margin: 0; color: #111827; font-size: 14px;">안녕하세요, 진료 예약 문의드립니다.</p>
+          <p style="margin: 4px 0 0 0; font-size: 11px; color: #6B7280;">오전 10:30</p>
+        </div>
+        <div style="text-align: right;">
+          <div style="background: #10B981; padding: 12px 16px; border-radius: 16px; display: inline-block; max-width: 70%;">
+            <p style="margin: 0; color: white; font-size: 14px;">네, 안녕하세요. 언제 진료 받으시려고 하시나요?</p>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: rgba(255,255,255,0.8);">오전 10:32</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 색상 사용 가이드 -->
+  <div class="section">
+    <div class="section-title">📖 색상 사용 가이드</div>
+    
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="background: #F3F4F6;">
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #E5E7EB;">색상</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #E5E7EB;">사용 예시</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #E5E7EB;">사용하지 말아야 할 곳</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">
+            <span style="display: inline-block; width: 20px; height: 20px; background: linear-gradient(135deg, #FFD700, #FFA500); border-radius: 4px; vertical-align: middle;"></span>
+            <strong style="margin-left: 8px;">브랜드 그라디언트</strong>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">메인 히어로 카드, 브랜딩 섹션, 로고 배경</td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB; color: #EF4444;">일반 버튼, 텍스트 배경</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">
+            <span style="display: inline-block; width: 20px; height: 20px; background: #3B82F6; border-radius: 4px; vertical-align: middle;"></span>
+            <strong style="margin-left: 8px;">Primary Blue</strong>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">주요 버튼, 링크, 선택된 탭</td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB; color: #EF4444;">오류 메시지, 경고</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">
+            <span style="display: inline-block; width: 20px; height: 20px; background: #10B981; border-radius: 4px; vertical-align: middle;"></span>
+            <strong style="margin-left: 8px;">Success Green</strong>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">성공 메시지, 완료 상태, 채팅 메시지</td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB; color: #EF4444;">메인 브랜딩, 오류 상태</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">
+            <span style="display: inline-block; width: 20px; height: 20px; background: #EC4899; border-radius: 4px; vertical-align: middle;"></span>
+            <strong style="margin-left: 8px;">Accent Pink</strong>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB;">한의사 모드, 특별 강조, 프로모션</td>
+          <td style="padding: 12px; border-bottom: 1px solid #E5E7EB; color: #EF4444;">일반적인 버튼, 메인 브랜딩</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 변경 사항 요약 -->
+  <div class="section" style="background: #FEF3C7; border-left: 4px solid #F59E0B;">
+    <div class="section-title" style="border-color: #F59E0B;">📋 변경 사항 요약 (2026-01-23)</div>
+    
+    <div style="color: #78350F;">
+      <h4 style="margin-top: 0; color: #78350F;">✨ 추가된 색상</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>brandYellow, brandOrange, brandGradient</strong> - 하니비 브랜딩 색상</li>
+        <li><strong>blueGradient, greenGradient</strong> - 그라디언트 시스템</li>
+        <li><strong>primaryLight, primaryMedium</strong> - Primary 색상 변형 확장</li>
+        <li><strong>accentDark</strong> - Accent 어두운 변형</li>
+        <li><strong>warningDark, errorDark</strong> - Semantic 색상 어두운 변형</li>
+        <li><strong>info, infoLight</strong> - 정보 상태 색상</li>
+        <li><strong>textDisabled</strong> - 비활성화 텍스트 색상</li>
+      </ul>
+
+      <h4 style="color: #78350F;">🔄 변경된 색상</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>primaryLight</strong>: #DBEAFE → #EFF6FF (더 밝게 조정)</li>
+        <li><strong>textSecondary</strong>: #4B5563 → #6B7280 (일관성 개선)</li>
+        <li><strong>successLight</strong>: #D1FAE5 → #E7F7EF (Custom 색상)</li>
+      </ul>
+
+      <h4 style="color: #78350F;">📝 개선 사항</h4>
+      <ul style="line-height: 1.8;">
+        <li>색상 그룹을 5개 섹션으로 명확하게 분리</li>
+        <li>각 색상에 상세한 주석 추가 (용도 설명)</li>
+        <li>textTertiary 제거 (textSecondary로 통합)</li>
+        <li>색상 계층 구조 명확화</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 다음 단계 -->
+  <div class="section" style="background: #DCFCE7; border-left: 4px solid #10B981;">
+    <div class="section-title" style="border-color: #10B981;">✅ 다음 단계</div>
+    <div style="color: #065F46;">
+      <p style="margin-top: 0; font-size: 16px;">
+        <strong>Phase 1 - Day 1-2 완료!</strong>
+      </p>
+      <p style="line-height: 1.8;">
+        색상 시스템 통합이 완료되었습니다. 이제 다음 단계로 넘어갈 수 있습니다:
+      </p>
+      <ul style="line-height: 1.8;">
+        <li><strong>Day 3</strong>: 타이포그래피 시스템 생성 (app_typography.dart)</li>
+        <li><strong>Day 4</strong>: 간격/Radius/Shadow 시스템 생성</li>
+        <li><strong>Day 5</strong>: 공통 컴포넌트 라이브러리 생성</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// 색상 카드 클릭 시 HEX 코드 복사
+document.querySelectorAll('.color-card').forEach(card => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', function() {
+    const hexCode = this.querySelector('.color-hex').textContent;
+    const colorCode = hexCode.split(' ')[0]; // "#FFD700 (Gold)" -> "#FFD700"
+    
+    navigator.clipboard.writeText(colorCode).then(() => {
+      const originalBorder = this.style.border;
+      this.style.border = '2px solid #10B981';
+      this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+      
+      setTimeout(() => {
+        this.style.border = originalBorder;
+        this.style.boxShadow = '';
+      }, 500);
+    });
+  });
+});
+</script>
+</body>
+</html>
+
