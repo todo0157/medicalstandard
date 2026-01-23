@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// 앱 전체에서 사용하는 통합 간격 시스템
 /// 
 /// 8px 기준의 일관된 간격 시스템을 제공합니다.

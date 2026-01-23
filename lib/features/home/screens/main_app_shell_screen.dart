@@ -12,6 +12,16 @@ import '../../../core/providers/ui_mode_provider.dart';
 import '../../../core/providers/profile_provider.dart';
 import '../../../core/models/user_profile.dart';
 
+// 디자인 시스템 import (Phase 1)
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_typography.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_radius.dart';
+import '../../../shared/theme/app_shadows.dart';
+import '../../../shared/widgets/common_button.dart';
+import '../../../shared/widgets/common_card.dart';
+import '../../../shared/widgets/common_badge.dart';
+
 // 4쪽&7쪽_대표 화면 설명&초기 화면.html의 Primary Color (#ec4899) 반영
 const Color kPrimaryPink = Color(0xFFEC4899);
 const Color kPrimaryBlue = Color(0xFF3B82F6);
@@ -707,6 +717,304 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  // ========================================
+  // Phase 1 개선: 새로운 UI 메서드들
+  // ========================================
+
+  /// 상단 브랜딩 헤더 (하니비 로고 + 환영 메시지)
+  Widget _buildBrandingHeader(BuildContext context, WidgetRef ref) {
+    final profileState = ref.watch(profileStateNotifierProvider);
+    final userName = profileState.maybeWhen(
+      data: (profile) => profile.name,
+      orElse: () => '사용자',
+    );
+
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: AppColors.brandGradient,
+        borderRadius: AppRadius.cardLargeRadius,
+        boxShadow: AppShadows.brandShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 하니비 로고
+          Row(
+            children: [
+              Icon(
+                Icons.favorite,
+                color: Colors.white,
+                size: 28,
+              ),
+              SizedBox(width: AppSpacing.xs),
+              Text(
+                '하니비',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.md),
+          // 환영 메시지
+          Text(
+            '안녕하세요, ${userName}님',
+            style: AppTypography.titleMedium.copyWith(
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xxs),
+          Text(
+            '오늘 어떤 도움이 필요하신가요?',
+            style: AppTypography.bodyMedium.copyWith(
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 메인 서비스 카드 (방문진료)
+  Widget _buildMainServiceCard(BuildContext context) {
+    return AppGradientCard(
+      gradient: AppColors.brandGradient,
+      padding: EdgeInsets.all(AppSpacing.lg),
+      radius: AppRadius.cardLargeRadius,
+      shadow: true,
+      onTap: () async {
+        // 기존 "한의사 찾기" 버튼과 동일한 로직
+        final doctor = await context.push<Doctor>('/find-doctor');
+        if (doctor != null && mounted) {
+          setState(() {
+            _selectedDoctor = doctor;
+            if (doctor.clinicLat != null && doctor.clinicLng != null) {
+              _selectedAddress = Address(
+                roadAddress: doctor.clinicName,
+                jibunAddress: doctor.clinicName,
+                x: doctor.clinicLng ?? 0,
+                y: doctor.clinicLat ?? 0,
+                distance: doctor.distanceKm ?? 0,
+                addressElements: [],
+              );
+            }
+          });
+        }
+      },
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 배지
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xxs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: AppRadius.badgeSmallRadius,
+                  ),
+                  child: Text(
+                    '방문 진료',
+                    style: AppTypography.labelMedium.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.sm),
+                // 제목
+                Text(
+                  '방문 진료\n한의사',
+                  style: AppTypography.displaySmall.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.xs),
+                // 설명
+                Text(
+                  '한의사 방문진료 예약하기',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                // 버튼
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: AppRadius.buttonRadius,
+                  ),
+                  child: Text(
+                    '예약하기',
+                    style: AppTypography.button.copyWith(
+                      color: AppColors.brandOrange,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 일러스트 이미지
+          SizedBox(
+            width: 80,
+            height: 80,
+            child: Image.network(
+              'https://readdy.ai/api/search-image?query=Professional%20doctor%20character%20illustration%2C%20friendly%20male%20doctor%20with%20stethoscope%2C%20medical%20uniform%2C%20smiling%2C%20clean%20medical%20illustration%20style%2C%20isolated%20on%20transparent%20background%2C%20centered%20composition%2C%20the%20character%20should%20take%20up%2080%25%20of%20the%20frame&width=80&height=80&seq=doctor1&orientation=squarish',
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.medical_services,
+                size: 60,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 추가 서비스 그리드
+  Widget _buildAdditionalServices(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '추가 서비스',
+          style: AppTypography.titleSmall,
+        ),
+        SizedBox(height: AppSpacing.md),
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: AppSpacing.sm,
+          mainAxisSpacing: AppSpacing.sm,
+          childAspectRatio: 1.1,
+          children: [
+            _buildServiceCard(
+              title: '의료기기\n추천',
+              badge: '🍯 추천 제품',
+              icon: Icons.medical_services,
+              color: AppColors.brandYellow,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('의료기기 추천 화면 준비 중입니다.')),
+                );
+              },
+            ),
+            _buildServiceCard(
+              title: '요양보호사\n부르기',
+              badge: '요양 서비스',
+              icon: Icons.elderly,
+              color: AppColors.brandOrange,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('요양보호사 서비스 준비 중입니다.')),
+                );
+              },
+            ),
+            _buildServiceCard(
+              title: '의료기기\n대여',
+              icon: Icons.accessible,
+              color: AppColors.secondary,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('의료기기 대여 서비스 준비 중입니다.')),
+                );
+              },
+            ),
+            _buildServiceCard(
+              title: '장기요양등급\n신청하기',
+              icon: Icons.description,
+              color: AppColors.accent,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('장기요양등급 신청 화면 준비 중입니다.')),
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// 서비스 카드 (추가 서비스 그리드용)
+  Widget _buildServiceCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    String? badge,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: AppRadius.cardRadius,
+          border: Border.all(
+            color: color.withOpacity(0.3),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // 배지 (있을 경우)
+            if (badge != null)
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xs,
+                  vertical: AppSpacing.xxs,
+                ),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: AppRadius.badgeSmallRadius,
+                ),
+                child: Text(
+                  badge,
+                  style: AppTypography.captionSmall.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            else
+              SizedBox(height: AppSpacing.sm),
+            // 제목
+            Text(
+              title,
+              style: AppTypography.headingSmall,
+            ),
+            // 아이콘
+            Align(
+              alignment: Alignment.center,
+              child: Icon(
+                icon,
+                size: 32,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final uiMode = ref.watch(uiModeProvider);
@@ -716,16 +1024,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return const PractitionerHomeScreen();
     }
     
-    // 환자 모드 (기존 UI)
+    // 환자 모드 - Phase 1 개선 UI
     return Container(
-      color: kPrimaryPink.withValues(alpha: 0.05),
+      color: AppColors.background,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(AppSpacing.screenPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ✨ Phase 1 추가: 브랜딩 헤더
+            _buildBrandingHeader(context, ref),
+            SizedBox(height: AppSpacing.sectionSpacing),
+            
+            // ✨ Phase 1 추가: 메인 서비스 카드 (방문진료)
+            _buildMainServiceCard(context),
+            SizedBox(height: AppSpacing.sectionSpacing),
+            
+            // ✨ Phase 1 추가: 추가 서비스 그리드
+            _buildAdditionalServices(context),
+            SizedBox(height: AppSpacing.sectionSpacing),
+            
+            // 🔄 기존 유지: 환자 선택
             _buildPatientSelection(),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.lg),
+            
+            // 🔄 기존 유지: 주소 입력
             GestureDetector(
               onTap: () async {
                 final address = await context.push<Address>(
@@ -739,16 +1062,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               },
               child: _buildAddressButton(_selectedAddress),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: AppSpacing.lg),
+            
+            // 🔄 기존 유지: 날짜 선택
+            Text(
               "언제 진료를 받을까요?",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: kDarkGray,
-              ),
+              style: AppTypography.titleSmall,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             GestureDetector(
               onTap: () => _selectDate(context),
               child: _buildSelectionButton(
@@ -761,86 +1082,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Icons.calendar_today,
               ),
             ),
-            const SizedBox(height: 24),
-            const Text(
+            SizedBox(height: AppSpacing.lg),
+            
+            // 🔄 기존 유지: 증상 선택
+            Text(
               "어떤 질환으로 진료받으시나요?",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: kDarkGray,
-              ),
+              style: AppTypography.titleSmall,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             _buildSymptomSelection(),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () async {
-                final doctor = await context.push<Doctor>('/find-doctor');
-                if (doctor != null && mounted) {
-                  setState(() {
-                    _selectedDoctor = doctor;
-                    // 선택된 한의사의 클리닉 주소를 자동으로 주소로 설정
-                    if (doctor.clinicLat != null && doctor.clinicLng != null) {
-                      // 주소는 나중에 geocoding으로 변환 가능하지만, 일단 클리닉 이름을 주소로 사용
-                      _selectedAddress = Address(
-                        roadAddress: doctor.clinicName,
-                        jibunAddress: doctor.clinicName,
-                        x: doctor.clinicLng ?? 0,
-                        y: doctor.clinicLat ?? 0,
-                        distance: doctor.distanceKm ?? 0,
-                        addressElements: [],
-                      );
-                    }
-                  });
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimaryPink,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                _selectedDoctor != null
-                    ? "${_selectedDoctor!.name} 한의사 선택됨"
-                    : "한의사 찾기",
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-            ),
+            
+            // ❌ 기존 "한의사 찾기" 버튼 삭제 (메인 서비스 카드로 대체됨)
+            
+            // 🔄 기존 유지: 선택된 한의사 정보
             if (_selectedDoctor != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: kPrimaryPink.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: kPrimaryPink.withValues(alpha: 0.3)),
+                  color: AppColors.primaryLight,
+                  borderRadius: AppRadius.cardRadius,
+                  border: Border.all(
+                    color: AppColors.primary.withOpacity(0.3),
+                  ),
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.local_hospital, color: kPrimaryPink, size: 20),
-                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.local_hospital, 
+                          color: AppColors.primary, 
+                          size: 20,
+                        ),
+                        SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 _selectedDoctor!.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
+                                style: AppTypography.headingMedium,
                               ),
                               Text(
                                 "${_selectedDoctor!.specialty} · ${_selectedDoctor!.clinicName}",
-                                style: TextStyle(
-                                  color: kGrayText,
-                                  fontSize: 12,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -858,7 +1145,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
                     // 예약 가능한 시간 표시
                     Consumer(
                       builder: (context, ref, _) {
