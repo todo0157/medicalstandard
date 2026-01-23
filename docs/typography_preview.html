@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하니비 앱 타이포그래피 시스템 - 미리보기</title>
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background: #F9FAFB;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6B7280;
+  margin-bottom: 40px;
+}
+
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.type-sample {
+  padding: 20px;
+  margin-bottom: 16px;
+  background: #F9FAFB;
+  border-radius: 12px;
+  border-left: 4px solid #3B82F6;
+}
+
+.type-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3B82F6;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-specs {
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.usage-note {
+  font-size: 12px;
+  color: #9CA3AF;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.example-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.example-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.new-badge {
+  background: #10B981;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.scale-visual {
+  position: relative;
+  padding-left: 60px;
+  margin-bottom: 12px;
+}
+
+.scale-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 4px;
+  background: linear-gradient(to right, #3B82F6, transparent);
+  border-radius: 2px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th {
+  background: #F3F4F6;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #111827;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #E5E7EB;
+  color: #6B7280;
+}
+
+.highlight {
+  background: #FEF3C7;
+  border-left-color: #F59E0B;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📝 하니비(Honeybee) 앱 타이포그래피 시스템</h1>
+  <p class="subtitle">ver 1.4.0 - UI/UX 개선 Phase 1</p>
+
+  <!-- Display -->
+  <div class="section">
+    <div class="section-title">Display (매우 큰 제목)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      온보딩, 랜딩 페이지, 중요한 메시지 등 사용자의 주목을 끌어야 하는 곳에 사용합니다.
+    </p>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 50px;"></div>
+      <div class="type-label">Display Large</div>
+      <div style="font-size: 32px; font-weight: bold; color: #111827; letter-spacing: -0.5px; line-height: 1.2;">
+        하니비와 함께하는 건강한 삶
+      </div>
+      <div class="type-specs">32px · Bold (700) · -0.5 letter-spacing · 1.2 line-height</div>
+      <div class="usage-note">사용 예: 온보딩 화면 메인 제목</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 45px;"></div>
+      <div class="type-label">Display Medium</div>
+      <div style="font-size: 28px; font-weight: bold; color: #111827; letter-spacing: -0.5px; line-height: 1.2;">
+        오늘도 건강한 하루 되세요
+      </div>
+      <div class="type-specs">28px · Bold (700) · -0.5 letter-spacing · 1.2 line-height</div>
+      <div class="usage-note">사용 예: 큰 섹션 제목, 강조 메시지</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 40px;"></div>
+      <div class="type-label">Display Small</div>
+      <div style="font-size: 24px; font-weight: bold; color: #111827; letter-spacing: -0.3px; line-height: 1.3;">
+        방문 진료 한의사
+      </div>
+      <div class="type-specs">24px · Bold (700) · -0.3 letter-spacing · 1.3 line-height</div>
+      <div class="usage-note">사용 예: 카드 내 큰 제목</div>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="section">
+    <div class="section-title">Title (제목)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      페이지 제목, AppBar 제목, 섹션 제목 등 정보 계층의 최상위 텍스트에 사용합니다.
+    </p>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 40px;"></div>
+      <div class="type-label">Title Large</div>
+      <div style="font-size: 24px; font-weight: bold; color: #111827; letter-spacing: -0.3px; line-height: 1.3;">
+        진료 기록
+      </div>
+      <div class="type-specs">24px · Bold (700) · -0.3 letter-spacing · 1.3 line-height</div>
+      <div class="usage-note">사용 예: 페이지 메인 제목</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 35px;"></div>
+      <div class="type-label">Title Medium</div>
+      <div style="font-size: 20px; font-weight: 600; color: #111827; letter-spacing: -0.3px; line-height: 1.3;">
+        채팅 목록
+      </div>
+      <div class="type-specs">20px · SemiBold (600) · -0.3 letter-spacing · 1.3 line-height</div>
+      <div class="usage-note">사용 예: AppBar 제목, 큰 섹션 제목</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 30px;"></div>
+      <div class="type-label">Title Small</div>
+      <div style="font-size: 18px; font-weight: 600; color: #111827; letter-spacing: -0.2px; line-height: 1.4;">
+        오늘의 한방 팁
+      </div>
+      <div class="type-specs">18px · SemiBold (600) · -0.2 letter-spacing · 1.4 line-height</div>
+      <div class="usage-note">사용 예: 작은 섹션 제목, 카드 제목</div>
+    </div>
+  </div>
+
+  <!-- Heading -->
+  <div class="section">
+    <div class="section-title">Heading (소제목)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      카드 내 소제목, 리스트 항목 제목 등 중간 계층의 텍스트에 사용합니다.
+    </p>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 28px;"></div>
+      <div class="type-label">Heading Large</div>
+      <div style="font-size: 16px; font-weight: bold; color: #111827; line-height: 1.4;">
+        김한의 한의사
+      </div>
+      <div class="type-specs">16px · Bold (700) · 1.4 line-height</div>
+      <div class="usage-note">사용 예: 카드 내 메인 소제목, 한의사 이름</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 26px;"></div>
+      <div class="type-label">Heading Medium</div>
+      <div style="font-size: 15px; font-weight: 600; color: #111827; line-height: 1.4;">
+        예약 정보
+      </div>
+      <div class="type-specs">15px · SemiBold (600) · 1.4 line-height</div>
+      <div class="usage-note">사용 예: 리스트 항목 제목</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 24px;"></div>
+      <div class="type-label">Heading Small</div>
+      <div style="font-size: 14px; font-weight: 600; color: #111827; line-height: 1.4;">
+        진료 내역
+      </div>
+      <div class="type-specs">14px · SemiBold (600) · 1.4 line-height</div>
+      <div class="usage-note">사용 예: 작은 카드 제목, 버튼 라벨</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="section">
+    <div class="section-title">Body (본문)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      일반 텍스트, 설명, 콘텐츠 등 앱의 주요 본문 텍스트에 사용합니다.
+    </p>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 28px;"></div>
+      <div class="type-label">Body Large</div>
+      <div style="font-size: 16px; font-weight: normal; color: #111827; line-height: 1.5;">
+        안녕하세요, 홍길동님. 오늘 예약하신 방문 진료가 오후 2시 30분에 예정되어 있습니다. 준비물을 확인해주세요.
+      </div>
+      <div class="type-specs">16px · Regular (400) · 1.5 line-height</div>
+      <div class="usage-note">사용 예: 중요한 본문, 설명 텍스트</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 24px;"></div>
+      <div class="type-label">Body Medium</div>
+      <div style="font-size: 14px; font-weight: normal; color: #111827; line-height: 1.5;">
+        내과 전문의로 8년간 방문진료를 통해 많은 환자분들의 건강을 관리해왔습니다.
+      </div>
+      <div class="type-specs">14px · Regular (400) · 1.5 line-height</div>
+      <div class="usage-note">사용 예: 일반 본문, 카드 설명 (가장 많이 사용)</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 22px;"></div>
+      <div class="type-label">Body Small</div>
+      <div style="font-size: 13px; font-weight: normal; color: #111827; line-height: 1.5;">
+        서울시 강남구 테헤란로 123-45
+      </div>
+      <div class="type-specs">13px · Regular (400) · 1.5 line-height</div>
+      <div class="usage-note">사용 예: 작은 설명 텍스트, 보조 정보</div>
+    </div>
+  </div>
+
+  <!-- Label -->
+  <div class="section">
+    <div class="section-title">Label (라벨)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      입력 필드 라벨, 작은 제목, 태그 등에 사용합니다. Medium 굵기를 사용하여 본문과 구분합니다.
+    </p>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 24px;"></div>
+      <div class="type-label">Label Large</div>
+      <div style="font-size: 14px; font-weight: 500; color: #6B7280; line-height: 1.4;">
+        이름
+      </div>
+      <div class="type-specs">14px · Medium (500) · #6B7280 · 1.4 line-height</div>
+      <div class="usage-note">사용 예: 입력 필드 라벨, 중요 태그</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 20px;"></div>
+      <div class="type-label">Label Medium</div>
+      <div style="font-size: 12px; font-weight: 500; color: #6B7280; line-height: 1.4;">
+        완료
+      </div>
+      <div class="type-specs">12px · Medium (500) · #6B7280 · 1.4 line-height</div>
+      <div class="usage-note">사용 예: 작은 라벨, 배지 텍스트</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 18px;"></div>
+      <div class="type-label">Label Small</div>
+      <div style="font-size: 11px; font-weight: 500; color: #6B7280; line-height: 1.4;">
+        신규
+      </div>
+      <div class="type-specs">11px · Medium (500) · #6B7280 · 1.4 line-height</div>
+      <div class="usage-note">사용 예: 매우 작은 라벨, 상태 표시</div>
+    </div>
+  </div>
+
+  <!-- Caption -->
+  <div class="section">
+    <div class="section-title">Caption (설명/힌트)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      힌트 텍스트, placeholder, 메타 정보 등 가장 작은 텍스트에 사용합니다.
+    </p>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 20px;"></div>
+      <div class="type-label">Caption</div>
+      <div style="font-size: 12px; font-weight: normal; color: #9CA3AF; line-height: 1.3;">
+        2024년 1월 15일 오후 2:30
+      </div>
+      <div class="type-specs">12px · Regular (400) · #9CA3AF · 1.3 line-height</div>
+      <div class="usage-note">사용 예: 힌트 텍스트, 날짜, 시간</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 18px;"></div>
+      <div class="type-label">Caption Small</div>
+      <div style="font-size: 11px; font-weight: normal; color: #9CA3AF; line-height: 1.3;">
+        약 2.3km
+      </div>
+      <div class="type-specs">11px · Regular (400) · #9CA3AF · 1.3 line-height</div>
+      <div class="usage-note">사용 예: 매우 작은 메타 정보</div>
+    </div>
+  </div>
+
+  <!-- Button -->
+  <div class="section">
+    <div class="section-title">Button (버튼 텍스트)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      버튼 라벨에 사용합니다. 가독성을 위해 SemiBold를 사용하고 자간을 약간 넓게 설정합니다.
+    </p>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 26px;"></div>
+      <div class="type-label">Button</div>
+      <div style="font-size: 15px; font-weight: 600; letter-spacing: 0.3px; line-height: 1.2;">
+        예약하기
+      </div>
+      <div class="type-specs">15px · SemiBold (600) · +0.3 letter-spacing · 1.2 line-height</div>
+      <div class="usage-note">사용 예: 큰 버튼 (Primary, Secondary)</div>
+    </div>
+
+    <div class="type-sample">
+      <div class="scale-bar" style="width: 22px;"></div>
+      <div class="type-label">Button Small</div>
+      <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.3px; line-height: 1.2;">
+        변경
+      </div>
+      <div class="type-specs">13px · SemiBold (600) · +0.3 letter-spacing · 1.2 line-height</div>
+      <div class="usage-note">사용 예: 작은 버튼, Outlined 버튼</div>
+    </div>
+  </div>
+
+  <!-- Semantic Styles -->
+  <div class="section">
+    <div class="section-title">Semantic Text Styles (특수 용도)</div>
+    <p style="color: #6B7280; margin-bottom: 20px;">
+      특정 상황에서 사용하도록 미리 정의된 스타일입니다.
+    </p>
+
+    <div class="comparison-grid">
+      <div style="padding: 16px; background: #E7F7EF; border-radius: 12px; border: 1px solid #10B981;">
+        <div style="font-size: 12px; font-weight: 600; color: #10B981; margin-bottom: 8px;">SUCCESS TEXT</div>
+        <div style="font-size: 14px; font-weight: 600; color: #10B981;">예약이 완료되었습니다</div>
+        <div style="font-size: 11px; color: #059669; margin-top: 4px;">14px · SemiBold (600) · Green</div>
+      </div>
+
+      <div style="padding: 16px; background: #FEE2E2; border-radius: 12px; border: 1px solid #EF4444;">
+        <div style="font-size: 12px; font-weight: 600; color: #EF4444; margin-bottom: 8px;">ERROR TEXT</div>
+        <div style="font-size: 14px; font-weight: 600; color: #EF4444;">예약을 취소하지 못했습니다</div>
+        <div style="font-size: 11px; color: #DC2626; margin-top: 4px;">14px · SemiBold (600) · Red</div>
+      </div>
+
+      <div style="padding: 16px; background: #FEF3C7; border-radius: 12px; border: 1px solid #F59E0B;">
+        <div style="font-size: 12px; font-weight: 600; color: #F59E0B; margin-bottom: 8px;">WARNING TEXT</div>
+        <div style="font-size: 14px; font-weight: 600; color: #F59E0B;">예약 시간까지 30분 남았습니다</div>
+        <div style="font-size: 11px; color: #D97706; margin-top: 4px;">14px · SemiBold (600) · Orange</div>
+      </div>
+
+      <div style="padding: 16px; background: #EFF6FF; border-radius: 12px; border: 1px solid #3B82F6;">
+        <div style="font-size: 12px; font-weight: 600; color: #3B82F6; margin-bottom: 8px;">INFO TEXT</div>
+        <div style="font-size: 14px; font-weight: 600; color: #3B82F6;">새로운 건강 팁이 추가되었습니다</div>
+        <div style="font-size: 11px; color: #2563EB; margin-top: 4px;">14px · SemiBold (600) · Blue</div>
+      </div>
+
+      <div style="padding: 16px; background: #F9FAFB; border-radius: 12px; border: 1px solid #3B82F6;">
+        <div style="font-size: 12px; font-weight: 600; color: #3B82F6; margin-bottom: 8px;">LINK TEXT</div>
+        <div style="font-size: 14px; font-weight: 500; color: #3B82F6; text-decoration: underline;">자세히 보기</div>
+        <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">14px · Medium (500) · Blue · Underline</div>
+      </div>
+
+      <div style="padding: 16px; background: #F9FAFB; border-radius: 12px; border: 1px solid #E5E7EB;">
+        <div style="font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 8px;">PRICE TEXT</div>
+        <div style="font-size: 18px; font-weight: bold; color: #111827;">89,000원</div>
+        <div style="font-size: 11px; color: #6B7280; margin-top: 4px;">18px · Bold (700)</div>
+      </div>
+
+      <div style="padding: 16px; background: #FEE2E2; border-radius: 12px; border: 1px solid #EF4444;">
+        <div style="font-size: 12px; font-weight: 600; color: #EF4444; margin-bottom: 8px;">DISCOUNT PRICE</div>
+        <div style="font-size: 18px; font-weight: bold; color: #EF4444;">75,000원</div>
+        <div style="font-size: 11px; color: #DC2626; margin-top: 4px;">18px · Bold (700) · Red</div>
+      </div>
+
+      <div style="padding: 16px; background: #F9FAFB; border-radius: 12px; border: 1px solid #E5E7EB;">
+        <div style="font-size: 12px; font-weight: 600; color: #6B7280; margin-bottom: 8px;">BADGE TEXT</div>
+        <div style="display: inline-block; padding: 6px 12px; background: #3B82F6; color: white; border-radius: 12px; font-size: 12px; font-weight: bold; letter-spacing: 0.2px;">추천</div>
+        <div style="font-size: 11px; color: #6B7280; margin-top: 8px;">12px · Bold (700) · +0.2 letter-spacing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 실제 화면 예시 -->
+  <div class="section">
+    <div class="section-title">🎨 실제 화면 적용 예시</div>
+    
+    <div class="comparison-grid">
+      <!-- 프로필 카드 예시 -->
+      <div class="example-card">
+        <div class="example-title">프로필 카드</div>
+        <div style="display: flex; align-items: center;">
+          <div style="width: 56px; height: 56px; background: #3B82F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">
+            홍
+          </div>
+          <div style="margin-left: 16px; flex: 1;">
+            <div style="font-size: 16px; font-weight: bold; color: #111827; margin-bottom: 4px;">
+              홍길동 <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Heading Large)</span>
+            </div>
+            <div style="font-size: 14px; color: #6B7280; margin-bottom: 2px;">
+              45세 · 남성 <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Body Medium)</span>
+            </div>
+            <div style="font-size: 12px; color: #9CA3AF;">
+              서울시 강남구 <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Caption)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 예약 카드 예시 -->
+      <div class="example-card">
+        <div class="example-title">예약 카드</div>
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 8px;">
+            김한의 한의사 <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Heading Medium)</span>
+          </div>
+          <div style="font-size: 13px; color: #6B7280; margin-bottom: 8px;">
+            내과 전문의 <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Body Small)</span>
+          </div>
+          <div style="display: flex; align-items: center; margin-bottom: 4px;">
+            <span style="font-size: 14px; color: #111827;">📅</span>
+            <span style="font-size: 14px; color: #111827; margin-left: 8px;">
+              2024년 1월 15일 오후 2:30 <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Body Medium)</span>
+            </span>
+          </div>
+          <div style="margin-top: 12px;">
+            <span style="display: inline-block; padding: 6px 12px; background: #E7F7EF; color: #10B981; border-radius: 12px; font-size: 12px; font-weight: bold;">
+              ✓ 완료 <span style="font-size: 11px; color: #059669; font-weight: normal;">(Badge)</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 채팅 메시지 예시 -->
+      <div class="example-card">
+        <div class="example-title">채팅 메시지</div>
+        <div>
+          <div style="background: #E5E7EB; padding: 12px 16px; border-radius: 16px; margin-bottom: 4px; max-width: 80%;">
+            <div style="font-size: 14px; color: #111827;">
+              안녕하세요, 진료 예약 문의드립니다. <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Body Medium)</span>
+            </div>
+          </div>
+          <div style="font-size: 11px; color: #9CA3AF;">
+            오전 10:30 <span style="font-size: 11px; color: #9CA3AF; font-weight: normal;">(Chat Time)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 건강 팁 카드 예시 -->
+      <div class="example-card" style="background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; border: none;">
+        <div style="padding: 8px 12px; background: rgba(255,255,255,0.3); border-radius: 6px; display: inline-block; margin-bottom: 12px;">
+          <span style="font-size: 12px; font-weight: bold; letter-spacing: 0.2px;">
+            건강 팁 <span style="font-size: 11px; opacity: 0.8; font-weight: normal;">(Badge)</span>
+          </span>
+        </div>
+        <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">
+          겨울철 건강 관리 방법 <span style="font-size: 11px; opacity: 0.8; font-weight: normal;">(Title Medium)</span>
+        </div>
+        <div style="font-size: 14px; opacity: 0.9; line-height: 1.5;">
+          추운 겨울철에는 체온 유지가 중요합니다. <span style="font-size: 11px; opacity: 0.8; font-weight: normal;">(Body Medium)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 타이포그래피 스케일 표 -->
+  <div class="section">
+    <div class="section-title">📏 타이포그래피 스케일 전체 보기</div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>카테고리</th>
+          <th>스타일명</th>
+          <th>크기</th>
+          <th>굵기</th>
+          <th>색상</th>
+          <th>주요 사용처</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Display -->
+        <tr style="background: #FEF3C7;">
+          <td rowspan="3"><strong>Display</strong></td>
+          <td>displayLarge</td>
+          <td>32px</td>
+          <td>Bold (700)</td>
+          <td>textPrimary</td>
+          <td>온보딩 메인 제목</td>
+        </tr>
+        <tr style="background: #FEF3C7;">
+          <td>displayMedium</td>
+          <td>28px</td>
+          <td>Bold (700)</td>
+          <td>textPrimary</td>
+          <td>큰 섹션 제목</td>
+        </tr>
+        <tr style="background: #FEF3C7;">
+          <td>displaySmall</td>
+          <td>24px</td>
+          <td>Bold (700)</td>
+          <td>textPrimary</td>
+          <td>카드 큰 제목</td>
+        </tr>
+        <!-- Title -->
+        <tr>
+          <td rowspan="3"><strong>Title</strong></td>
+          <td>titleLarge</td>
+          <td>24px</td>
+          <td>Bold (700)</td>
+          <td>textPrimary</td>
+          <td>페이지 제목</td>
+        </tr>
+        <tr>
+          <td>titleMedium</td>
+          <td>20px</td>
+          <td>SemiBold (600)</td>
+          <td>textPrimary</td>
+          <td>AppBar 제목</td>
+        </tr>
+        <tr>
+          <td>titleSmall</td>
+          <td>18px</td>
+          <td>SemiBold (600)</td>
+          <td>textPrimary</td>
+          <td>섹션 제목</td>
+        </tr>
+        <!-- Heading -->
+        <tr style="background: #EFF6FF;">
+          <td rowspan="3"><strong>Heading</strong></td>
+          <td>headingLarge</td>
+          <td>16px</td>
+          <td>Bold (700)</td>
+          <td>textPrimary</td>
+          <td>카드 소제목</td>
+        </tr>
+        <tr style="background: #EFF6FF;">
+          <td>headingMedium</td>
+          <td>15px</td>
+          <td>SemiBold (600)</td>
+          <td>textPrimary</td>
+          <td>리스트 제목</td>
+        </tr>
+        <tr style="background: #EFF6FF;">
+          <td>headingSmall</td>
+          <td>14px</td>
+          <td>SemiBold (600)</td>
+          <td>textPrimary</td>
+          <td>작은 제목</td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td rowspan="3"><strong>Body</strong></td>
+          <td>bodyLarge</td>
+          <td>16px</td>
+          <td>Regular (400)</td>
+          <td>textPrimary</td>
+          <td>중요 본문</td>
+        </tr>
+        <tr>
+          <td>bodyMedium</td>
+          <td>14px</td>
+          <td>Regular (400)</td>
+          <td>textPrimary</td>
+          <td>일반 본문 (가장 많이 사용)</td>
+        </tr>
+        <tr>
+          <td>bodySmall</td>
+          <td>13px</td>
+          <td>Regular (400)</td>
+          <td>textPrimary</td>
+          <td>보조 정보</td>
+        </tr>
+        <!-- Label -->
+        <tr style="background: #E7F7EF;">
+          <td rowspan="3"><strong>Label</strong></td>
+          <td>labelLarge</td>
+          <td>14px</td>
+          <td>Medium (500)</td>
+          <td>textSecondary</td>
+          <td>입력 라벨</td>
+        </tr>
+        <tr style="background: #E7F7EF;">
+          <td>labelMedium</td>
+          <td>12px</td>
+          <td>Medium (500)</td>
+          <td>textSecondary</td>
+          <td>작은 라벨</td>
+        </tr>
+        <tr style="background: #E7F7EF;">
+          <td>labelSmall</td>
+          <td>11px</td>
+          <td>Medium (500)</td>
+          <td>textSecondary</td>
+          <td>상태 표시</td>
+        </tr>
+        <!-- Caption -->
+        <tr>
+          <td rowspan="2"><strong>Caption</strong></td>
+          <td>caption</td>
+          <td>12px</td>
+          <td>Regular (400)</td>
+          <td>textHint</td>
+          <td>힌트, 날짜</td>
+        </tr>
+        <tr>
+          <td>captionSmall</td>
+          <td>11px</td>
+          <td>Regular (400)</td>
+          <td>textHint</td>
+          <td>작은 메타 정보</td>
+        </tr>
+        <!-- Button -->
+        <tr style="background: #EFF6FF;">
+          <td rowspan="2"><strong>Button</strong></td>
+          <td>button</td>
+          <td>15px</td>
+          <td>SemiBold (600)</td>
+          <td>-</td>
+          <td>큰 버튼</td>
+        </tr>
+        <tr style="background: #EFF6FF;">
+          <td>buttonSmall</td>
+          <td>13px</td>
+          <td>SemiBold (600)</td>
+          <td>-</td>
+          <td>작은 버튼</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 사용 예시 코드 -->
+  <div class="section" style="background: #F3F4F6;">
+    <div class="section-title">💻 Flutter 코드 사용 예시</div>
+    
+    <div style="background: #1F2937; color: #E5E7EB; padding: 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 13px; overflow-x: auto;">
+<pre style="margin: 0; color: #E5E7EB;">
+<span style="color: #9CA3AF;">// 1. import 추가</span>
+<span style="color: #F59E0B;">import</span> <span style="color: #10B981;">'package:your_app/shared/theme/app_typography.dart'</span>;
+
+<span style="color: #9CA3AF;">// 2. 사용 예시</span>
+
+<span style="color: #9CA3AF;">// 페이지 제목</span>
+Text(
+  <span style="color: #10B981;">'진료 기록'</span>,
+  style: <span style="color: #3B82F6;">AppTypography.titleLarge</span>,
+),
+
+<span style="color: #9CA3AF;">// 카드 제목</span>
+Text(
+  <span style="color: #10B981;">'김한의 한의사'</span>,
+  style: <span style="color: #3B82F6;">AppTypography.headingLarge</span>,
+),
+
+<span style="color: #9CA3AF;">// 본문 텍스트</span>
+Text(
+  <span style="color: #10B981;">'내과 전문의로 8년간 방문진료를...'</span>,
+  style: <span style="color: #3B82F6;">AppTypography.bodyMedium</span>,
+),
+
+<span style="color: #9CA3AF;">// 날짜/시간</span>
+Text(
+  <span style="color: #10B981;">'2024년 1월 15일 오후 2:30'</span>,
+  style: <span style="color: #3B82F6;">AppTypography.caption</span>,
+),
+
+<span style="color: #9CA3AF;">// 성공 메시지</span>
+Text(
+  <span style="color: #10B981;">'예약이 완료되었습니다'</span>,
+  style: <span style="color: #3B82F6;">AppTypography.successText</span>,
+),
+
+<span style="color: #9CA3AF;">// 색상 변경이 필요한 경우</span>
+Text(
+  <span style="color: #10B981;">'특별한 텍스트'</span>,
+  style: <span style="color: #3B82F6;">AppTypography.withColor</span>(
+    <span style="color: #3B82F6;">AppTypography.bodyMedium</span>,
+    <span style="color: #3B82F6;">AppColors.primary</span>,
+  ),
+),
+
+<span style="color: #9CA3AF;">// 버튼</span>
+ElevatedButton(
+  child: Text(
+    <span style="color: #10B981;">'예약하기'</span>,
+    style: <span style="color: #3B82F6;">AppTypography.button</span>,
+  ),
+),
+</pre>
+    </div>
+  </div>
+
+  <!-- 변경 사항 요약 -->
+  <div class="section" style="background: #DCFCE7; border-left: 4px solid #10B981;">
+    <div class="section-title" style="border-color: #10B981;">✅ Phase 1 - Day 3 완료!</div>
+    
+    <div style="color: #065F46;">
+      <h4 style="margin-top: 0; color: #065F46;">📋 생성된 스타일</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>Display</strong>: 3개 (Large 32px, Medium 28px, Small 24px)</li>
+        <li><strong>Title</strong>: 3개 (Large 24px, Medium 20px, Small 18px)</li>
+        <li><strong>Heading</strong>: 3개 (Large 16px, Medium 15px, Small 14px)</li>
+        <li><strong>Body</strong>: 3개 (Large 16px, Medium 14px, Small 13px)</li>
+        <li><strong>Label</strong>: 3개 (Large 14px, Medium 12px, Small 11px)</li>
+        <li><strong>Caption</strong>: 2개 (12px, Small 11px)</li>
+        <li><strong>Button</strong>: 2개 (15px, Small 13px)</li>
+      </ul>
+
+      <h4 style="color: #065F46;">🎯 Semantic 스타일 (특수 용도)</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>successText</strong>: 성공 메시지 (Green, SemiBold)</li>
+        <li><strong>errorText</strong>: 오류 메시지 (Red, SemiBold)</li>
+        <li><strong>warningText</strong>: 경고 메시지 (Orange, SemiBold)</li>
+        <li><strong>infoText</strong>: 정보 메시지 (Blue, SemiBold)</li>
+        <li><strong>linkText</strong>: 링크 (Blue, Underline)</li>
+        <li><strong>priceText</strong>: 가격 (18px, Bold)</li>
+        <li><strong>discountPriceText</strong>: 할인 가격 (Red, Bold)</li>
+        <li><strong>chatTimeText</strong>: 채팅 시간 (11px, Hint)</li>
+        <li><strong>badgeText</strong>: 배지 (12px, Bold)</li>
+      </ul>
+
+      <h4 style="color: #065F46;">🛠️ 유틸리티 헬퍼</h4>
+      <ul style="line-height: 1.8;">
+        <li><strong>withColor(style, color)</strong>: 색상 변경</li>
+        <li><strong>withWeight(style, weight)</strong>: 굵기 변경</li>
+        <li><strong>withSize(style, size)</strong>: 크기 변경</li>
+      </ul>
+
+      <h4 style="color: #065F46;">✨ 주요 특징</h4>
+      <ul style="line-height: 1.8;">
+        <li>총 <strong>16개 기본 스타일</strong> + <strong>9개 Semantic 스타일</strong></li>
+        <li>모든 스타일에 <strong>line-height 최적화</strong> (가독성 향상)</li>
+        <li><strong>letter-spacing</strong> 조정 (큰 제목은 좁게, 버튼은 넓게)</li>
+        <li>상세한 주석으로 사용 용도 명시</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 다음 단계 -->
+  <div class="section" style="background: #EFF6FF; border-left: 4px solid #3B82F6;">
+    <div class="section-title" style="border-color: #3B82F6;">🚀 다음 단계</div>
+    <div style="color: #1E40AF;">
+      <p style="margin-top: 0; font-size: 16px;">
+        <strong>Phase 1 - Day 3 완료!</strong>
+      </p>
+      <p style="line-height: 1.8;">
+        타이포그래피 시스템이 완료되었습니다. 다음 단계:
+      </p>
+      <ul style="line-height: 1.8;">
+        <li><strong>Day 4</strong>: 간격/Radius/Shadow 시스템 생성</li>
+        <li><strong>Day 5</strong>: 공통 컴포넌트 라이브러리 생성</li>
+        <li><strong>Day 6-7</strong>: 홈 화면 개선 (브랜딩 적용)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+
