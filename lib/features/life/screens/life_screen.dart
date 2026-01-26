@@ -6,10 +6,15 @@ import '../../../core/models/health_tip.dart';
 import '../../../core/models/health_log.dart';
 import '../providers/life_providers.dart';
 
-const Color kPrimaryPink = Color(0xFFEC4899);
-const Color kPrimaryBlue = Color(0xFF3B82F6);
-const Color kGrayText = Color(0xFF6B7280);
-const Color kDarkGray = Color(0xFF1F2937);
+// 디자인 시스템 import (Phase 1)
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_typography.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_radius.dart';
+import '../../../shared/theme/app_shadows.dart';
+import '../../../shared/widgets/common_button.dart';
+import '../../../shared/widgets/common_card.dart';
+import '../../../shared/widgets/common_badge.dart';
 
 class LifeScreen extends ConsumerWidget {
   const LifeScreen({super.key});
@@ -17,20 +22,48 @@ class LifeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      color: Colors.white,
+      color: AppColors.background,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: AppSpacing.screenPaddingAll,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildStatsDashboard(context, ref),
+            SizedBox(height: AppSpacing.sectionSpacing),
             _buildTodayTip(context, ref),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.sectionSpacing),
             _buildHealthLogSection(context, ref),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.sectionSpacing),
             _buildHealthTipsFeed(context, ref),
           ],
         ),
       ),
+    );
+  }
+
+  // 상단: 통계 대시보드 (NEW)
+  Widget _buildStatsDashboard(BuildContext context, WidgetRef ref) {
+    return Row(
+      children: [
+        Expanded(
+          child: AppStatCard(
+            icon: Icons.calendar_month_rounded,
+            value: "7일", // TODO: 실제 데이터 연동
+            label: "연속 기록",
+            color: AppColors.primary,
+            trend: "+1",
+          ),
+        ),
+        SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: AppStatCard(
+            icon: Icons.sentiment_satisfied_rounded,
+            value: "😊", // TODO: 실제 데이터 연동
+            label: "평균 기분",
+            color: AppColors.success,
+          ),
+        ),
+      ],
     );
   }
 
@@ -41,15 +74,11 @@ class LifeScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "오늘의 한방 팁",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: kDarkGray,
-          ),
+          style: AppTypography.titleSmall,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppSpacing.sm),
         tipsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) {
@@ -59,6 +88,7 @@ class LifeScreen extends ConsumerWidget {
           data: (tips) {
             if (tips.isEmpty) return const Text("등록된 팁이 없습니다.");
             final tip = tips.first;
+            
             return GestureDetector(
               onTap: () {
                 context.push('/health-tip/${tip.id}');
@@ -66,57 +96,70 @@ class LifeScreen extends ConsumerWidget {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: AppRadius.cardLargeRadius,
+                  boxShadow: AppShadows.cardElevated,
                   image: tip.imageUrl != null
                       ? DecorationImage(
                           image: NetworkImage(tip.imageUrl!),
                           fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(
-                            Colors.black.withValues(alpha: 0.3),
-                            BlendMode.darken,
-                          ),
                         )
                       : null,
-                  color: tip.imageUrl == null ? kPrimaryBlue : null,
+                  color: tip.imageUrl == null ? AppColors.primary : null,
                 ),
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: AppRadius.cardLargeRadius,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.7),
+                      ],
+                    ),
+                  ),
+                  padding: AppSpacing.allLG,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 60), // 이미지 공간 확보
+                      AppCategoryBadge(
+                        label: tip.category.toUpperCase(),
+                        color: Colors.white,
+                        size: BadgeSize.small,
                       ),
-                      child: Text(
-                        tip.category.toUpperCase(),
-                        style: const TextStyle(
+                      SizedBox(height: AppSpacing.sm),
+                      Text(
+                        tip.title,
+                        style: AppTypography.titleMedium.copyWith(
                           color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              offset: const Offset(0, 1),
+                              blurRadius: 3.0,
+                              color: Colors.black.withOpacity(0.5),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      tip.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      SizedBox(height: AppSpacing.xs),
+                      Row(
+                        children: [
+                          Text(
+                            "자세히 보기",
+                            style: AppTypography.bodySmall.copyWith(
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: Colors.white.withOpacity(0.9),
+                            size: 16,
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "자세히 보기 >",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -130,48 +173,42 @@ class LifeScreen extends ConsumerWidget {
   Widget _buildHealthLogSection(BuildContext context, WidgetRef ref) {
     final logsAsync = ref.watch(healthLogsNotifierProvider);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: kPrimaryPink.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: kPrimaryPink.withValues(alpha: 0.1)),
-      ),
+    return AppBaseCard(
+      padding: AppSpacing.cardPaddingAll,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "나의 건강 일기",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: kDarkGray,
-                ),
+                style: AppTypography.headingMedium,
               ),
-              IconButton(
-                icon: const Icon(Icons.add_circle, color: kPrimaryPink),
+              AppIconButton(
                 onPressed: () => _showAddLogModal(context, ref),
+                icon: Icons.add_circle_outline_rounded,
+                color: AppColors.primary,
+                size: 32,
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.sm),
           logsAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: CircularProgressIndicator(),
+              ),
+            ),
             error: (err, stack) {
               debugPrint("HealthLogs Error: $err");
-              return const Text("기록을 불러올 수 없습니다.");
+              return Text(
+                "기록을 불러올 수 없습니다.",
+                style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+              );
             },
             data: (logs) {
-              if (logs.isEmpty) {
-                return const Text(
-                  "오늘의 기분과 상태를 기록해보세요!",
-                  style: TextStyle(color: kGrayText, fontSize: 14),
-                );
-              }
-              
               // 날짜 비교 로직 개선 (toLocal() 사용)
               final now = DateTime.now();
               final todayStr = DateFormat('yyyy-MM-dd').format(now);
@@ -186,45 +223,65 @@ class LifeScreen extends ConsumerWidget {
               }
               
               if (todayLog == null) {
-                return const Text(
-                  "오늘의 기록이 없습니다. 기록을 추가해보세요!",
-                  style: TextStyle(color: kGrayText, fontSize: 14),
-                );
-              }
-              
-              return Row(
-                children: [
-                  Text(
-                    _getMoodEmoji(todayLog.mood),
-                    style: const TextStyle(fontSize: 32),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          todayLog.note != null && todayLog.note!.isNotEmpty 
-                              ? todayLog.note! 
-                              : "메모 없이 기록됨",
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: kDarkGray,
+                          "오늘 하루는 어떠셨나요?",
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: AppColors.textSecondary,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
-                          DateFormat('yyyy년 MM월 dd일').format(todayLog.date.toLocal()),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: kGrayText,
-                          ),
+                        SizedBox(height: AppSpacing.md),
+                        AppPrimaryButton(
+                          onPressed: () => _showAddLogModal(context, ref),
+                          text: "오늘의 기분 기록하기",
+                          icon: Icons.edit_note_rounded,
+                          size: ButtonSize.medium,
                         ),
                       ],
                     ),
                   ),
-                ],
+                );
+              }
+              
+              return Container(
+                padding: AppSpacing.allMD,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: AppRadius.cardRadius,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      _getMoodEmoji(todayLog.mood),
+                      style: const TextStyle(fontSize: 40),
+                    ),
+                    SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            todayLog.note != null && todayLog.note!.isNotEmpty 
+                                ? todayLog.note! 
+                                : "메모 없이 기록됨",
+                            style: AppTypography.bodyMedium,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: AppSpacing.xs),
+                          Text(
+                            DateFormat('a h:mm', 'ko').format(todayLog.date.toLocal()),
+                            style: AppTypography.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -240,80 +297,78 @@ class LifeScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "건강 정보",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: kDarkGray,
-          ),
+          style: AppTypography.titleSmall,
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppSpacing.sm),
         tipsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => const Text("정보를 불러올 수 없습니다."),
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (err, stack) => Text(
+            "정보를 불러올 수 없습니다.",
+            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+          ),
           data: (tips) {
             if (tips.isEmpty) return const SizedBox();
             return ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: tips.length,
-              separatorBuilder: (_, __) => const Divider(height: 32),
+              separatorBuilder: (_, __) => SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) {
                 final tip = tips[index];
-                return InkWell(
-                  onTap: () {
-                    context.push('/health-tip/${tip.id}');
-                  },
+                return AppBaseCard(
+                  onTap: () => context.push('/health-tip/${tip.id}'),
+                  padding: AppSpacing.cardPaddingAll,
                   child: Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              tip.category,
-                              style: const TextStyle(
-                                color: kPrimaryBlue,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            AppCategoryBadge(
+                              label: tip.category,
+                              color: AppColors.primary,
+                              size: BadgeSize.small,
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: AppSpacing.xs),
                             Text(
                               tip.title,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: kDarkGray,
-                              ),
+                              style: AppTypography.headingMedium,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: AppSpacing.xs),
                             Text(
                               DateFormat('MM월 dd일').format(tip.createdAt.toLocal()),
-                              style: const TextStyle(
-                                color: kGrayText,
-                                fontSize: 12,
-                              ),
+                              style: AppTypography.caption,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      if (tip.imageUrl != null)
+                      if (tip.imageUrl != null) ...[
+                        SizedBox(width: AppSpacing.md),
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: AppRadius.thumbnailRadius,
                           child: Image.network(
                             tip.imageUrl!,
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
-                              width: 80, height: 80, color: Colors.grey[200],
-                              child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                              width: 80, 
+                              height: 80, 
+                              color: AppColors.surfaceVariant,
+                              child: Icon(Icons.image_not_supported, color: AppColors.iconSecondary),
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                 );
@@ -353,28 +408,40 @@ class LifeScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 24,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          top: AppSpacing.lg,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: AppRadius.modalTopRadius,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "오늘의 건강 기록",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: EdgeInsets.only(bottom: AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
-            const SizedBox(height: 24),
-            const Text("현재 기분은 어떠신가요?", style: TextStyle(color: kGrayText)),
-            const SizedBox(height: 12),
+            Text(
+              "오늘의 건강 기록",
+              style: AppTypography.titleMedium,
+            ),
+            SizedBox(height: AppSpacing.lg),
+            Text("현재 기분은 어떠신가요?", style: AppTypography.labelMedium),
+            SizedBox(height: AppSpacing.sm),
             StatefulBuilder(
               builder: (context, setState) => Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -385,19 +452,32 @@ class LifeScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            const Text("특이사항 (선택)", style: TextStyle(color: kGrayText)),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.lg),
+            Text("특이사항 (선택)", style: AppTypography.labelMedium),
+            SizedBox(height: AppSpacing.sm),
             TextField(
               controller: noteController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: "오늘 몸 상태는 어떤가요?",
-                border: OutlineInputBorder(),
+                hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textHint),
+                border: OutlineInputBorder(
+                  borderRadius: AppRadius.inputRadius,
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: AppRadius.inputRadius,
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: AppRadius.inputRadius,
+                  borderSide: BorderSide(color: AppColors.primary),
+                ),
+                contentPadding: AppSpacing.inputPaddingDefault,
               ),
               maxLines: 3,
             ),
-            const SizedBox(height: 24),
-            ElevatedButton(
+            SizedBox(height: AppSpacing.xl),
+            AppPrimaryButton(
               onPressed: () async {
                 await ref.read(healthLogsNotifierProvider.notifier).addLog(
                   mood: selectedMood,
@@ -405,14 +485,8 @@ class LifeScreen extends ConsumerWidget {
                 );
                 if (context.mounted) Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimaryPink,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 52),
-              ),
-              child: const Text("저장하기"),
+              text: "저장하기",
             ),
-            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -423,21 +497,28 @@ class LifeScreen extends ConsumerWidget {
     final isSelected = mood == current;
     return GestureDetector(
       onTap: () => onSelect(mood),
-      child: Container(
-        padding: const EdgeInsets.all(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: AppSpacing.allMD,
         decoration: BoxDecoration(
-          color: isSelected ? kPrimaryPink.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? kPrimaryPink : Colors.transparent),
+          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          borderRadius: AppRadius.cardRadius,
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: isSelected ? 2 : 1,
+          ),
         ),
         child: Column(
           children: [
             Text(emoji, style: const TextStyle(fontSize: 40)),
-            const SizedBox(height: 4),
-            Text(mood, style: TextStyle(
-              color: isSelected ? kPrimaryPink : kGrayText,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            )),
+            SizedBox(height: AppSpacing.xs),
+            Text(
+              mood, 
+              style: AppTypography.labelMedium.copyWith(
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ],
         ),
       ),
