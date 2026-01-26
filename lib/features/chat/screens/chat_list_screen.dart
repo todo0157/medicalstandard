@@ -13,13 +13,15 @@ import 'chat_screen.dart';
 import 'practitioner_chat_screen.dart';
 import '../../doctor/screens/find_doctor_screen.dart';
 
-// Modern color palette for chat list
-const Color kChatListPrimaryGreen = Color(0xFF10B981);
-const Color kChatListPrimaryBlue = Color(0xFF3B82F6);
-const Color kChatListGray = Color(0xFF6B7280);
-const Color kChatListLightGray = Color(0xFFF3F4F6);
-const Color kChatListDarkGray = Color(0xFF111827);
-const Color kChatListBackground = Color(0xFFF9FAFB);
+// 디자인 시스템 import (Phase 1)
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_typography.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_radius.dart';
+import '../../../shared/theme/app_shadows.dart';
+import '../../../shared/widgets/common_badge.dart';
+import '../../../shared/widgets/common_button.dart';
+import '../../../shared/widgets/common_card.dart';
 
 class ChatListScreen extends ConsumerStatefulWidget {
   const ChatListScreen({super.key});
@@ -222,92 +224,69 @@ class _ChatListContentState extends ConsumerState<_ChatListContent> with Widgets
     final sessionsAsync = ref.watch(chatSessionsProvider);
 
     return Scaffold(
-      backgroundColor: kChatListBackground,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
         shadowColor: Colors.transparent,
         title: Text(
           uiMode == UIMode.practitioner ? '환자 상담 목록' : '채팅 목록',
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            color: kChatListDarkGray,
-            letterSpacing: -0.5,
-          ),
+          style: AppTypography.titleMedium,
         ),
         centerTitle: true,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
             height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  kChatListLightGray,
-                  Colors.transparent,
-                ],
-              ),
-            ),
+            color: AppColors.divider,
           ),
         ),
       ),
+      floatingActionButton: uiMode == UIMode.patient
+          ? FloatingActionButton.extended(
+              onPressed: () => _startConsultation(context, ref),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 4,
+              icon: const Icon(Icons.add_comment_outlined),
+              label: const Text('새 상담'),
+            )
+          : null,
       body: sessionsAsync.when(
         loading: () => const Center(
-          child: CircularProgressIndicator(
-            color: kChatListPrimaryGreen,
-          ),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
         error: (error, _) => Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: AppSpacing.screenPaddingAll,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.error_outline_rounded,
-                    size: 48,
-                    color: Colors.red,
-                  ),
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: AppColors.error,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
                 Text(
                   '채팅 목록을 불러오지 못했어요',
-                  style: TextStyle(
-                    color: kChatListDarkGray,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.headingMedium,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Text(
                   error.toString(),
-                  style: TextStyle(
-                    color: kChatListGray,
-                    fontSize: 14,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
+                SizedBox(height: AppSpacing.lg),
+                AppPrimaryButton(
                   onPressed: () => ref.refresh(chatSessionsProvider),
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: const Text('다시 시도'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kChatListPrimaryGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  text: '다시 시도',
+                  icon: Icons.refresh_rounded,
+                  size: ButtonSize.medium,
+                  isFullWidth: false,
                 ),
               ],
             ),
@@ -316,69 +295,58 @@ class _ChatListContentState extends ConsumerState<_ChatListContent> with Widgets
         data: (sessions) {
           if (sessions.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: kChatListPrimaryGreen.withValues(alpha: 0.1),
-                          blurRadius: 20,
-                          spreadRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.chat_bubble_outline_rounded,
-                      size: 64,
-                      color: kChatListPrimaryGreen.withValues(alpha: 0.4),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    uiMode == UIMode.practitioner
-                        ? '진행 중인 상담이 없습니다'
-                        : '채팅 내역이 없습니다',
-                    style: TextStyle(
-                      color: kChatListDarkGray,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    uiMode == UIMode.practitioner
-                        ? '환자와의 상담을 시작해보세요'
-                        : '한의사와 상담을 시작해보세요',
-                    style: TextStyle(
-                      color: kChatListGray,
-                      fontSize: 14,
-                    ),
-                  ),
-                  if (uiMode == UIMode.patient) ...[
-                    const SizedBox(height: 32),
-                    Builder(
-                      builder: (context) => ElevatedButton.icon(
-                        onPressed: () => _startConsultation(context, ref),
-                        icon: const Icon(Icons.search_rounded),
-                        label: const Text('한의사 찾기'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kChatListPrimaryGreen,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: AppSpacing.screenPaddingAll,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.1),
+                            blurRadius: 20,
+                            spreadRadius: 5,
                           ),
-                          elevation: 2,
-                        ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        size: 64,
+                        color: AppColors.primary.withOpacity(0.5),
                       ),
                     ),
+                    SizedBox(height: AppSpacing.lg),
+                    Text(
+                      uiMode == UIMode.practitioner
+                          ? '진행 중인 상담이 없습니다'
+                          : '채팅 내역이 없습니다',
+                      style: AppTypography.titleMedium,
+                    ),
+                    SizedBox(height: AppSpacing.xs),
+                    Text(
+                      uiMode == UIMode.practitioner
+                          ? '환자와의 상담을 시작하면\n여기에 채팅 목록이 표시됩니다'
+                          : '한의사와 상담을 시작해보세요\n24시간 언제든지 문의할 수 있습니다',
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (uiMode == UIMode.patient) ...[
+                      SizedBox(height: AppSpacing.xl),
+                      AppBrandButton(
+                        onPressed: () => _startConsultation(context, ref),
+                        text: '한의사 찾기',
+                        icon: Icons.search_rounded,
+                        isFullWidth: false,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             );
           }
@@ -387,52 +355,27 @@ class _ChatListContentState extends ConsumerState<_ChatListContent> with Widgets
             onRefresh: () async {
               ref.refresh(chatSessionsProvider);
             },
-            color: kChatListPrimaryGreen,
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    itemCount: sessions.length,
-                    itemBuilder: (context, index) {
-                      final session = sessions[index];
-                      return _ModernChatListItem(
-                        session: session,
-                        uiMode: uiMode,
-                        onTap: () {
-                          if (uiMode == UIMode.practitioner) {
-                            context.push('/practitioner-chat/${session.id}');
-                          } else {
-                            context.push('/chat/${session.id}');
-                          }
-                        },
-                        onDelete: () => _deleteSession(context, ref, session.id),
-                      );
-                    },
-                  ),
-                ),
-                // 한의사 찾기 버튼 (항상 표시)
-                if (uiMode == UIMode.patient)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Builder(
-                      builder: (context) => ElevatedButton.icon(
-                        onPressed: () => _startConsultation(context, ref),
-                        icon: const Icon(Icons.search_rounded),
-                        label: const Text('한의사 찾기'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: kChatListPrimaryGreen,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+            color: AppColors.primary,
+            child: ListView.separated(
+              padding: AppSpacing.screenPaddingAll,
+              itemCount: sessions.length,
+              separatorBuilder: (context, index) =>
+                  SizedBox(height: AppSpacing.sm),
+              itemBuilder: (context, index) {
+                final session = sessions[index];
+                return _ModernChatListItem(
+                  session: session,
+                  uiMode: uiMode,
+                  onTap: () {
+                    if (uiMode == UIMode.practitioner) {
+                      context.push('/practitioner-chat/${session.id}');
+                    } else {
+                      context.push('/chat/${session.id}');
+                    }
+                  },
+                  onDelete: () => _deleteSession(context, ref, session.id),
+                );
+              },
             ),
           );
         },
@@ -458,14 +401,12 @@ class _ModernChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MM월 dd일', 'ko_KR');
     final timeFormat = DateFormat('HH:mm', 'ko_KR');
-    // lastMessageAt이 있으면 그것을 사용, 없으면 updatedAt 사용
-    // UTC 시간을 로컬 시간으로 변환
     final displayTime = (session.lastMessageAt ?? session.updatedAt).toLocal();
     final now = DateTime.now();
     final isToday = displayTime.year == now.year &&
         displayTime.month == now.month &&
         displayTime.day == now.day;
-    
+
     // 디버깅: 표시할 시간과 읽지 않은 메시지 수 확인
     if (kDebugMode) {
       print('[ChatListItem] Session: ${session.id}');
@@ -488,8 +429,8 @@ class _ModernChatListItem extends StatelessWidget {
       displayName = '환자';
       subtitle = session.subject ?? '방문 진료 상담';
       iconData = Icons.person_rounded;
-      iconColor = kChatListPrimaryBlue;
-      iconBackgroundColor = kChatListPrimaryBlue.withValues(alpha: 0.1);
+      iconColor = AppColors.primary;
+      iconBackgroundColor = AppColors.primaryLight;
     } else {
       // 환자 모드: 한의사 정보 표시
       if (session.doctor != null) {
@@ -500,148 +441,97 @@ class _ModernChatListItem extends StatelessWidget {
         subtitle = session.subject ?? '방문 진료 상담';
       }
       iconData = Icons.health_and_safety_rounded;
-      iconColor = kChatListPrimaryGreen;
-      iconBackgroundColor = kChatListPrimaryGreen.withValues(alpha: 0.1);
+      iconColor = AppColors.secondary;
+      iconBackgroundColor = AppColors.secondaryLight;
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return AppBaseCard(
+      onTap: onTap,
+      margin: EdgeInsets.zero,
+      padding: AppSpacing.cardPaddingAll,
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: iconBackgroundColor,
+            ),
+            child: Icon(
+              iconData,
+              color: iconColor,
+              size: 28,
+            ),
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+          SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: iconBackgroundColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: iconColor.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayName,
+                        style: AppTypography.headingLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.xs),
+                    Text(
+                      isToday
+                          ? timeFormat.format(displayTime)
+                          : dateFormat.format(displayTime),
+                      style: AppTypography.chatTimeText.copyWith(
+                        color: session.unreadCount > 0
+                            ? AppColors.primary
+                            : AppColors.textHint,
+                        fontWeight: session.unreadCount > 0
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        subtitle ?? '',
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: session.unreadCount > 0
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (session.unreadCount > 0) ...[
+                      SizedBox(width: AppSpacing.xs),
+                      AppCountBadge(
+                        count: session.unreadCount,
+                        color: uiMode == UIMode.practitioner
+                            ? AppColors.primary
+                            : AppColors.secondary,
                       ),
                     ],
-                  ),
-                  child: Icon(
-                    iconData,
-                    color: iconColor,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              displayName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                                color: kChatListDarkGray,
-                                letterSpacing: -0.3,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            isToday
-                                ? timeFormat.format(displayTime)
-                                : dateFormat.format(displayTime),
-                            style: TextStyle(
-                              color: kChatListGray,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: kChatListGray,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // 읽지 않은 메시지 알림 표시
-                Builder(
-                  builder: (context) {
-                    final unreadCount = session.unreadCount;
-                    
-                    if (kDebugMode) {
-                      print('[ChatListItem] unreadCount check:');
-                      print('  - session.id: ${session.id}');
-                      print('  - session.unreadCount: $unreadCount');
-                      print('  - session.unreadCount > 0: ${unreadCount > 0}');
-                      print('  - uiMode: $uiMode');
-                      print('  - will show badge: ${unreadCount > 0}');
-                    }
-                    
-                    if (unreadCount > 0) {
-                      return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: uiMode == UIMode.practitioner 
-                              ? kChatListPrimaryBlue 
-                              : kChatListPrimaryGreen,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          unreadCount > 99 ? '99+' : unreadCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: kChatListGray.withValues(alpha: 0.4),
-                  size: 24,
+                  ],
                 ),
               ],
             ),
           ),
-        ),
+          SizedBox(width: AppSpacing.xs),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.iconSecondary.withOpacity(0.5),
+            size: 24,
+          ),
+        ],
       ),
     );
   }
