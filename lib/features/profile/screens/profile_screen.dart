@@ -126,6 +126,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           message: _mapErrorMessage(error),
           onRetry: _handleRefresh,
           onSupport: _showSupportSheet,
+          onLogout: _logout,
         ),
         data: (profile) => RefreshIndicator(
           color: AppColors.primary,
@@ -278,11 +279,13 @@ class _ProfileErrorView extends StatelessWidget {
     required this.message,
     required this.onRetry,
     required this.onSupport,
+    required this.onLogout,
   });
 
   final String message;
   final Future<void> Function() onRetry;
   final VoidCallback onSupport;
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -341,6 +344,15 @@ class _ProfileErrorView extends StatelessWidget {
                   child: const Text('고객센터'),
                 ),
               ],
+            ),
+            const SizedBox(height: 24),
+            TextButton.icon(
+              onPressed: onLogout,
+              icon: const Icon(Icons.logout, size: 16, color: AppColors.textSecondary),
+              label: Text(
+                '로그아웃',
+                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+              ),
             ),
           ],
         ),

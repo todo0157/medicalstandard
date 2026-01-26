@@ -4,6 +4,13 @@ import 'package:intl/intl.dart';
 
 import '../../core/models/medical_record.dart';
 import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/app_typography.dart';
+import '../../shared/theme/app_spacing.dart';
+import '../../shared/theme/app_radius.dart';
+import '../../shared/theme/app_shadows.dart';
+import '../../shared/widgets/common_card.dart';
+import '../../shared/widgets/common_button.dart';
+import '../../shared/widgets/common_badge.dart';
 import 'providers/medical_record_providers.dart';
 
 class MedicalRecordsScreen extends ConsumerWidget {
@@ -18,22 +25,19 @@ class MedicalRecordsScreen extends ConsumerWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: AppColors.surface,
-        shadowColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.iconPrimary),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           '진료 기록',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+          style: AppTypography.titleMedium,
         ),
         centerTitle: true,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, color: AppColors.divider),
+          child: Container(color: AppColors.divider, height: 1),
         ),
       ),
       body: recordsAsync.when(
@@ -50,39 +54,114 @@ class MedicalRecordsScreen extends ConsumerWidget {
               onExplore: () => Navigator.of(context).pop(),
             );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            itemCount: records.length,
-            itemBuilder: (context, index) {
-              final record = records[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _RecordCard(
-                  record: record,
-                  onTap: () => _showRecordSheet(context, record),
+          return SingleChildScrollView(
+            padding: AppSpacing.screenPaddingAll,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSummarySection(records),
+                SizedBox(height: AppSpacing.sectionSpacing),
+                Text(
+                  "최근 진료 내역",
+                  style: AppTypography.headingMedium,
                 ),
-              );
-            },
+                SizedBox(height: AppSpacing.md),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: records.length,
+                  separatorBuilder: (_, __) => SizedBox(height: AppSpacing.md),
+                  itemBuilder: (context, index) {
+                    final record = records[index];
+                    return _RecordCard(
+                      record: record,
+                      onTap: () => _showRecordSheet(context, record),
+                    );
+                  },
+                ),
+                SizedBox(height: AppSpacing.xl),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
+  Widget _buildSummarySection(List<MedicalRecord> records) {
+    final totalVisits = records.length;
+    // 가장 최근 진료 병원 찾기
+    final lastHospital = records.isNotEmpty ? records.first.doctor.clinicName : '-';
+
+    return AppGradientCard(
+      gradient: AppColors.brandGradient,
+      padding: AppSpacing.allLG,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "총 진료 횟수",
+                  style: AppTypography.labelMedium.copyWith(color: Colors.white.withOpacity(0.9)),
+                ),
+                SizedBox(height: AppSpacing.xs),
+                Text(
+                  "$totalVisits회",
+                  style: AppTypography.displaySmall.copyWith(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 40,
+            color: Colors.white.withOpacity(0.3),
+            margin: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "최근 방문",
+                  style: AppTypography.labelMedium.copyWith(color: Colors.white.withOpacity(0.9)),
+                ),
+                SizedBox(height: AppSpacing.xs),
+                Text(
+                  lastHospital,
+                  style: AppTypography.titleMedium.copyWith(color: Colors.white),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   void _showRecordSheet(BuildContext context, MedicalRecord record) {
     final dateLabel = DateFormat('yyyy.MM.dd').format(record.createdAt.toLocal());
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            top: AppSpacing.lg,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: AppRadius.modalTopRadius,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,50 +170,85 @@ class MedicalRecordsScreen extends ConsumerWidget {
                 child: Container(
                   width: 40,
                   height: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: EdgeInsets.only(bottom: AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-              Text(
-                record.title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      record.title,
+                      style: AppTypography.headingLarge,
                     ),
+                  ),
+                  AppStatusBadge(
+                    label: "진료완료",
+                    type: BadgeType.success,
+                  ),
+                ],
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: AppSpacing.sm),
               Text(
-                '${record.doctor.name} · ${record.doctor.specialty} · $dateLabel',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                '${record.doctor.name} 원장 · ${record.doctor.specialty} · $dateLabel',
+                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.xl),
               if (record.summary != null && record.summary!.isNotEmpty) ...[
                 const _SectionTitle(label: '진료 내용'),
-                Text(
-                  record.summary!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        height: 1.5,
-                      ),
+                Container(
+                  width: double.infinity,
+                  padding: AppSpacing.allMD,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: AppRadius.cardRadius,
+                  ),
+                  child: Text(
+                    record.summary!,
+                    style: AppTypography.bodyMedium.copyWith(height: 1.5),
+                  ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.lg),
               ],
               if (record.prescriptions != null &&
                   record.prescriptions!.isNotEmpty) ...[
                 const _SectionTitle(label: '처방/가이드'),
-                Text(
-                  record.prescriptions!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textPrimary,
-                        height: 1.5,
+                Container(
+                  width: double.infinity,
+                  padding: AppSpacing.allMD,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.05),
+                    borderRadius: AppRadius.cardRadius,
+                    border: Border.all(color: AppColors.primary.withOpacity(0.1)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.medication_rounded, size: 16, color: AppColors.primary),
+                          SizedBox(width: AppSpacing.xs),
+                          Text("처방전", style: AppTypography.labelMedium.copyWith(color: AppColors.primary)),
+                        ],
                       ),
+                      SizedBox(height: AppSpacing.sm),
+                      Text(
+                        record.prescriptions!,
+                        style: AppTypography.bodyMedium.copyWith(height: 1.5),
+                      ),
+                    ],
+                  ),
                 ),
+                SizedBox(height: AppSpacing.xl),
               ],
+              SizedBox(width: double.infinity, child: AppPrimaryButton(
+                onPressed: () => Navigator.pop(context),
+                text: "닫기",
+              )),
             ],
           ),
         );
@@ -152,90 +266,62 @@ class _RecordCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateLabel = DateFormat('yyyy.MM.dd').format(record.createdAt.toLocal());
-    return InkWell(
+    return AppBaseCard(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Ink(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: AppColors.primaryLight,
-                  child: const Icon(Icons.health_and_safety, color: AppColors.primary),
+      padding: AppSpacing.cardPaddingAll,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: AppSpacing.allSM,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        record.title,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${record.doctor.name} · ${record.doctor.specialty}',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                      ),
-                    ],
-                  ),
+                child: Icon(Icons.medical_services_rounded, color: AppColors.primary, size: 20),
+              ),
+              SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      record.title,
+                      style: AppTypography.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '${record.doctor.name} 원장 · ${record.doctor.specialty}',
+                      style: AppTypography.caption,
+                    ),
+                  ],
                 ),
-                Text(
-                  dateLabel,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textHint,
-                      ),
-                ),
-              ],
-            ),
-            if (record.summary != null && record.summary!.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              ),
               Text(
+                dateLabel,
+                style: AppTypography.caption.copyWith(color: AppColors.textHint),
+              ),
+            ],
+          ),
+          if (record.summary != null && record.summary!.isNotEmpty) ...[
+            Padding(
+              padding: EdgeInsets.only(top: AppSpacing.md, left: 44), // 아이콘 너비 + 간격만큼 들여쓰기
+              child: Text(
                 record.summary!,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      height: 1.4,
-                    ),
+                style: AppTypography.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.4,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-            ],
-            if (record.prescriptions != null &&
-                record.prescriptions!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                record.prescriptions!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.3,
-                    ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -249,13 +335,10 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: AppSpacing.xs),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textHint,
-              fontWeight: FontWeight.w600,
-            ),
+        style: AppTypography.labelMedium.copyWith(color: AppColors.textSecondary),
       ),
     );
   }
@@ -270,34 +353,39 @@ class _EmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: AppSpacing.screenPaddingAll,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.description_outlined,
-                size: 56, color: AppColors.primary),
-            const SizedBox(height: 12),
+            Container(
+              padding: AppSpacing.allXL,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.description_outlined,
+                  size: 48, color: AppColors.textHint),
+            ),
+            SizedBox(height: AppSpacing.lg),
             Text(
               '아직 진료 기록이 없어요',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: AppTypography.titleMedium,
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: AppSpacing.sm),
             Text(
               '첫 방문 진료를 예약하면 진료 기록이 여기에 저장돼요.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: onExplore,
-              icon: const Icon(Icons.search, color: AppColors.primary),
-              label: const Text('한의사 찾기'),
+            SizedBox(height: AppSpacing.xl),
+            SizedBox(
+              width: 200,
+              child: AppPrimaryButton(
+                onPressed: onExplore,
+                text: "한의사 찾기",
+                icon: Icons.search_rounded,
+              ),
             ),
           ],
         ),
@@ -316,24 +404,25 @@ class _ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: AppSpacing.screenPaddingAll,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
-            const SizedBox(height: 12),
+            Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+            SizedBox(height: AppSpacing.md),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
+              style: AppTypography.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh, color: AppColors.primary),
-              label: const Text('다시 시도'),
+            SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: 160,
+              child: AppOutlinedButton(
+                onPressed: onRetry,
+                text: "다시 시도",
+                icon: Icons.refresh_rounded,
+              ),
             ),
           ],
         ),
