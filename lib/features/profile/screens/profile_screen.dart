@@ -10,7 +10,16 @@ import '../../../core/providers/profile_provider.dart';
 import '../../../core/services/auth_state.dart';
 import '../../../core/services/auth_session.dart';
 import '../../doctor/providers/doctor_providers.dart';
+
+// 디자인 시스템 import (Phase 1)
 import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_typography.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_radius.dart';
+import '../../../shared/theme/app_shadows.dart';
+import '../../../shared/widgets/common_button.dart';
+import '../../../shared/widgets/common_card.dart';
+import '../../../shared/widgets/common_badge.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -350,24 +359,29 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            offset: const Offset(0, 6),
-            blurRadius: 16,
-          ),
-        ],
-      ),
+    return AppGradientCard(
+      gradient: AppColors.blueGradient,
+      padding: EdgeInsets.all(AppSpacing.cardPaddingLarge), // 20px
+      radius: AppRadius.cardLargeRadius, // 20px
+      shadow: true,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _ProfileAvatar(imageUrl: profile.profileImageUrl),
-          const SizedBox(width: 16),
+          // 프로필 이미지
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: _ProfileAvatar(
+              imageUrl: profile.profileImageUrl,
+              size: 72,
+            ),
+          ),
+          SizedBox(width: AppSpacing.md),
+          
+          // 정보
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,41 +392,57 @@ class _ProfileCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         profile.name,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: AppTypography.titleMedium.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => onEdit(),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
+                    // 수정 버튼 (아이콘)
+                    Material(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        onTap: onEdit,
+                        customBorder: const CircleBorder(),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            Icons.edit_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text('수정'),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Text(
-                  '${profile.age}세 / $_genderLabel',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                  '${profile.age}세 · $_genderLabel',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: Colors.white.withOpacity(0.9),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  profile.address,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on, 
+                      size: 16, 
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                    SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        profile.address,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -439,101 +469,80 @@ class _CertificationStatusCard extends ConsumerWidget {
     }
   }
 
-  Color _getStatusColor(CertificationStatus status) {
+  BadgeType _getBadgeType(CertificationStatus status) {
     switch (status) {
       case CertificationStatus.none:
-        return AppColors.textSecondary;
+        return BadgeType.info;
       case CertificationStatus.pending:
-        return AppColors.warning;
+        return BadgeType.warning;
       case CertificationStatus.verified:
-        return AppColors.success;
-    }
-  }
-
-  IconData _getStatusIcon(CertificationStatus status) {
-    switch (status) {
-      case CertificationStatus.none:
-        return Icons.info_outline;
-      case CertificationStatus.pending:
-        return Icons.pending_outlined;
-      case CertificationStatus.verified:
-        return Icons.verified;
+        return BadgeType.success;
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statusColor = _getStatusColor(profile.certificationStatus);
+    final badgeType = _getBadgeType(profile.certificationStatus);
     final statusText = _getStatusText(profile.certificationStatus);
-    final statusIcon = _getStatusIcon(profile.certificationStatus);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-      ),
+    return AppBaseCard(
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: AppSpacing.allXS,
             decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: _getIconColor(badgeType).withOpacity(0.1),
+              borderRadius: AppRadius.buttonRadius,
             ),
-            child: Icon(statusIcon, color: statusColor, size: 24),
+            child: Icon(
+              Icons.verified_user_rounded, 
+              color: _getIconColor(badgeType), 
+              size: 24
+            ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '한의사 인증 상태',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+                  style: AppTypography.headingSmall,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  statusText,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w500,
-                      ),
+                SizedBox(height: AppSpacing.xxs),
+                AppStatusBadge(
+                  label: statusText,
+                  type: badgeType,
                 ),
               ],
             ),
           ),
           if (profile.certificationStatus == CertificationStatus.none)
-            TextButton(
-              onPressed: () {
-                context.push('/profile/certification-request');
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-              child: const Text('인증 신청'),
+            AppOutlinedButton(
+              onPressed: () => context.push('/profile/certification-request'),
+              text: '인증 신청',
+              size: ButtonSize.small,
+              isFullWidth: false,
             )
           else if (profile.certificationStatus == CertificationStatus.pending)
             Text(
               '검토 중',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
         ],
       ),
     );
+  }
+
+  Color _getIconColor(BadgeType type) {
+    switch (type) {
+      case BadgeType.success: return AppColors.success;
+      case BadgeType.warning: return AppColors.warning;
+      case BadgeType.error: return AppColors.error;
+      default: return AppColors.textSecondary;
+    }
   }
 }
 
@@ -544,27 +553,47 @@ class _ProfileStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+    return AppBaseCard(
+      padding: EdgeInsets.symmetric(
+        vertical: AppSpacing.lg,
+        horizontal: AppSpacing.md,
       ),
       child: Row(
         children: [
           Expanded(
-            child: _StatTile(
+            child: AppStatCard(
+              icon: Icons.calendar_today_rounded,
               value: profile.appointmentCount.toString(),
               label: '예약',
-              valueColor: AppColors.primary,
+              color: AppColors.primary,
+              // trend: '+2', // TODO: 실제 데이터 연동
             ),
           ),
-          Container(width: 1, height: 64, color: AppColors.border),
+          Container(
+            width: 1, 
+            height: 40, 
+            color: AppColors.divider,
+          ),
           Expanded(
-            child: _StatTile(
+            child: AppStatCard(
+              icon: Icons.medical_services_rounded,
               value: profile.treatmentCount.toString(),
               label: '진료',
-              valueColor: AppColors.success,
+              color: AppColors.success,
+              // trend: '+1', // TODO: 실제 데이터 연동
+            ),
+          ),
+          Container(
+            width: 1, 
+            height: 40, 
+            color: AppColors.divider,
+          ),
+          Expanded(
+            child: AppStatCard(
+              icon: Icons.star_rounded,
+              value: '4.8', // TODO: 실제 데이터 연동
+              label: '만족도',
+              color: AppColors.warning,
             ),
           ),
         ],
@@ -591,106 +620,78 @@ class _AppointmentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.event_available, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Text(
+              '내 예약',
+              style: AppTypography.titleSmall,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        state.when(
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          error: (error, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.event_available, color: AppColors.primary),
-              const SizedBox(width: 8),
               Text(
-                '내 예약',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                '예약 정보를 불러오지 못했습니다.',
+                style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
+              ),
+              const SizedBox(height: 8),
+              AppTextButton(
+                onPressed: onRetry,
+                icon: Icons.refresh,
+                text: '다시 시도',
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          state.when(
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            ),
-            error: (error, _) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '예약 정보를 불러오지 못했습니다.',
-                  style: TextStyle(color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('다시 시도'),
-                ),
-              ],
-            ),
-            data: (appointments) {
-              if (appointments.isEmpty) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '아직 예약이 없습니다. 가까운 한의사를 찾아보세요.',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: () => context.push('/find-doctor'),
-                      icon: const Icon(Icons.search, color: AppColors.primary),
-                      label: const Text('한의사 찾기'),
-                    ),
-                  ],
-                );
-              }
-
-              final formatter = DateFormat('M월 d일 (E) a h:mm', 'ko');
-              final visible = appointments.take(_maxVisible).toList();
-              final remaining = appointments.length - visible.length;
-
-              return Column(
-                children: [
-                  for (final appointment in visible) ...[
-                    _AppointmentCard(
-                      appointment: appointment,
-                      formatter: formatter,
-                      onCancel: () => onCancel(appointment),
-                      onDelete: () => onDelete(appointment),
-                      onEdit: () => onEdit(appointment),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  if (remaining > 0)
-                    Text(
-                      '외 $remaining건의 예약이 있습니다.',
-                      style: const TextStyle(color: AppColors.textSecondary),
-                    ),
-                ],
+          data: (appointments) {
+            if (appointments.isEmpty) {
+              return AppInfoCard(
+                title: '예약 없음',
+                content: '아직 예약이 없습니다. 가까운 한의사를 찾아보세요.',
+                icon: Icons.calendar_today_outlined,
+                type: InfoCardType.info,
               );
-            },
-          ),
-        ],
-      ),
+            }
+
+            final formatter = DateFormat('M월 d일 (E) a h:mm', 'ko');
+            final visible = appointments.take(_maxVisible).toList();
+            final remaining = appointments.length - visible.length;
+
+            return Column(
+              children: [
+                for (final appointment in visible) ...[
+                  _AppointmentCard(
+                    appointment: appointment,
+                    formatter: formatter,
+                    onCancel: () => onCancel(appointment),
+                    onDelete: () => onDelete(appointment),
+                    onEdit: () => onEdit(appointment),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                if (remaining > 0)
+                  Text(
+                    '외 $remaining건의 예약이 있습니다.',
+                    style: AppTypography.caption,
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -723,16 +724,16 @@ class _AppointmentCard extends StatelessWidget {
     }
   }
 
-  Color get _statusColor {
+  BadgeType get _badgeType {
     switch (appointment.status) {
       case 'confirmed':
-        return AppColors.primary;
+        return BadgeType.primary;
       case 'cancelled':
-        return AppColors.error;
+        return BadgeType.error;
       case 'completed':
-        return AppColors.success;
+        return BadgeType.success;
       default:
-        return AppColors.textSecondary;
+        return BadgeType.warning;
     }
   }
 
@@ -742,14 +743,8 @@ class _AppointmentCard extends StatelessWidget {
         appointment.status != 'cancelled' && appointment.status != 'completed';
     final canDelete = appointment.status == 'cancelled';
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
-      ),
+    return AppBaseCard(
+      padding: AppSpacing.cardPaddingAll,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -762,51 +757,39 @@ class _AppointmentCard extends StatelessWidget {
                   children: [
                     Text(
                       appointment.doctor.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: AppTypography.headingMedium,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       appointment.doctor.specialty,
-                      style: const TextStyle(color: AppColors.textSecondary),
+                      style: AppTypography.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-              appointment.doctor.clinicName,
-              style: const TextStyle(color: AppColors.textHint),
-            ),
-          ],
-        ),
-      ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                      appointment.doctor.clinicName,
+                      style: AppTypography.caption,
+                    ),
+                  ],
                 ),
-                child: Text(
-                  _statusLabel,
-                  style: TextStyle(
-                    color: _statusColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+              ),
+              AppStatusBadge(
+                label: _statusLabel,
+                type: _badgeType,
               ),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.schedule, size: 18, color: AppColors.iconSecondary),
+              const Icon(Icons.schedule, size: 16, color: AppColors.iconSecondary),
               const SizedBox(width: 6),
               Text(
-                // 선택한 시간대가 있으면 그것을 사용, 없으면 슬롯의 시작 시간 사용
                 formatter.format(
                   (appointment.appointmentTime ?? appointment.slot.startsAt).toLocal(),
                 ),
-                style: const TextStyle(color: AppColors.textPrimary),
+                style: AppTypography.bodySmall,
               ),
             ],
           ),
@@ -814,49 +797,56 @@ class _AppointmentCard extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.push_pin_outlined,
-                  size: 18, color: AppColors.iconSecondary),
+                  size: 16, color: AppColors.iconSecondary),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   appointment.notes?.isNotEmpty == true
                       ? appointment.notes!
                       : '메모 없음',
-                  style: const TextStyle(color: AppColors.textSecondary),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-          ],
-        ),
+            ],
+          ),
           if (canCancel || canDelete || onEdit != null) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Row(
               children: [
                 if (onEdit != null && canCancel)
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: AppOutlinedButton(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined),
-                      label: const Text('시간 변경'),
+                      text: '시간 변경',
+                      icon: Icons.edit_outlined,
+                      size: ButtonSize.small,
                     ),
                   ),
                 if (canCancel) ...[
                   if (onEdit != null) const SizedBox(width: 8),
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: AppOutlinedButton(
                       onPressed: onCancel,
-                      icon: const Icon(Icons.cancel_outlined),
-                      label: const Text('예약 취소'),
+                      text: '취소',
+                      icon: Icons.cancel_outlined,
+                      color: AppColors.error,
+                      size: ButtonSize.small,
                     ),
                   ),
                 ],
                 if (canDelete) ...[
                   if (canCancel || onEdit != null) const SizedBox(width: 8),
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: AppOutlinedButton(
                       onPressed: onDelete,
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text('삭제'),
+                      text: '삭제',
+                      icon: Icons.delete_outline,
+                      color: AppColors.error,
+                      size: ButtonSize.small,
                     ),
                   ),
                 ],
@@ -870,17 +860,18 @@ class _AppointmentCard extends StatelessWidget {
 }
 
 class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({this.imageUrl});
+  const _ProfileAvatar({this.imageUrl, this.size = 72.0});
 
   final String? imageUrl;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(40),
+      borderRadius: BorderRadius.circular(size / 2),
       child: SizedBox(
-        width: 72,
-        height: 72,
+        width: size,
+        height: size,
         child: imageUrl != null
             ? Image.network(
                 imageUrl!,
@@ -914,7 +905,11 @@ class _ProfileAvatar extends StatelessWidget {
   Widget _fallback() {
     return Container(
       color: AppColors.surfaceVariant,
-      child: const Icon(Icons.person, size: 36, color: AppColors.iconSecondary),
+      child: Icon(
+        Icons.person, 
+        size: size * 0.5, 
+        color: AppColors.iconSecondary
+      ),
     );
   }
 }
@@ -969,14 +964,14 @@ class _QuickActionGrid extends StatelessWidget {
         title: '진료 기록',
         icon: Icons.description_outlined,
         iconColor: AppColors.primary,
-        backgroundColor: const Color(0xFFEFF6FF),
+        backgroundColor: AppColors.primaryLight,
         actionKey: 'records',
       ),
       _QuickActionData(
         title: '건강보험',
         icon: Icons.health_and_safety_outlined,
         iconColor: AppColors.success,
-        backgroundColor: const Color(0xFFE7F7EF),
+        backgroundColor: AppColors.successLight,
         actionKey: 'insurance',
       ),
     ];
@@ -986,8 +981,8 @@ class _QuickActionGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+        crossAxisSpacing: AppSpacing.sm,
+        mainAxisSpacing: AppSpacing.sm,
         childAspectRatio: 1.4,
       ),
       itemCount: actions.length,
@@ -1026,48 +1021,27 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
+    return AppBaseCard(
       onTap: onTap,
-      child: Ink(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              offset: const Offset(0, 3),
-              blurRadius: 8,
+      padding: AppSpacing.cardPaddingAll,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: AppSpacing.allSM,
+            decoration: BoxDecoration(
+              color: data.backgroundColor,
+              shape: BoxShape.circle,
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: data.backgroundColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(data.icon, color: data.iconColor),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                data.title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+            child: Icon(data.icon, color: data.iconColor, size: 24),
           ),
-        ),
+          SizedBox(height: AppSpacing.sm),
+          Text(
+            data.title,
+            style: AppTypography.headingMedium,
+          ),
+        ],
       ),
     );
   }
@@ -1108,27 +1082,18 @@ class _MenuSection extends StatelessWidget {
         title: '로그아웃',
         icon: Icons.logout,
         onTap: onLogout,
+        isDestructive: true,
       ),
     ];
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
+    return AppBaseCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           for (int i = 0; i < items.length; i++) ...[
             _MenuButton(data: items[i]),
             if (i != items.length - 1)
-              const Divider(height: 1, thickness: 1, color: AppColors.border),
+              Divider(height: 1, thickness: 1, color: AppColors.divider),
           ],
         ],
       ),
@@ -1141,11 +1106,13 @@ class _MenuItemData {
     required this.title,
     required this.icon,
     required this.onTap,
+    this.isDestructive = false,
   });
 
   final String title;
   final IconData icon;
   final VoidCallback onTap;
+  final bool isDestructive;
 }
 
 class _MenuButton extends StatelessWidget {
@@ -1160,23 +1127,30 @@ class _MenuButton extends StatelessWidget {
       child: InkWell(
         onTap: data.onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
           child: Row(
             children: [
-              Icon(data.icon, color: AppColors.iconPrimary),
-              const SizedBox(width: 16),
+              Icon(
+                data.icon, 
+                color: data.isDestructive ? AppColors.error : AppColors.iconPrimary,
+                size: 20,
+              ),
+              SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   data.title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: data.isDestructive ? AppColors.error : AppColors.textPrimary,
+                    fontWeight: data.isDestructive ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
                 color: AppColors.iconSecondary,
               ),
             ],
@@ -1195,29 +1169,30 @@ class _SupportSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: AppRadius.modalTopRadius,
       ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
+      child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              '고객지원',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
+            Container(
+              width: 40,
+              height: 4,
+              margin: EdgeInsets.only(bottom: AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 16),
+            Text(
+              '고객지원',
+              style: AppTypography.titleMedium,
+            ),
+            SizedBox(height: AppSpacing.lg),
             _SupportButton(
               icon: Icons.phone_in_talk_outlined,
               label: '전화 상담',
@@ -1225,7 +1200,7 @@ class _SupportSheet extends StatelessWidget {
               iconColor: AppColors.primary,
               onTap: onPhoneTap,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.md),
             _SupportButton(
               icon: Icons.chat_bubble_outline,
               label: '채팅 상담',
@@ -1233,13 +1208,11 @@ class _SupportSheet extends StatelessWidget {
               iconColor: AppColors.success,
               onTap: onChatTap,
             ),
-            const SizedBox(height: 8),
-            TextButton(
+            SizedBox(height: AppSpacing.lg),
+            AppTextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                '취소',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
+              text: '취소',
+              color: AppColors.textSecondary,
             ),
           ],
         ),
@@ -1271,23 +1244,22 @@ class _SupportButton extends StatelessWidget {
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: background,
+          foregroundColor: iconColor,
           shadowColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: AppRadius.cardRadius,
           ),
+          elevation: 0,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: iconColor),
-            const SizedBox(width: 8),
+            Icon(icon, color: iconColor, size: 20),
+            SizedBox(width: AppSpacing.xs),
             Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: iconColor,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.button.copyWith(color: iconColor),
             ),
           ],
         ),
@@ -1295,3 +1267,4 @@ class _SupportButton extends StatelessWidget {
     );
   }
 }
+
