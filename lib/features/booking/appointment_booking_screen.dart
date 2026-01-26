@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/errors/app_exception.dart';
 import '../../core/models/address.dart';
@@ -8,14 +9,18 @@ import '../../core/models/appointment.dart';
 import '../../core/models/doctor.dart';
 import '../../core/models/slot.dart';
 import '../../core/services/doctor_service.dart';
-import '../../shared/theme/app_colors.dart';
 import '../address/screens/address_search_screen.dart';
 import '../doctor/providers/doctor_providers.dart';
-import 'package:go_router/go_router.dart';
 
-const Color kBookingPrimary = Color(0xFFEC4899);
-const Color kBookingPrimaryLight = Color(0xFFFCE7F3);
-const Color kBookingInfoBlue = Color(0xFF2563EB);
+// 디자인 시스템 import (Phase 3)
+import '../../shared/theme/app_colors.dart';
+import '../../shared/theme/app_typography.dart';
+import '../../shared/theme/app_spacing.dart';
+import '../../shared/theme/app_radius.dart';
+import '../../shared/theme/app_shadows.dart';
+import '../../shared/widgets/common_card.dart';
+import '../../shared/widgets/common_button.dart';
+import '../../shared/widgets/common_badge.dart';
 
 class AppointmentBookingScreen extends ConsumerStatefulWidget {
   const AppointmentBookingScreen({
@@ -435,14 +440,14 @@ class _AppointmentBookingScreenState
                 address: _selectedAddress,
                 onChangeAddress: _selectAddress,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSpacing.sectionSpacing),
               _buildSectionTitle('담당 한의사를 선택해 주세요'),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md),
               if (_loadingDoctors)
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
-                    child: CircularProgressIndicator(color: kBookingPrimary),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 )
               else if (_doctors.isEmpty)
@@ -457,14 +462,14 @@ class _AppointmentBookingScreenState
                   selectedDoctor: _selectedDoctor,
                   onSelected: _onDoctorSelected,
                 ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.sectionSpacing),
               _buildSectionTitle('예약 날짜 선택'),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md),
               if (_loadingSlots)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
                   child: Center(
-                    child: CircularProgressIndicator(color: kBookingPrimary),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 )
               else if (_slots.isEmpty)
@@ -478,9 +483,9 @@ class _AppointmentBookingScreenState
                   onDateSelected: _onDateSelected,
                 ),
               if (_selectedDate != null && _filteredSlots.isNotEmpty) ...[
-                const SizedBox(height: 24),
+                SizedBox(height: AppSpacing.sectionSpacing),
                 _buildSectionTitle('예약 가능한 시간'),
-                const SizedBox(height: 12),
+                SizedBox(height: AppSpacing.md),
                 _TimeSlotGrid(
                   timeSlots: _timeSlotOptions,
                   selectedSlot: _selectedSlot,
@@ -488,28 +493,28 @@ class _AppointmentBookingScreenState
                   onTimeSlotSelected: _onTimeSlotSelected,
                 ),
               ] else if (_selectedDate != null && _filteredSlots.isEmpty) ...[
-                const SizedBox(height: 24),
+                SizedBox(height: AppSpacing.sectionSpacing),
                 _buildSectionTitle('예약 가능한 시간'),
-                const SizedBox(height: 12),
+                SizedBox(height: AppSpacing.md),
                 const _EmptyPlaceholder(
                   message: '선택한 날짜에 예약 가능한 시간이 없습니다. 다른 날짜를 선택해 주세요.',
                 ),
               ],
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.sectionSpacing),
               _buildSectionTitle('증상 및 요청사항'),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md),
               _SymptomField(
                 controller: _symptomController,
                 hint: '예) 3일 전부터 어깨가 뻐근하고 움직이기 힘들어요',
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md),
               _SymptomField(
                 controller: _noteController,
                 hint: '의사에게 전달하고 싶은 내용을 입력하세요',
                 label: '추가 요청 (선택)',
                 maxLines: 3,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md),
               _MedicineSwitch(
                 needsMedicine: _needsMedicine,
                 onChanged: (value) {
@@ -518,13 +523,13 @@ class _AppointmentBookingScreenState
                   });
                 },
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSpacing.sectionSpacing),
               const _SummaryCard(),
               if (_error != null) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: AppSpacing.md),
                 Text(
                   _error!,
-                  style: const TextStyle(color: AppColors.error),
+                  style: AppTypography.bodyMedium.copyWith(color: AppColors.error),
                 ),
               ],
             ],
@@ -544,22 +549,19 @@ class _AppointmentBookingScreenState
     return AppBar(
       backgroundColor: AppColors.surface,
       elevation: 0,
-      shadowColor: Colors.transparent,
+      scrolledUnderElevation: 0,
       title: Text(
         _existingAppointmentId != null ? '예약 수정' : '예약하기',
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
+        style: AppTypography.titleMedium,
       ),
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.iconPrimary),
+        icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.iconPrimary),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(1),
-        child: Divider(height: 1, color: AppColors.divider),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: AppColors.divider, height: 1),
       ),
     );
   }
@@ -567,92 +569,65 @@ class _AppointmentBookingScreenState
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
+      style: AppTypography.titleLarge,
     );
   }
 
   void _showConfirmationSheet() {
     final doctor = _selectedDoctor!;
     final slot = _selectedSlot!;
-    // 선택한 시간대가 있으면 그것을 사용, 없으면 슬롯의 시작 시간 사용
     final displayTime = _selectedTimeSlot ?? slot.startsAt.toLocal();
-    final dateLabel = DateFormat('M월 d일 (E) a h:mm', 'ko')
-        .format(displayTime);
+    final dateLabel = DateFormat('M월 d일 (E) a h:mm', 'ko').format(displayTime);
 
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: AppRadius.modalTopRadius,
         ),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: const BoxDecoration(
-                  color: kBookingPrimaryLight,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: kBookingPrimary, size: 32),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          MediaQuery.of(ctx).viewInsets.bottom + AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                shape: BoxShape.circle,
               ),
-              const SizedBox(height: 16),
-              const Text(
-                '예약이 완료되었어요!',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '$dateLabel\n${doctor.name} · ${doctor.specialty}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                    Navigator.of(context).pop();
-                    _showSnack('마이페이지에서 예약 내역을 확인하세요');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kBookingPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    '확인',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+              child: Icon(Icons.check_rounded, color: AppColors.primary, size: 32),
+            ),
+            SizedBox(height: AppSpacing.lg),
+            Text(
+              '예약이 완료되었어요!',
+              style: AppTypography.headingLarge,
+            ),
+            SizedBox(height: AppSpacing.sm),
+            Text(
+              '$dateLabel\n${doctor.name} · ${doctor.specialty}',
+              textAlign: TextAlign.center,
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+            ),
+            SizedBox(height: AppSpacing.xl),
+            AppPrimaryButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                Navigator.of(context).pop();
+                _showSnack('마이페이지에서 예약 내역을 확인하세요');
+              },
+              text: '확인',
+              isFullWidth: true,
+            ),
+          ],
         ),
       ),
     );
@@ -681,89 +656,33 @@ class _DoctorSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: doctors
-          .map(
-            (doctor) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: InkWell(
-                onTap: () => onSelected(doctor),
-                borderRadius: BorderRadius.circular(18),
-                child: Ink(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: doctor.id == selectedDoctor?.id
-                          ? kBookingPrimary
-                          : AppColors.border,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 26,
-                        backgroundColor: AppColors.surfaceVariant,
-                        child: Text(
-                          doctor.name.isNotEmpty ? doctor.name[0] : '?',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              doctor.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              doctor.specialty,
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              doctor.clinicName,
-                              style: const TextStyle(
-                                color: AppColors.textHint,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.check_circle,
-                        color: doctor.id == selectedDoctor?.id
-                            ? kBookingPrimary
-                            : AppColors.border,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+      children: doctors.map((doctor) {
+        final isSelected = doctor.id == selectedDoctor?.id;
+        return Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.sm),
+          child: AppListCard(
+            onTap: () => onSelected(doctor),
+            title: doctor.name,
+            subtitle: '${doctor.specialty} · ${doctor.clinicName}',
+            leading: CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.surfaceVariant,
+              backgroundImage: doctor.imageUrl != null ? NetworkImage(doctor.imageUrl!) : null,
+              child: doctor.imageUrl == null
+                  ? Text(
+                      doctor.name.isNotEmpty ? doctor.name[0] : '?',
+                      style: AppTypography.titleMedium.copyWith(color: AppColors.textPrimary),
+                    )
+                  : null,
             ),
-          )
-          .toList(),
+            trailing: isSelected
+                ? Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 24)
+                : Icon(Icons.radio_button_unchecked_rounded, color: AppColors.border, size: 24),
+            borderColor: isSelected ? AppColors.primary : AppColors.border,
+            backgroundColor: isSelected ? AppColors.primaryLight.withOpacity(0.3) : Colors.white,
+          ),
+        );
+      }).toList(),
     );
   }
 }
@@ -795,46 +714,37 @@ class _DateSelector extends StatelessWidget {
               date.day == selectedDate!.day;
 
           return Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: EdgeInsets.only(right: AppSpacing.sm),
             child: InkWell(
               onTap: () => onDateSelected(date),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              borderRadius: AppRadius.buttonRadius,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: isSelected ? kBookingPrimary : Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  color: isSelected ? AppColors.primary : Colors.white,
+                  borderRadius: AppRadius.buttonRadius,
                   border: Border.all(
-                    color: isSelected ? kBookingPrimary : AppColors.border,
-                    width: isSelected ? 2 : 1,
+                    color: isSelected ? AppColors.primary : AppColors.border,
+                    width: isSelected ? 0 : 1,
                   ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: kBookingPrimary.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : null,
+                  boxShadow: isSelected ? AppShadows.primaryShadow : null,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       DateFormat('E', 'ko_KR').format(date),
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: AppTypography.labelMedium.copyWith(
                         color: isSelected ? Colors.white : AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4),
                     Text(
                       DateFormat('M/d', 'ko_KR').format(date),
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: AppTypography.titleMedium.copyWith(
                         color: isSelected ? Colors.white : AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -879,8 +789,8 @@ class _TimeSlotGrid extends StatelessWidget {
     }
 
     return Wrap(
-      spacing: 12,
-      runSpacing: 12,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: timeSlots.map((option) {
         // 선택된 정확한 시간대와 일치하는지 확인
         final isSelected = selectedTimeSlot != null &&
@@ -889,7 +799,6 @@ class _TimeSlotGrid extends StatelessWidget {
             option.time.day == selectedTimeSlot!.day &&
             option.time.hour == selectedTimeSlot!.hour &&
             option.time.minute == selectedTimeSlot!.minute;
-        final timeStr = DateFormat('HH:mm').format(option.time);
         final period = option.time.hour < 12 ? '오전' : '오후';
         final displayHour = option.time.hour > 12 
             ? option.time.hour - 12 
@@ -898,31 +807,24 @@ class _TimeSlotGrid extends StatelessWidget {
 
         return InkWell(
           onTap: () => onTimeSlotSelected(option),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          borderRadius: AppRadius.buttonRadius,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
             decoration: BoxDecoration(
-              color: isSelected ? kBookingPrimary : Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              color: isSelected ? AppColors.primary : Colors.white,
+              borderRadius: AppRadius.buttonRadius,
               border: Border.all(
-                color: isSelected ? kBookingPrimary : AppColors.border,
-                width: isSelected ? 2 : 1,
+                color: isSelected ? AppColors.primary : AppColors.border,
+                width: isSelected ? 0 : 1,
               ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: kBookingPrimary.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+              boxShadow: isSelected ? AppShadows.primaryShadow : null,
             ),
             child: Text(
               displayTime,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+              style: AppTypography.labelLarge.copyWith(
                 color: isSelected ? Colors.white : AppColors.textPrimary,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ),
@@ -952,27 +854,30 @@ class _SymptomField extends StatelessWidget {
       children: [
         Text(
           label ?? '증상 설명',
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+          style: AppTypography.titleMedium,
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.sm),
         TextField(
           controller: controller,
           maxLines: maxLines,
+          style: AppTypography.bodyMedium,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.textHint),
+            hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textHint),
             filled: true,
             fillColor: Colors.white,
+            contentPadding: EdgeInsets.all(AppSpacing.md),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.border),
+              borderRadius: AppRadius.inputRadius,
+              borderSide: BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: AppRadius.inputRadius,
+              borderSide: BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: kBookingPrimary, width: 2),
+              borderRadius: AppRadius.inputRadius,
+              borderSide: BorderSide(color: AppColors.primary, width: 2),
             ),
           ),
         ),
@@ -992,31 +897,23 @@ class _MedicineSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
+    return AppBaseCard(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       child: Row(
         children: [
-          const Icon(Icons.local_pharmacy_outlined, color: kBookingPrimary),
-          const SizedBox(width: 12),
-          const Expanded(
+          Icon(Icons.local_pharmacy_outlined, color: AppColors.primary),
+          SizedBox(width: AppSpacing.md),
+          Expanded(
             child: Text(
               '진료 후 한약 처방이 필요해요',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.titleMedium,
             ),
           ),
           Switch.adaptive(
             value: needsMedicine,
             onChanged: onChanged,
-            activeThumbColor: kBookingPrimary,
-            activeTrackColor: kBookingPrimary.withValues(alpha: 0.4),
+            activeColor: AppColors.primary,
+            activeTrackColor: AppColors.primaryLight,
           ),
         ],
       ),
@@ -1037,26 +934,22 @@ class _EmptyPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
-      ),
+    return AppBaseCard(
+      padding: AppSpacing.cardPaddingAll,
       child: Column(
         children: [
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary),
+            style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
           ),
           if (onAction != null) ...[
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: onAction,
-              child: Text(actionLabel ?? '새로고침'),
+            SizedBox(height: AppSpacing.md),
+            AppOutlinedButton(
+              onPressed: onAction!,
+              text: actionLabel ?? '새로고침',
+              size: ButtonSize.small,
+              isFullWidth: false,
             ),
           ],
         ],
@@ -1081,42 +974,19 @@ class _BottomActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: AppColors.divider)),
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: isEnabled ? onPressed : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kBookingPrimary,
-                disabledBackgroundColor: kBookingPrimary.withValues(alpha: 0.3),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: isLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child:
-                          CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(
-                      isEditMode ? '수정하기' : '예약하기',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-            ),
+          padding: EdgeInsets.fromLTRB(AppSpacing.screenPadding, AppSpacing.sm, AppSpacing.screenPadding, AppSpacing.sm),
+          child: AppPrimaryButton(
+            onPressed: isEnabled ? onPressed : null,
+            text: isEditMode ? '수정하기' : '예약하기',
+            isLoading: isLoading,
+            isFullWidth: true,
           ),
         ),
       ),
@@ -1135,60 +1005,41 @@ class _BookingHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
+    return AppBaseCard(
+      padding: AppSpacing.cardPaddingAll,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: kBookingPrimaryLight,
-                  borderRadius: BorderRadius.circular(16),
+                  color: AppColors.primaryLight,
+                  borderRadius: AppRadius.cardRadius,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.home_filled,
-                  color: kBookingPrimary,
-                  size: 26,
+                  color: AppColors.primary,
+                  size: 24,
                 ),
               ),
-              const SizedBox(width: 16),
-              const Expanded(
+              SizedBox(width: AppSpacing.md),
+              Expanded(
                 child: Text(
                   '방문 진료 예약',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.headingMedium,
                 ),
               ),
-              TextButton(
+              AppTextButton(
                 onPressed: onChangeAddress,
-                style: TextButton.styleFrom(
-                  foregroundColor: kBookingPrimary,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                child: const Text('주소 변경'),
+                text: '주소 변경',
+                color: AppColors.primary,
               ),
             ],
           ),
           if (address != null) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1196,21 +1047,15 @@ class _BookingHeroCard extends StatelessWidget {
                   address!.roadAddress.isNotEmpty
                       ? address!.roadAddress
                       : address!.jibunAddress,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
+                  style: AppTypography.bodyMedium.copyWith(height: 1.5),
                 ),
                 if (address!.detailAddress != null &&
                     address!.detailAddress!.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4),
                   Text(
                     address!.detailAddress!,
-                    style: const TextStyle(
+                    style: AppTypography.bodyMedium.copyWith(
                       color: AppColors.textSecondary,
-                      fontSize: 14,
-                      height: 1.5,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -1218,34 +1063,27 @@ class _BookingHeroCard extends StatelessWidget {
               ],
             ),
           ] else ...[
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: AppSpacing.md),
+            Text(
               '주소를 선택해주세요',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-                height: 1.5,
-              ),
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.textHint),
             ),
           ],
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.md),
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: AppRadius.cardRadius,
             ),
             child: Row(
-              children: const [
-                Icon(Icons.info_outline, color: kBookingInfoBlue, size: 18),
-                SizedBox(width: 8),
+              children: [
+                Icon(Icons.info_outline_rounded, color: AppColors.info, size: 18),
+                SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     '방문진료비는 별도 안내되며, 안전한 진료를 위해 상태를 정확히 입력해주세요.',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 12,
-                    ),
+                    style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
                   ),
                 ),
               ],
@@ -1262,51 +1100,33 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+    return AppBaseCard(
+      padding: AppSpacing.cardPaddingAll,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children: [
               Text(
                 '진료 비용',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTypography.headingSmall,
               ),
               Text(
                 '₩45,000',
-                style: TextStyle(
-                  color: kBookingPrimary,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: AppTypography.headingLarge.copyWith(color: AppColors.secondary),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          const Divider(color: AppColors.border),
-          const SizedBox(height: 12),
-          const Text(
+          SizedBox(height: AppSpacing.md),
+          Divider(color: AppColors.border),
+          SizedBox(height: AppSpacing.md),
+          Text(
             '• 방문 진료 기본 비용 포함\n• 보험 청구는 진료 후 진행됩니다\n• 추가 검사가 필요한 경우 비용이 달라질 수 있어요',
-            style: TextStyle(color: AppColors.textSecondary, height: 1.5),
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
           ),
         ],
       ),

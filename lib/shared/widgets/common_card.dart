@@ -175,6 +175,8 @@ class AppListCard extends StatelessWidget {
     this.trailing,
     this.onTap,
     this.margin,
+    this.borderColor,
+    this.backgroundColor,
   });
 
   final String title;
@@ -183,12 +185,16 @@ class AppListCard extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? margin;
+  final Color? borderColor;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return AppBaseCard(
       onTap: onTap,
       margin: margin ?? EdgeInsets.only(bottom: AppSpacing.listItemSpacing),
+      borderColor: borderColor,
+      color: backgroundColor ?? AppColors.surface,
       child: Row(
         children: [
           if (leading != null) ...[
