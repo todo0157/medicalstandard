@@ -10,14 +10,14 @@ import '../../../core/services/auth_session.dart';
 import '../../../core/services/chat_realtime_service.dart';
 import '../providers/chat_providers.dart';
 
-// Modern color palette for patient chat UI
-const Color kChatPrimaryGreen = Color(0xFF10B981);
-const Color kChatPrimaryGreenLight = Color(0xFFD1FAE5);
-const Color kChatBubbleGray = Color(0xFFF9FAFB);
-const Color kChatDarkGray = Color(0xFF111827);
-const Color kChatMediumGray = Color(0xFF6B7280);
-const Color kChatLightGray = Color(0xFFE5E7EB);
-const Color kChatBackground = Color(0xFFF3F4F6);
+// 디자인 시스템 import
+import '../../../shared/theme/app_colors.dart';
+import '../../../shared/theme/app_typography.dart';
+import '../../../shared/theme/app_spacing.dart';
+import '../../../shared/theme/app_radius.dart';
+import '../../../shared/theme/app_shadows.dart';
+import '../widgets/chat_bubble.dart';
+import '../widgets/chat_input.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key, this.sessionId});
@@ -102,13 +102,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return sessionAsync.when(
       loading: () => Scaffold(
-        backgroundColor: kChatBackground,
+        backgroundColor: AppColors.scaffoldBackground,
         body: const Center(
-          child: CircularProgressIndicator(color: kChatPrimaryGreen),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       ),
       error: (error, _) => Scaffold(
-        backgroundColor: kChatBackground,
+        backgroundColor: AppColors.scaffoldBackground,
+        appBar: AppBar(title: const Text('채팅')),
         body: _ErrorView(
           message: '채팅 세션을 불러오지 못했어요: $error',
           onRetry: () => ref.refresh(activeChatSessionProvider),
@@ -119,118 +120,218 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         final messagesState = ref.watch(chatMessagesNotifierProvider(session.id));
 
         return Scaffold(
-          backgroundColor: kChatBackground,
-          body: SafeArea(
-            child: Column(
-              children: [
-                _ModernChatHeader(session: session),
-                Expanded(
-                  child: messagesState.when(
-                    loading: () => const Center(
-                      child: CircularProgressIndicator(color: kChatPrimaryGreen),
-                    ),
-                    error: (error, _) => _ErrorView(
-                      message: '메시지를 불러오지 못했어요: $error',
-                      onRetry: () => ref
-                          .read(chatMessagesNotifierProvider(session.id).notifier)
-                          .load(),
-                    ),
-                    data: (messages) {
-                      if (messages.isEmpty) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: kChatPrimaryGreen.withValues(alpha: 0.1),
-                                      blurRadius: 20,
-                                      spreadRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  Icons.chat_bubble_outline,
-                                  size: 48,
-                                  color: kChatPrimaryGreen.withValues(alpha: 0.6),
-                                ),
+          backgroundColor: AppColors.scaffoldBackground,
+          appBar: _buildAppBar(context, ref, session),
+          body: Column(
+            children: [
+              Expanded(
+                child: messagesState.when(
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                  error: (error, _) => _ErrorView(
+                    message: '메시지를 불러오지 못했어요: $error',
+                    onRetry: () => ref
+                        .read(chatMessagesNotifierProvider(session.id).notifier)
+                        .load(),
+                  ),
+                  data: (messages) {
+                    if (messages.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(AppSpacing.xl),
+                              decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                shape: BoxShape.circle,
+                                boxShadow: AppShadows.card,
                               ),
-                              const SizedBox(height: 24),
-                              Text(
-                                '메시지를 입력하여\n상담을 시작해보세요',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: kChatMediumGray,
-                                  fontSize: 16,
-                                  height: 1.5,
-                                ),
+                              child: Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 48,
+                                color: AppColors.primaryLight,
                               ),
-                            ],
-                          ),
-                        );
-                      }
-                      _scrollToBottom(animated: false);
-                      return Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white,
-                              kChatBackground,
-                            ],
-                            stops: const [0.0, 0.3],
-                          ),
-                        ),
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 20.0,
-                          ),
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final showAvatar = index == 0 ||
-                                messages[index].sender != messages[index - 1].sender;
-                            return _ModernMessageBubble(
-                              message: messages[index],
-                              showAvatar: showAvatar,
-                            );
-                          },
+                            ),
+                            SizedBox(height: AppSpacing.lg),
+                            Text(
+                              '메시지를 입력하여\n상담을 시작해보세요',
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodyLarge.copyWith(color: AppColors.textSecondary),
+                            ),
+                          ],
                         ),
                       );
-                    },
-                  ),
+                    }
+                    _scrollToBottom(animated: false);
+                    
+                    return ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.screenPadding,
+                        vertical: AppSpacing.md,
+                      ),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index];
+                        final isUser = message.sender == 'user';
+                        
+                        // 날짜 구분선 표시 여부
+                        bool showDateDivider = false;
+                        if (index == 0) {
+                          showDateDivider = true;
+                        } else {
+                          final prevMessage = messages[index - 1];
+                          final prevDate = prevMessage.createdAt.toLocal();
+                          final currDate = message.createdAt.toLocal();
+                          if (prevDate.year != currDate.year ||
+                              prevDate.month != currDate.month ||
+                              prevDate.day != currDate.day) {
+                            showDateDivider = true;
+                          }
+                        }
+
+                        // 아바타/시간 표시 여부 (연속된 메시지 처리)
+                        bool showAvatar = true;
+                        bool showTime = true;
+                        
+                        if (index < messages.length - 1) {
+                          final nextMessage = messages[index + 1];
+                          // 다음 메시지가 같은 사람이 보낸거면 시간 숨김 (1분 이내)
+                          if (nextMessage.sender == message.sender) {
+                            final currTime = message.createdAt.toLocal();
+                            final nextTime = nextMessage.createdAt.toLocal();
+                             if (currTime.minute == nextTime.minute && 
+                                 currTime.hour == nextTime.hour) {
+                               showTime = false;
+                             }
+                          }
+                        }
+                        
+                        if (index > 0) {
+                          final prevMessage = messages[index - 1];
+                          // 이전 메시지가 같은 사람이 보낸거면 아바타 숨김
+                          if (prevMessage.sender == message.sender) {
+                             // 단, 날짜가 바뀌었으면 아바타 다시 표시
+                             if (!showDateDivider) {
+                               showAvatar = false;
+                             }
+                          }
+                        }
+
+                        return Column(
+                          children: [
+                            if (showDateDivider) _buildDateDivider(message.createdAt.toLocal()),
+                            AppMessageBubble(
+                              message: message,
+                              isUser: isUser,
+                              showAvatar: showAvatar,
+                              showTime: showTime,
+                              senderName: session.doctor?.name,
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
-                _ModernChatInputBar(
-                  controller: _chatController,
-                  onSend: () => _sendMessage(session),
-                ),
-              ],
-            ),
+              ),
+              AppChatInput(
+                controller: _chatController,
+                onSend: () => _sendMessage(session),
+              ),
+            ],
           ),
         );
       },
     );
   }
-}
 
-class _ModernChatHeader extends ConsumerWidget {
-  const _ModernChatHeader({required this.session});
+  PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref, ChatSession session) {
+    final doctor = session.doctor;
+    return AppBar(
+      backgroundColor: AppColors.surface,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.iconPrimary),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            session.subject ?? '방문 진료 상담',
+            style: AppTypography.titleMedium,
+          ),
+          if (doctor != null)
+            Text(
+              '${doctor.name} 한의사 · ${doctor.specialty}',
+              style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+            ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.more_vert_rounded, color: AppColors.iconPrimary),
+          onPressed: () => _showChatOptions(context, ref, session),
+        ),
+      ],
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(1),
+        child: Container(color: AppColors.divider, height: 1),
+      ),
+    );
+  }
 
-  final ChatSession session;
+  Widget _buildDateDivider(DateTime date) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+      child: Row(
+        children: [
+          Expanded(child: Divider(color: AppColors.divider)),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Text(
+              DateFormat('yyyy년 M월 d일 EEEE', 'ko').format(date),
+              style: AppTypography.caption.copyWith(color: AppColors.textHint),
+            ),
+          ),
+          Expanded(child: Divider(color: AppColors.divider)),
+        ],
+      ),
+    );
+  }
 
-  Future<void> _deleteSession(BuildContext context, WidgetRef ref) async {
+  void _showChatOptions(BuildContext context, WidgetRef ref, ChatSession session) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.modalTopRadius),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.exit_to_app_rounded, color: AppColors.error),
+              title: Text('채팅방 나가기', style: TextStyle(color: AppColors.error)),
+              onTap: () {
+                Navigator.pop(context);
+                _deleteSession(context, ref, session);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deleteSession(BuildContext context, WidgetRef ref, ChatSession session) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('채팅방 나가기'),
-        content: const Text('정말 이 채팅방을 나가시겠습니까?'),
+        content: const Text('정말 이 채팅방을 나가시겠습니까?\n대화 내용이 모두 삭제됩니다.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -238,9 +339,7 @@ class _ModernChatHeader extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
             child: const Text('나가기'),
           ),
         ],
@@ -254,504 +353,22 @@ class _ModernChatHeader extends ConsumerWidget {
       await service.deleteSession(session.id);
       
       if (context.mounted) {
-        // 채팅 세션 목록 새로고침
         ref.refresh(chatSessionsProvider);
-        
-        // 채팅 목록으로 돌아가기
-        context.pop();
-        
+        context.pop(); // 채팅 화면 닫기
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('채팅방을 나갔습니다.'),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text('채팅방을 나갔습니다.')),
         );
       }
     } catch (error) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('채팅방 나가기에 실패했습니다: ${error.toString()}'),
-            backgroundColor: Colors.red,
+            content: Text('오류 발생: ${error.toString()}'),
+            backgroundColor: AppColors.error,
           ),
         );
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final doctor = session.doctor;
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-                color: kChatDarkGray,
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      kChatPrimaryGreen,
-                      kChatPrimaryGreen.withValues(alpha: 0.8),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: kChatPrimaryGreen.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.health_and_safety_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      session.subject ?? '방문 진료 상담',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: kChatDarkGray,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      doctor != null
-                          ? '${doctor.name} · ${doctor.specialty}'
-                          : '의료진이 배정되었습니다',
-                      style: TextStyle(
-                        color: kChatMediumGray,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              PopupMenuButton<String>(
-                icon: Icon(
-                  Icons.more_vert,
-                  color: kChatDarkGray,
-                  size: 20,
-                ),
-                onSelected: (value) {
-                  if (value == 'leave') {
-                    _deleteSession(context, ref);
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'leave',
-                    child: Row(
-                      children: [
-                        Icon(Icons.exit_to_app, size: 18, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('채팅방 나가기', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: kChatPrimaryGreenLight,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: kChatPrimaryGreen,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      '온라인',
-                      style: TextStyle(
-                        color: kChatPrimaryGreen,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ModernMessageBubble extends StatelessWidget {
-  const _ModernMessageBubble({
-    required this.message,
-    required this.showAvatar,
-  });
-
-  final ChatMessage message;
-  final bool showAvatar;
-
-  @override
-  Widget build(BuildContext context) {
-    // 환자 전용 채팅: sender가 'user'면 오른쪽(자신), 'doctor'면 왼쪽(의사)
-    final bool isUser = message.sender == 'user';
-    final alignment = isUser ? MainAxisAlignment.end : MainAxisAlignment.start;
-    final bubbleColor = isUser ? kChatPrimaryGreen : Colors.white;
-    final textColor = isUser ? Colors.white : kChatDarkGray;
-    final timeFormat = DateFormat('HH:mm');
-    final messageTime = message.createdAt.toLocal();
-    
-    // 디버깅: sender 값 확인
-    if (kDebugMode) {
-      print('[ChatScreen] Message sender: ${message.sender}, isUser: $isUser, alignment: $alignment');
-    }
-
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: 12.0,
-        top: showAvatar ? 0 : 4.0,
-      ),
-      child: Row(
-        mainAxisAlignment: alignment,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isUser && showAvatar)
-            Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      kChatPrimaryGreen,
-                      kChatPrimaryGreen.withValues(alpha: 0.8),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: kChatPrimaryGreen.withValues(alpha: 0.2),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.health_and_safety_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-          ),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: [
-                Container(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.75,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: bubbleColor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(20),
-                      topRight: const Radius.circular(20),
-                      bottomLeft: isUser ? const Radius.circular(20) : const Radius.circular(4),
-                      bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(20),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isUser
-                            ? kChatPrimaryGreen.withValues(alpha: 0.25)
-                            : Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    message.content,
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 15,
-                      height: 1.5,
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        timeFormat.format(messageTime),
-                        style: TextStyle(
-                          color: kChatMediumGray,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                    // 읽음/안 읽음 표시 (카카오톡 스타일)
-                    if (isUser)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 4),
-                        child: Text(
-                          message.readAt != null ? '0' : '1',
-                          style: TextStyle(
-                            color: kChatMediumGray,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (isUser && showAvatar)
-            Container(
-              margin: const EdgeInsets.only(left: 8),
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: kChatPrimaryGreen,
-                  boxShadow: [
-                    BoxShadow(
-                      color: kChatPrimaryGreen.withValues(alpha: 0.2),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.person_rounded,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModernChatInputBar extends StatefulWidget {
-  const _ModernChatInputBar({
-    required this.controller,
-    required this.onSend,
-  });
-
-  final TextEditingController controller;
-  final VoidCallback onSend;
-
-  @override
-  State<_ModernChatInputBar> createState() => _ModernChatInputBarState();
-}
-
-class _ModernChatInputBarState extends State<_ModernChatInputBar> {
-  bool _hasText = false;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_onTextChanged);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_onTextChanged);
-    super.dispose();
-  }
-
-  void _onTextChanged() {
-    final hasText = widget.controller.text.trim().isNotEmpty;
-    if (hasText != _hasText) {
-      setState(() {
-        _hasText = hasText;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: kChatBubbleGray,
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.add_rounded,
-                    color: kChatMediumGray,
-                    size: 24,
-                  ),
-                  padding: EdgeInsets.zero,
-                  onPressed: () {},
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    textSelectionTheme: TextSelectionThemeData(
-                      selectionColor: kChatPrimaryGreen.withValues(alpha: 0.3),
-                      cursorColor: kChatPrimaryGreen,
-                    ),
-                  ),
-                  child: TextField(
-                    controller: widget.controller,
-                    maxLines: null,
-                    textInputAction: TextInputAction.newline,
-                    style: const TextStyle(
-                      color: kChatDarkGray,
-                      fontSize: 15,
-                      height: 1.4,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    cursorColor: kChatPrimaryGreen,
-                    decoration: InputDecoration(
-                      hintText: "메시지를 입력하세요",
-                      hintStyle: TextStyle(
-                        color: kChatMediumGray.withValues(alpha: 0.6),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      filled: true,
-                      fillColor: kChatBubbleGray,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 12,
-                      ),
-                    ),
-                    onSubmitted: (_) {
-                      if (_hasText) {
-                        widget.onSend();
-                      }
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                width: _hasText ? 48 : 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: _hasText
-                      ? LinearGradient(
-                          colors: [
-                            kChatPrimaryGreen,
-                            kChatPrimaryGreen.withValues(alpha: 0.9),
-                          ],
-                        )
-                      : null,
-                  color: _hasText ? null : kChatBubbleGray,
-                  shape: BoxShape.circle,
-                  boxShadow: _hasText
-                      ? [
-                          BoxShadow(
-                            color: kChatPrimaryGreen.withValues(alpha: 0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: _hasText ? widget.onSend : null,
-                    borderRadius: BorderRadius.circular(40),
-                    child: Center(
-                      child: Icon(
-                        _hasText ? Icons.send_rounded : Icons.mic_rounded,
-                        color: _hasText ? Colors.white : kChatMediumGray,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -765,37 +382,23 @@ class _ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.error_outline_rounded, size: 48, color: Colors.red),
-            ),
-            const SizedBox(height: 16),
+            Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
+            SizedBox(height: AppSpacing.md),
             Text(
               message,
-              style: const TextStyle(color: kChatDarkGray, fontSize: 15),
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
+            SizedBox(height: AppSpacing.lg),
+            FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('다시 시도'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kChatPrimaryGreen,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
             ),
           ],
         ),

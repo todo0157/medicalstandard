@@ -31,7 +31,7 @@ class AppColors {
   static const Color primaryLight = Color(0xFFEFF6FF); // Blue-50
   static const Color primaryMedium = Color(0xFFDBEAFE); // Blue-100
   static const Color primaryDark = Color(0xFF1E40AF); // Blue-800
-  
+
   /// Blue 그라디언트 (프로필 헤더 등)
   static const LinearGradient blueGradient = LinearGradient(
     colors: [primary, Color(0xFF2563EB)], // Blue-600 to Blue-700
@@ -67,12 +67,12 @@ class AppColors {
   // ========================================
   // Semantic Colors (상태 색상)
   // ========================================
-  
+
   /// 성공 상태 (예약 완료, 진료 완료 등)
   static const Color success = Color(0xFF10B981); // Green-500
   static const Color successLight = Color(0xFFE7F7EF); // Custom Green-50
   static const Color successDark = Color(0xFF059669); // Green-600
-  
+
   /// 경고 상태 (대기, 주의 필요 등)
   static const Color warning = Color(0xFFF59E0B); // Amber-500
   static const Color warningLight = Color(0xFFFEF3C7); // Amber-100
@@ -82,10 +82,10 @@ class AppColors {
   static const Color error = Color(0xFFEF4444); // Red-500
   static const Color errorLight = Color(0xFFFEE2E2); // Red-100
   static const Color errorDark = Color(0xFFDC2626); // Red-600
-  
+
   /// 정보 상태 (알림, 안내 등)
   static const Color info = Color(0xFF3B82F6); // Blue-600
-  static const Color infoLight = Color(0xFFDCFCE7); // Custom Blue-50
+  static const Color infoLight = Color(0xFFEFF6FF); // Blue-50
 
   // ========================================
   // Neutral/Gray Scale
@@ -93,6 +93,7 @@ class AppColors {
   
   /// 배경 색상
   static const Color background = Color(0xFFF9FAFB); // Gray-50
+  static const Color scaffoldBackground = Color(0xFFF3F4F6); // Gray-100 (스캐폴드 배경)
   static const Color surface = Color(0xFFFFFFFF); // White
   static const Color surfaceVariant = Color(0xFFF3F4F6); // Gray-100
 
@@ -120,11 +121,11 @@ class AppColors {
   
   /// Kakao 로그인 버튼
   static const Color kakao = Color(0xFFFEE500); // Kakao Yellow
-  
+
   /// 채팅 메시지 배경
   static const Color chatDoctor = Color(0xFFE5E7EB); // Gray-200 (한의사 메시지)
   static const Color chatUser = Color(0xFF10B981); // Green-500 (사용자 메시지)
-  
+
   /// 한의사 인증 배지
   static const Color certificationGreen = Color(0xFF16A34A); // Green-600
   static const Color certificationGreenBg = Color(0xFFDCFCE7); // Green-100
