@@ -123,7 +123,10 @@ class _ChatListContentState extends ConsumerState<_ChatListContent> with Widgets
 
   Future<void> _startConsultation(BuildContext context, WidgetRef ref) async {
     // 한의사 찾기 화면으로 이동하고 선택된 한의사 받기
-    final selectedDoctor = await context.push<Doctor>('/find-doctor');
+    final selectedDoctor = await context.push<Doctor>(
+      '/find-doctor',
+      extra: {'actionButtonLabel': '상담하기'},
+    );
     if (selectedDoctor != null && context.mounted) {
       // 선택된 한의사와의 상담 시작
       await _createChatSessionAndNavigate(context, ref, selectedDoctor);

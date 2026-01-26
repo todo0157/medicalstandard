@@ -213,6 +213,14 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final ScrollController _scrollController = ScrollController(); // 스크롤 컨트롤러 추가
+
+  @override
+  void dispose() {
+    _scrollController.dispose(); // 컨트롤러 해제
+    super.dispose();
+  }
+
   final List<Patient> _patients = [
     Patient(
       id: "me",
@@ -786,8 +794,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       radius: AppRadius.cardLargeRadius,
       shadow: true,
       onTap: () async {
-        // 기존 "한의사 찾기" 버튼과 동일한 로직
-        final doctor = await context.push<Doctor>('/find-doctor');
+        // "한의사 찾기" 버튼 로직
+        final doctor = await context.push<Doctor>(
+          '/find-doctor',
+          extra: {'actionButtonLabel': '선택하기'}, // 버튼 라벨 변경
+        );
+        
         if (doctor != null && mounted) {
           setState(() {
             _selectedDoctor = doctor;
@@ -802,6 +814,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }
           });
+          
+          // 사용자에게 선택 완료 알림 (다이얼로그)
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('한의사 선택 완료', style: AppTypography.titleMedium),
+              content: Text('${doctor.name} 한의사가 선택되었습니다.\n아래에서 예약 시간을 선택해주세요.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('확인', style: TextStyle(color: AppColors.primary)),
+                ),
+              ],
+            ),
+          );
+
+          // 다이얼로그가 닫힌 후 스크롤 최하단으로 이동
+          if (mounted) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.animateTo(
+                  _scrollController.position.maxScrollExtent,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOut,
+                );
+              }
+            });
+          }
         }
       },
       child: Row(
@@ -1028,6 +1068,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       color: AppColors.background,
       child: SingleChildScrollView(
+        controller: _scrollController, // 컨트롤러 연결
         padding: EdgeInsets.all(AppSpacing.screenPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1068,7 +1109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Text(
               "언제 진료를 받을까요?",
               style: AppTypography.titleSmall,
-            ),
+              ),
             SizedBox(height: AppSpacing.md),
             GestureDetector(
               onTap: () => _selectDate(context),
@@ -1088,7 +1129,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             Text(
               "어떤 질환으로 진료받으시나요?",
               style: AppTypography.titleSmall,
-            ),
+              ),
             SizedBox(height: AppSpacing.md),
             _buildSymptomSelection(),
             

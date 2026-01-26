@@ -122,6 +122,12 @@ router.get("/sessions", async (req: AuthenticatedRequest, res, next) => {
 router.post("/sessions", async (req: AuthenticatedRequest, res, next) => {
   try {
     const payload = sessionSchema.parse(req.body);
+    
+    console.log('[Chat API] POST /sessions');
+    console.log(`  - userAccountId: ${req.user!.sub}`);
+    console.log(`  - doctorId: ${payload.doctorId}`);
+    console.log(`  - subject: ${payload.subject}`);
+
     const session = await prisma.chatSession.create({
       data: {
         userAccountId: req.user!.sub,
@@ -135,6 +141,7 @@ router.post("/sessions", async (req: AuthenticatedRequest, res, next) => {
 
     return res.status(201).json({ data: session });
   } catch (error) {
+    console.error('[Chat API] Error creating session:', error);
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         message: "입력값이 올바르지 않습니다.",

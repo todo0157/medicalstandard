@@ -152,9 +152,13 @@ GoRouter createAppRouter(bool isAuthenticated) {
       GoRoute(
         path: '/find-doctor',
         name: 'find-doctor',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const FindDoctorScreen(),
-        ),
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final actionButtonLabel = extra?['actionButtonLabel'] as String? ?? '상담하기';
+          return MaterialPage(
+            child: FindDoctorScreen(actionButtonLabel: actionButtonLabel),
+          );
+        },
       ),
       // Doctor Schedule
       GoRoute(
