@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 
 import 'app_router.dart';
 import 'core/services/auth_session.dart';
-import 'core/services/auth_state.dart';
 import 'core/services/notification_service.dart';
 
 Future<void> main() async {
@@ -40,9 +39,8 @@ Future<void> main() async {
 
   KakaoSdk.init(nativeAppKey: '6daf1cc619f2e11d4d4a129475e9c3ff');
 
-  // 저장된 토큰 복원
+  // 저장된 토큰 복원 (AuthSession.load() 내부에서 AuthState도 갱신됨)
   await AuthSession.instance.load();
-  AuthState.instance.setAuthenticated(AuthSession.instance.token != null);
   final GoRouter router = createAppRouter(AuthSession.instance.token != null);
 
   runApp(ProviderScope(child: MyApp(router: router)));

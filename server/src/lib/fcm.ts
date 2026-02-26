@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import path from 'path';
+import { logger } from './logger';
 
 // 서비스 계정 키 파일 경로
 // .gitignore에 추가된 파일이어야 함
@@ -27,9 +28,9 @@ export function initFirebase() {
     });
 
     isInitialized = true;
-    console.log('[FCM] Firebase Admin Initialized successfully.');
+    logger.info('[FCM] Firebase Admin Initialized successfully.');
   } catch (error) {
-    console.error('[FCM] Firebase initialization failed:', error);
+    logger.error('[FCM] Firebase initialization failed:', error);
     // 파일이 없거나 키가 잘못된 경우 등 초기화 실패 시 알림 기능만 비활성화됨
   }
 }
@@ -45,7 +46,7 @@ export type NotificationPayload = {
  */
 export async function sendPushNotification(token: string, payload: NotificationPayload) {
   if (!isInitialized) {
-    console.warn('[FCM] Firebase not initialized. Skipping notification.');
+    logger.warn('[FCM] Firebase not initialized. Skipping notification.');
     return;
   }
 
@@ -75,13 +76,13 @@ export async function sendPushNotification(token: string, payload: NotificationP
     };
 
     const response = await admin.messaging().send(message);
-    console.log('[FCM] Successfully sent message:', response);
+    logger.info('[FCM] Successfully sent message:', response);
     return response;
   } catch (error) {
-    console.error('[FCM] Error sending message:', error);
+    logger.error('[FCM] Error sending message:', error);
     // 유효하지 않은 토큰일 경우 처리 필요 (DB에서 삭제 등)
     if ((error as any).code === 'messaging/registration-token-not-registered') {
-      console.warn('[FCM] Token is no longer valid:', token);
+      logger.warn('[FCM] Token is no longer valid:', token);
       // TODO: 호출부에서 토큰 삭제 처리 콜백 등을 고려할 수 있음
     }
     throw error;
@@ -93,7 +94,7 @@ export async function sendPushNotification(token: string, payload: NotificationP
  */
 export async function sendMulticastNotification(tokens: string[], payload: NotificationPayload) {
   if (!isInitialized) {
-    console.warn('[FCM] Firebase not initialized. Skipping notification.');
+    logger.warn('[FCM] Firebase not initialized. Skipping notification.');
     return;
   }
 
@@ -125,7 +126,7 @@ export async function sendMulticastNotification(tokens: string[], payload: Notif
     };
 
     const response = await admin.messaging().sendEachForMulticast(message);
-    console.log(`[FCM] Sent ${response.successCount} messages, ${response.failureCount} failed.`);
+    logger.info(`[FCM] Sent ${response.successCount} messages, ${response.failureCount} failed.`);
 
     // 실패한 토큰 처리 (유효하지 않은 토큰 제거용)
     const failedTokens: string[] = [];
@@ -142,7 +143,7 @@ export async function sendMulticastNotification(tokens: string[], payload: Notif
 
     return { successCount: response.successCount, failedTokens };
   } catch (error) {
-    console.error('[FCM] Error sending multicast message:', error);
+    logger.error('[FCM] Error sending multicast message:', error);
     throw error;
   }
 }

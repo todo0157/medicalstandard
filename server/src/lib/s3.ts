@@ -1,5 +1,6 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from './logger';
 
 // 환경 변수 검증
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
@@ -8,7 +9,7 @@ const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION || !AWS_BUCKET_NAME) {
-  console.warn('⚠️ AWS S3 configuration is missing. Image upload will fail.');
+  logger.warn('[S3] AWS S3 configuration is missing. Image upload will fail.');
 }
 
 // S3 클라이언트 초기화
@@ -71,11 +72,11 @@ export async function uploadImageToS3(base64Data: string, folderPath: string = '
 
     // 4. URL 생성
     const url = `https://${AWS_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${key}`;
-    console.log(`[S3 Upload] Success: ${url}`);
+    logger.debug(`[S3 Upload] Success: ${url}`);
     
     return url;
   } catch (error) {
-    console.error('[S3 Upload] Error:', error);
+    logger.error('[S3 Upload] Error:', error);
     throw new Error('Failed to upload image to storage');
   }
 }

@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { logger } from '../lib/logger';
 
 interface PostalCodeRecord {
   postalCode: string;
@@ -79,7 +80,7 @@ class PostalCodeService {
       const normalizedPath = path.normalize(possiblePath);
       if (fs.existsSync(normalizedPath)) {
         this.dataDir = normalizedPath;
-        console.log(`[PostalCodeService] ✓ Data directory found: ${this.dataDir}`);
+        logger.info(`[PostalCodeService] Data directory found: ${this.dataDir}`);
         found = true;
         break;
       }
@@ -88,14 +89,14 @@ class PostalCodeService {
     if (!found) {
       // 기본값 설정 (에러는 나중에 발생)
       this.dataDir = possiblePaths[0] || path.join(process.cwd(), '..', 'search_number');
-      console.error(`[PostalCodeService] ✗ Data directory not found. Tried paths:`);
+      logger.error(`[PostalCodeService] Data directory not found. Tried paths:`);
       possiblePaths.forEach((p, i) => {
         const normalized = path.normalize(p);
         const exists = fs.existsSync(normalized);
-        console.error(`  ${i + 1}. ${normalized} ${exists ? '✓' : '✗'}`);
+        logger.error(`  ${i + 1}. ${normalized} ${exists ? '✓' : '✗'}`);
       });
-      console.error(`[PostalCodeService] Current working directory: ${process.cwd()}`);
-      console.error(`[PostalCodeService] __dirname: ${__dirname}`);
+      logger.error(`[PostalCodeService] Current working directory: ${process.cwd()}`);
+      logger.error(`[PostalCodeService] __dirname: ${__dirname}`);
     }
   }
 
@@ -191,7 +192,7 @@ class PostalCodeService {
     try {
       // 파일이 존재하는지 확인
       if (!fs.existsSync(filePath)) {
-        console.warn(`[PostalCodeService] File not found: ${filePath}`);
+        logger.warn(`[PostalCodeService] File not found: ${filePath}`);
         return results;
       }
 
@@ -226,10 +227,7 @@ class PostalCodeService {
         }
       }
     } catch (error) {
-      console.error(`[PostalCodeService] Error reading file ${filePath}:`, error);
-      if (error instanceof Error) {
-        console.error(`[PostalCodeService] Error message: ${error.message}`);
-      }
+      logger.error(`[PostalCodeService] Error reading file ${filePath}:`, error);
     }
 
     return results;
@@ -271,7 +269,7 @@ class PostalCodeService {
         }
       }
     } catch (error) {
-      console.error(`[PostalCodeService] Error in stream search for ${filePath}:`, error);
+      logger.error(`[PostalCodeService] Error in stream search for ${filePath}:`, error);
     }
 
     return results;
@@ -288,7 +286,7 @@ class PostalCodeService {
 
     // 캐시 확인
     if (this.cache.has(postalCode)) {
-      console.log(`[PostalCodeService] Cache hit for postal code: ${postalCode}`);
+      logger.debug(`[PostalCodeService] Cache hit for postal code: ${postalCode}`);
       return this.cache.get(postalCode)!;
     }
 
@@ -297,7 +295,7 @@ class PostalCodeService {
     try {
       // 데이터 디렉토리 확인
       if (!fs.existsSync(this.dataDir)) {
-        console.error(`[PostalCodeService] Data directory does not exist: ${this.dataDir}`);
+        logger.error(`[PostalCodeService] Data directory does not exist: ${this.dataDir}`);
         throw new Error(`우편번호 데이터 디렉토리를 찾을 수 없습니다: ${this.dataDir}`);
       }
 
@@ -305,10 +303,10 @@ class PostalCodeService {
       const files = fs.readdirSync(this.dataDir);
       const txtFiles = files.filter(f => f.endsWith('.txt') && !f.includes('설명'));
       
-      console.log(`[PostalCodeService] Searching in ${txtFiles.length} files for postal code: ${postalCode}`);
+      logger.debug(`[PostalCodeService] Searching in ${txtFiles.length} files for postal code: ${postalCode}`);
 
       if (txtFiles.length === 0) {
-        console.error(`[PostalCodeService] No .txt files found in ${this.dataDir}`);
+        logger.error(`[PostalCodeService] No .txt files found in ${this.dataDir}`);
         throw new Error('우편번호 데이터 파일을 찾을 수 없습니다.');
       }
 
@@ -316,7 +314,7 @@ class PostalCodeService {
         const filePath = path.join(this.dataDir, file);
         const fileResults = this.searchInFile(filePath, postalCode);
         if (fileResults.length > 0) {
-          console.log(`[PostalCodeService] Found ${fileResults.length} results in ${file}`);
+          logger.debug(`[PostalCodeService] Found ${fileResults.length} results in ${file}`);
         }
         results.push(...fileResults);
       }
@@ -324,7 +322,7 @@ class PostalCodeService {
       // 결과 정렬 (도로명 주소 기준)
       results.sort((a, b) => a.roadAddress.localeCompare(b.roadAddress));
 
-      console.log(`[PostalCodeService] Total results for ${postalCode}: ${results.length}`);
+      logger.debug(`[PostalCodeService] Total results for ${postalCode}: ${results.length}`);
 
       // 캐시에 저장 (최대 1000개까지만 캐시)
       if (this.cache.size < 1000) {
@@ -333,7 +331,7 @@ class PostalCodeService {
 
       return results;
     } catch (error) {
-      console.error('[PostalCodeService] Error searching postal code:', error);
+      logger.error('[PostalCodeService] Error searching postal code:', error);
       if (error instanceof Error) {
         throw error;
       }

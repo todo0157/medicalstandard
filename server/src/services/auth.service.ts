@@ -5,6 +5,7 @@ import { randomBytes } from "crypto";
 
 import { env } from "../config";
 import { prisma } from "../lib/prisma";
+import { Errors } from "../lib/app-error";
 import type { AuthResult, AuthTokenPayload } from "../types/auth";
 import type { UserProfile } from "../types/userProfile";
 import { issueEmailVerificationToken } from "./token.service";
@@ -74,7 +75,7 @@ export class AuthService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === "P2002"
       ) {
-        throw new Error("EMAIL_ALREADY_EXISTS");
+        throw Errors.emailAlreadyExists();
       }
       throw error;
     }
@@ -87,7 +88,7 @@ export class AuthService {
     });
 
     if (!account || !(await bcrypt.compare(input.password, account.passwordHash))) {
-      throw new Error("INVALID_CREDENTIALS");
+      throw Errors.invalidCredentials();
     }
 
     const profile = account.profile;
@@ -129,11 +130,11 @@ export class AuthService {
 
   async loginWithKakao(params: { code: string; redirectUri?: string }): Promise<AuthResult & { profile: UserProfile }> {
     if (!env.KAKAO_REST_API_KEY) {
-      throw new Error("KAKAO_CONFIG_MISSING");
+      throw Errors.kakaoConfigMissing();
     }
     const redirectUri = params.redirectUri ?? env.KAKAO_REDIRECT_URI;
     if (!redirectUri) {
-      throw new Error("KAKAO_CONFIG_MISSING");
+      throw Errors.kakaoConfigMissing();
     }
 
     const tokenRes = await fetch(KAKAO_TOKEN_URL, {
@@ -150,21 +151,21 @@ export class AuthService {
 
     if (!tokenRes.ok) {
       const txt = await tokenRes.text();
-      throw new Error(`KAKAO_TOKEN_FAILED: ${txt}`);
+      throw Errors.kakaoAuthFailed();
     }
     const tokenJson = (await tokenRes.json()) as { access_token: string };
-    if (!tokenJson.access_token) throw new Error("KAKAO_TOKEN_MISSING");
+    if (!tokenJson.access_token) throw Errors.kakaoAuthFailed();
 
     const meRes = await fetch(KAKAO_ME_URL, {
       headers: { Authorization: `Bearer ${tokenJson.access_token}` },
     });
     if (!meRes.ok) {
       const txt = await meRes.text();
-      throw new Error(`KAKAO_ME_FAILED: ${txt}`);
+      throw Errors.kakaoAuthFailed();
     }
     const me = await meRes.json() as any;
     const kakaoId: string = me.id?.toString();
-    if (!kakaoId) throw new Error("KAKAO_ID_MISSING");
+    if (!kakaoId) throw Errors.kakaoAuthFailed();
     const kakaoAccount = me.kakao_account ?? {};
     const profileInfo = kakaoAccount.profile ?? {};
     const email: string = kakaoAccount.email ??
@@ -223,11 +224,11 @@ export class AuthService {
       include: { userAccount: { include: { profile: true } } },
     });
     if (!session) {
-      throw new Error("INVALID_REFRESH");
+      throw Errors.invalidRefreshToken();
     }
     if (new Date(session.expiresAt) < new Date()) {
       await prisma.session.delete({ where: { id: session.id } });
-      throw new Error("EXPIRED_REFRESH");
+      throw Errors.expiredRefreshToken();
     }
     const account = session.userAccount;
     const profile = account.profile!;

@@ -1,5 +1,6 @@
 import type { Prisma, UserProfile as PrismaUserProfile } from '@prisma/client';
 import { prisma } from '../lib/prisma';
+import { logger } from '../lib/logger';
 import { env } from '../config';
 import type { UserProfile } from '../types/userProfile';
 
@@ -49,7 +50,7 @@ export class ProfileService {
         updateData.clinicName = data.clinicName;
       }
 
-      console.log('[ProfileService] Updating profile:', { id, updateData });
+      logger.debug('[ProfileService] Updating profile:', { id, updateData });
 
       const updated = await prisma.userProfile.update({
         where: { id },
@@ -58,7 +59,7 @@ export class ProfileService {
 
       return this.map(updated);
     } catch (error) {
-      console.error('[ProfileService] Update error:', error);
+      logger.error('[ProfileService] Update error:', error);
       throw error;
     }
   }

@@ -19,124 +19,139 @@ import 'features/profile/screens/profile_edit_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/profile/screens/certification_request_screen.dart';
 import 'features/settings/settings_screen.dart';
-import 'features/support/customer_support_screen.dart';
+import 'features/support/screens/customer_support_screen.dart';
 import 'features/address/screens/address_search_screen.dart';
 import 'features/chat/screens/chat_list_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
 import 'features/chat/screens/practitioner_chat_screen.dart';
 import 'features/doctor/screens/doctor_schedule_screen.dart';
-import 'features/life/screens/health_tip_detail_screen.dart'; // 추가
+import 'features/life/screens/health_tip_detail_screen.dart';
 import 'core/models/doctor.dart';
 import 'core/models/address.dart';
 import 'core/models/appointment.dart';
+
+/// Paths that do NOT require authentication.
+const _unauthenticatedPaths = {
+  '/login',
+  '/signup',
+  '/kakao-callback',
+  '/reset-password',
+  '/verify-email',
+  '/verify-pre',
+};
 
 GoRouter createAppRouter(bool isAuthenticated) {
   return GoRouter(
     refreshListenable: AuthState.instance.listenable,
     initialLocation: isAuthenticated ? '/home' : '/signup',
     routes: [
-      // Auth Routes
+      // ── Auth ───────────────────────────────────────────────
       GoRoute(
         path: '/signup',
         name: 'signup',
-        builder: (context, state) => const SignUpScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: SignUpScreen(),
+        ),
       ),
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: LoginScreen(),
+        ),
       ),
       GoRoute(
         path: '/kakao-callback',
         name: 'kakao-callback',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final code = state.uri.queryParameters['code'];
           if (code == null || code.isEmpty) {
-            return const Scaffold(
-              body: Center(child: Text('Kakao 인증 코드가 없습니다.')),
+            return const MaterialPage(
+              child: Scaffold(
+                body: Center(child: Text('Kakao 인증 코드가 없습니다.')),
+              ),
             );
           }
-          return KakaoCallbackScreen(code: code);
+          return MaterialPage(child: KakaoCallbackScreen(code: code));
         },
       ),
       GoRoute(
         path: '/reset-password',
         name: 'reset-password',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'];
-          return PasswordResetScreen(token: token);
+          return MaterialPage(child: PasswordResetScreen(token: token));
         },
       ),
       GoRoute(
         path: '/verify-email',
         name: 'verify-email',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'];
-          return EmailVerifyScreen(token: token);
+          return MaterialPage(child: EmailVerifyScreen(token: token));
         },
       ),
       GoRoute(
         path: '/verify-pre',
         name: 'verify-pre',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final token = state.uri.queryParameters['token'];
-          return PreEmailVerifyScreen(token: token);
+          return MaterialPage(child: PreEmailVerifyScreen(token: token));
         },
       ),
 
-      // Main App Shell (with nested navigation)
+      // ── Main Shell ─────────────────────────────────────────
       GoRoute(
         path: '/home',
         name: 'home',
-        builder: (context, state) => const MainAppShellScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: MainAppShellScreen(),
+        ),
       ),
 
-      // Profile Routes
+      // ── Profile ────────────────────────────────────────────
       GoRoute(
         path: '/profile',
         name: 'profile',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const ProfileScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: ProfileScreen(),
         ),
       ),
       GoRoute(
         path: '/profile/edit',
         name: 'profile-edit',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const ProfileEditScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: ProfileEditScreen(),
         ),
       ),
       GoRoute(
         path: '/profile/certification-request',
         name: 'certification-request',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const CertificationRequestScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: CertificationRequestScreen(),
         ),
       ),
 
-      // Medical Records
+      // ── Medical Records ────────────────────────────────────
       GoRoute(
         path: '/medical-records',
         name: 'medical-records',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const MedicalRecordsScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: MedicalRecordsScreen(),
         ),
       ),
-      // Appointment Booking
+
+      // ── Booking ────────────────────────────────────────────
       GoRoute(
         path: '/booking',
         name: 'booking',
         pageBuilder: (context, state) {
-          // Appointment 객체가 직접 전달된 경우 (수정 모드)
           if (state.extra is Appointment) {
             final appointment = state.extra as Appointment;
             return MaterialPage(
-              child: AppointmentBookingScreen(
-                existingAppointment: appointment,
-              ),
+              child: AppointmentBookingScreen(existingAppointment: appointment),
             );
           }
-          // Map 형태로 전달된 경우 (새 예약 모드)
           final extra = state.extra as Map<String, dynamic>?;
           return MaterialPage(
             child: AppointmentBookingScreen(
@@ -148,78 +163,70 @@ GoRouter createAppRouter(bool isAuthenticated) {
           );
         },
       ),
-      // Find Doctor
+
+      // ── Doctor ─────────────────────────────────────────────
       GoRoute(
         path: '/find-doctor',
         name: 'find-doctor',
         pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          final actionButtonLabel = extra?['actionButtonLabel'] as String? ?? '상담하기';
+          final label = extra?['actionButtonLabel'] as String? ?? '상담하기';
           return MaterialPage(
-            child: FindDoctorScreen(actionButtonLabel: actionButtonLabel),
+            child: FindDoctorScreen(actionButtonLabel: label),
           );
         },
       ),
-      // Doctor Schedule
       GoRoute(
         path: '/doctor-schedule',
         name: 'doctor-schedule',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const DoctorScheduleScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: DoctorScheduleScreen(),
         ),
       ),
 
-      // Health Insurance
+      // ── Misc ───────────────────────────────────────────────
       GoRoute(
         path: '/health-insurance',
         name: 'health-insurance',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const HealthInsuranceScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: HealthInsuranceScreen(),
         ),
       ),
-
-      // Support
       GoRoute(
         path: '/support',
         name: 'support',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const CustomerSupportScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: CustomerSupportScreen(),
         ),
       ),
-
-      // Settings
       GoRoute(
         path: '/settings',
         name: 'settings',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const SettingsScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: SettingsScreen(),
         ),
       ),
-
-      // Legal Notice
       GoRoute(
         path: '/legal',
         name: 'legal',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const LegalNoticeScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: LegalNoticeScreen(),
         ),
       ),
-
-      // Address Search
       GoRoute(
         path: '/address/search',
         name: 'address-search',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const AddressSearchScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: AddressSearchScreen(),
         ),
       ),
 
-      // Chat Routes
+      // ── Chat ───────────────────────────────────────────────
       GoRoute(
         path: '/chat',
         name: 'chat-list',
-        pageBuilder: (context, state) => MaterialPage(
-          child: const ChatListScreen(),
+        pageBuilder: (context, state) => const MaterialPage(
+          child: ChatListScreen(),
         ),
       ),
       GoRoute(
@@ -227,7 +234,8 @@ GoRouter createAppRouter(bool isAuthenticated) {
         name: 'chat-detail',
         pageBuilder: (context, state) {
           final sessionId = state.pathParameters['sessionId']!;
-          final isPractitioner = state.extra is Map && (state.extra as Map)['isPractitioner'] == true;
+          final isPractitioner =
+              state.extra is Map && (state.extra as Map)['isPractitioner'] == true;
           return MaterialPage(
             child: isPractitioner
                 ? PractitionerChatScreen(sessionId: sessionId)
@@ -246,31 +254,33 @@ GoRouter createAppRouter(bool isAuthenticated) {
         },
       ),
 
-      // Health Tips Detail
+      // ── Health Tips ────────────────────────────────────────
       GoRoute(
         path: '/health-tip/:id',
         name: 'health-tip-detail',
         pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
-          return MaterialPage(
-            child: HealthTipDetailScreen(tipId: id),
-          );
+          return MaterialPage(child: HealthTipDetailScreen(tipId: id));
         },
       ),
     ],
-    redirect: (context, state) {
-      final hasToken = AuthState.instance.isAuthenticated && AuthSession.instance.token != null;
-      final location = state.matchedLocation;
-      final allowUnauthed = location == '/login' ||
-          location == '/signup' ||
-          location == '/kakao-callback' ||
-          location == '/reset-password' ||
-          location == '/verify-email';
 
-      if (!hasToken && !allowUnauthed) return '/signup';
-      if (hasToken && (location == '/login' || location == '/signup')) return '/home';
+    // ── Auth Guard ──────────────────────────────────────────
+    redirect: (context, state) {
+      final hasToken =
+          AuthState.instance.isAuthenticated && AuthSession.instance.token != null;
+      final location = state.matchedLocation;
+
+      if (!hasToken && !_unauthenticatedPaths.contains(location)) {
+        return '/signup';
+      }
+      if (hasToken && (location == '/login' || location == '/signup')) {
+        return '/home';
+      }
       return null;
     },
+
+    // ── Error Page ──────────────────────────────────────────
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('에러')),
       body: Center(

@@ -1,5 +1,6 @@
 import type { NextFunction, Response } from "express";
 import { env } from "../config";
+import { logger } from "../lib/logger";
 import { prisma } from "../lib/prisma";
 import type { AuthenticatedRequest } from "./auth.middleware";
 
@@ -24,7 +25,7 @@ export async function requireAdmin(
       .filter((email) => email.length > 0);
 
     if (adminEmails.length === 0) {
-      console.warn("[Admin] ADMIN_EMAILS 환경변수가 설정되지 않았습니다.");
+      logger.warn("[Admin] ADMIN_EMAILS 환경변수가 설정되지 않았습니다.");
       return res.status(403).json({
         message: "관리자 기능이 설정되지 않았습니다.",
       });
@@ -51,7 +52,7 @@ export async function requireAdmin(
     // 관리자 권한 확인됨
     return next();
   } catch (error) {
-    console.error("[Admin] Error checking admin permission:", error);
+    logger.error("[Admin] Error checking admin permission:", error);
     return res.status(500).json({
       message: "관리자 권한 확인 중 오류가 발생했습니다.",
     });

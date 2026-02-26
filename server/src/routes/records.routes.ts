@@ -2,7 +2,9 @@ import { Router } from "express";
 import { z } from "zod";
 
 import { prisma } from "../lib/prisma";
-import { authenticate, AuthenticatedRequest } from "../middleware/auth.middleware";
+import { authenticate, type AuthenticatedRequest } from "../middleware/auth.middleware";
+import { asyncHandler } from "../middleware/async-handler";
+import { validateBody } from "../middleware/validate";
 
 const router = Router();
 
@@ -16,8 +18,9 @@ const recordSchema = z.object({
 
 router.use(authenticate);
 
-router.get("/", async (req: AuthenticatedRequest, res, next) => {
-  try {
+router.get(
+  "/",
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
     const records = await prisma.medicalRecord.findMany({
       where: { userAccountId: req.user!.sub },
       orderBy: { createdAt: "desc" },
@@ -27,13 +30,12 @@ router.get("/", async (req: AuthenticatedRequest, res, next) => {
       },
     });
     return res.json({ data: records });
-  } catch (error) {
-    return next(error);
-  }
-});
+  }),
+);
 
-router.get("/:id", async (req: AuthenticatedRequest, res, next) => {
-  try {
+router.get(
+  "/:id",
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
     const record = await prisma.medicalRecord.findUnique({
       where: { id: req.params.id },
       include: {
@@ -45,14 +47,13 @@ router.get("/:id", async (req: AuthenticatedRequest, res, next) => {
       return res.status(404).json({ message: "진료 기록을 찾을 수 없습니다." });
     }
     return res.json({ data: record });
-  } catch (error) {
-    return next(error);
-  }
-});
+  }),
+);
 
-router.post("/", async (req: AuthenticatedRequest, res, next) => {
-  try {
-    const payload = recordSchema.parse(req.body);
+router.post(
+  "/",
+  validateBody(recordSchema),
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
     const profileId = req.user?.profileId;
     if (!profileId) {
       return res.status(401).json({ message: "인증 정보가 없습니다." });
@@ -61,14 +62,15 @@ router.post("/", async (req: AuthenticatedRequest, res, next) => {
     if (!profile?.isPractitioner) {
       return res.status(403).json({ message: "진료 기록은 인증된 한의사만 등록할 수 있습니다." });
     }
+
     const created = await prisma.medicalRecord.create({
       data: {
         userAccountId: req.user!.sub,
-        doctorId: payload.doctorId,
-        appointmentId: payload.appointmentId,
-        title: payload.title,
-        summary: payload.summary,
-        prescriptions: payload.prescriptions,
+        doctorId: req.body.doctorId,
+        appointmentId: req.body.appointmentId,
+        title: req.body.title,
+        summary: req.body.summary,
+        prescriptions: req.body.prescriptions,
       },
       include: {
         doctor: { include: { clinic: true } },
@@ -76,15 +78,7 @@ router.post("/", async (req: AuthenticatedRequest, res, next) => {
       },
     });
     return res.status(201).json({ data: created });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        message: "입력값이 올바르지 않습니다.",
-        issues: error.flatten().fieldErrors,
-      });
-    }
-    return next(error);
-  }
-});
+  }),
+);
 
 export default router;

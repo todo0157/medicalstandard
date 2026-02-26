@@ -1,5 +1,6 @@
 import sgMail from '@sendgrid/mail';
 import { env } from '../config';
+import { logger } from '../lib/logger';
 
 const apiKey = env.SENDGRID_API_KEY;
 const mailFrom = env.MAIL_FROM;
@@ -29,9 +30,9 @@ export async function sendMail(params: {
 
   try {
     await sgMail.send(msg);
-    console.info('[Mailer] sent to', params.to, 'subject:', params.subject);
+    logger.info('[Mailer] sent to', params.to, 'subject:', params.subject);
   } catch (error) {
-    console.error('[Mailer] failed to send', params.to, 'reason:', error);
+    logger.error('[Mailer] failed to send', params.to, 'reason:', error);
     throw error;
   }
 }

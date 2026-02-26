@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 
 import { env } from "../config";
+import { logger } from "../lib/logger";
 import { AuthService } from "../services/auth.service";
 import type { AuthTokenPayload } from "../types/auth";
 
@@ -27,7 +28,7 @@ export function authenticate(
     return next();
   } catch (error) {
     if (env.NODE_ENV === "development") {
-      console.error("JWT verification failed", error);
+      logger.debug("[Auth] JWT verification failed", error);
     }
     return res.status(401).json({ message: "인증에 실패했습니다." });
   }

@@ -1,55 +1,16 @@
-import { Router } from 'express';
-import { z } from 'zod';
-import { prisma } from '../lib/prisma';
-import { authenticate, AuthenticatedRequest } from '../middleware/auth.middleware';
-import { requireAdmin } from '../middleware/admin.middleware';
+import { Router } from "express";
+import { z } from "zod";
+
+import { prisma } from "../lib/prisma";
+import { authenticate, type AuthenticatedRequest } from "../middleware/auth.middleware";
+import { requireAdmin } from "../middleware/admin.middleware";
+import { asyncHandler } from "../middleware/async-handler";
+import { validateBody } from "../middleware/validate";
 
 const router = Router();
 
-/**
- * GET /api/contents/tips
- * 건강 팁 목록 조회
- */
-router.get('/tips', async (req, res, next) => {
-  try {
-    const { category, limit = '20' } = req.query;
-    const limitNum = parseInt(limit as string, 10);
-    
-    const where: any = category ? { category: category as string } : {};
-    
-    const tips = await prisma.healthTip.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: limitNum,
-    });
-    
-    return res.json({ data: tips });
-  } catch (error) {
-    return next(error);
-  }
-});
+// ─── Schemas ─────────────────────────────────────────────────────
 
-/**
- * GET /api/contents/tips/:id
- * 건강 팁 상세 조회
- */
-router.get('/tips/:id', async (req, res, next) => {
-  try {
-    const tip = await prisma.healthTip.update({
-      where: { id: req.params.id },
-      data: { viewCount: { increment: 1 } },
-    });
-    
-    return res.json({ data: tip });
-  } catch (error) {
-    return next(error);
-  }
-});
-
-/**
- * POST /api/contents/tips (Admin 전용)
- * 건강 팁 생성
- */
 const createTipSchema = z.object({
   title: z.string().min(1),
   content: z.string().min(1),
@@ -58,31 +19,6 @@ const createTipSchema = z.object({
   isVisible: z.boolean().optional().default(true),
 });
 
-router.post('/tips', authenticate, requireAdmin, async (req: AuthenticatedRequest, res, next) => {
-  try {
-    const payload = createTipSchema.parse(req.body);
-    const tip = await prisma.healthTip.create({
-      data: {
-        title: payload.title,
-        content: payload.content,
-        category: payload.category ?? "general",
-        imageUrl: payload.imageUrl,
-        isVisible: payload.isVisible,
-      },
-    });
-    return res.status(201).json({ data: tip });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: '입력값이 올바르지 않습니다.', issues: error.flatten().fieldErrors });
-    }
-    return next(error);
-  }
-});
-
-/**
- * PUT /api/contents/tips/:id (Admin 전용)
- * 건강 팁 수정
- */
 const updateTipSchema = z.object({
   title: z.string().min(1).optional(),
   content: z.string().min(1).optional(),
@@ -91,9 +27,63 @@ const updateTipSchema = z.object({
   isVisible: z.boolean().optional(),
 });
 
-router.put('/tips/:id', authenticate, requireAdmin, async (req: AuthenticatedRequest, res, next) => {
-  try {
-    const payload = updateTipSchema.parse(req.body);
+// ─── Public ──────────────────────────────────────────────────────
+
+router.get(
+  "/tips",
+  asyncHandler(async (req, res) => {
+    const { category, limit = "20" } = req.query;
+    const limitNum = parseInt(limit as string, 10);
+    const where: any = category ? { category: category as string } : {};
+
+    const tips = await prisma.healthTip.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: limitNum,
+    });
+    return res.json({ data: tips });
+  }),
+);
+
+router.get(
+  "/tips/:id",
+  asyncHandler(async (req, res) => {
+    const tip = await prisma.healthTip.update({
+      where: { id: req.params.id },
+      data: { viewCount: { increment: 1 } },
+    });
+    return res.json({ data: tip });
+  }),
+);
+
+// ─── Admin ───────────────────────────────────────────────────────
+
+router.post(
+  "/tips",
+  authenticate,
+  requireAdmin,
+  validateBody(createTipSchema),
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
+    const tip = await prisma.healthTip.create({
+      data: {
+        title: req.body.title,
+        content: req.body.content,
+        category: req.body.category ?? "general",
+        imageUrl: req.body.imageUrl,
+        isVisible: req.body.isVisible,
+      },
+    });
+    return res.status(201).json({ data: tip });
+  }),
+);
+
+router.put(
+  "/tips/:id",
+  authenticate,
+  requireAdmin,
+  validateBody(updateTipSchema),
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
+    const payload = req.body;
     const tip = await prisma.healthTip.update({
       where: { id: req.params.id },
       data: {
@@ -105,27 +95,17 @@ router.put('/tips/:id', authenticate, requireAdmin, async (req: AuthenticatedReq
       },
     });
     return res.json({ data: tip });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: '입력값이 올바르지 않습니다.', issues: error.flatten().fieldErrors });
-    }
-    return next(error);
-  }
-});
+  }),
+);
 
-/**
- * DELETE /api/contents/tips/:id (Admin 전용)
- * 건강 팁 삭제
- */
-router.delete('/tips/:id', authenticate, requireAdmin, async (req: AuthenticatedRequest, res, next) => {
-  try {
-    await prisma.healthTip.delete({
-      where: { id: req.params.id },
-    });
+router.delete(
+  "/tips/:id",
+  authenticate,
+  requireAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res) => {
+    await prisma.healthTip.delete({ where: { id: req.params.id } });
     return res.status(204).send();
-  } catch (error) {
-    return next(error);
-  }
-});
+  }),
+);
 
 export default router;
